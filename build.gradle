@@ -11,9 +11,9 @@ plugins {
 group = "net.derfruhling.discord"
 version = "1.0-SNAPSHOT"
 
-tasks.register("unzipSocialSdk", Copy) {
+def unzipSocialSdk = tasks.register("unzipSocialSdk", Copy) {
     from zipTree("discord-social-sdk.zip")
-    into "discord_social_sdk"
+    into "."
 }
 
 def buildDir = layout.buildDirectory.get()
@@ -39,6 +39,10 @@ model {
             binaries.all {
                 if(it instanceof StaticLibraryBinarySpec) {
                     it.buildable = false
+                }
+
+                it.tasks.configureEach {
+                    it.dependsOn(unzipSocialSdk)
                 }
 
                 def jvmHome = Jvm.current().javaHome
