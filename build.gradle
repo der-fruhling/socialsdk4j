@@ -123,6 +123,8 @@ model {
                     it.tasks.configureEach {
                         it.dependsOn(socialSdkMacosBinaries)
                     }
+
+                    cppCompiler.args "--std=c++17"
                 } else if (targetPlatform.operatingSystem.linux) {
                     cppCompiler.args '-I', "${jvmHome}/include"
                     cppCompiler.args '-I', "${jvmHome}/include/linux"
@@ -131,6 +133,8 @@ model {
                     it.tasks.configureEach {
                         it.dependsOn(socialSdkLinuxBinaries)
                     }
+
+                    cppCompiler.args "--std=c++17"
                 } else if (targetPlatform.operatingSystem.windows) {
                     cppCompiler.args "-I${jvmHome}/include"
                     cppCompiler.args "-I${jvmHome}/include/win32"
@@ -138,11 +142,12 @@ model {
                     it.tasks.configureEach {
                         it.dependsOn(socialSdkWindowsBinaries)
                     }
+
+                    cppCompiler.args "/std:c++17"
                 }
 
                 cppCompiler.args "-I${projectDir}/discord_social_sdk/include"
 //                cppCompiler.args "-I${buildDir}/generated/jni-headers"
-                cppCompiler.args "--std=c++17"
                 linker.args "-L${projectDir}/discord_social_sdk/lib/release"
                 linker.args "-ldiscord_partner_sdk"
             }
