@@ -148,7 +148,10 @@ jobs:
         cp *.so *.dylib *.dll build/libs/socialsdk4j/shared/
 
     - name: Build with Gradle
-      run: gradle -Dci=yes publish
+      run: gradle -Dci=yes publishAllPublicationsToGitHubPackagesRepository
+      env:
+        USERNAME: ${{ github.actor }}
+        TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   dependency-submission:
     runs-on: ubuntu-latest

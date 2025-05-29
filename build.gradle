@@ -5,7 +5,6 @@ plugins {
     id 'java'
     id 'cpp'
     id 'maven-publish'
-    id 'org.jreleaser' version '1.18.0'
 }
 
 group = "net.derfruhling.discord"
@@ -186,7 +185,13 @@ def jarLinuxBinaries = tasks.register("jarLinuxBinaries", Jar) {
     archiveClassifier = "linux"
     dependsOn(socialSdkBinaries, socialSdkGrabLicense)
 
-    from("discord_social_sdk/License-Notices.txt")
+    from("LICENSE.txt") {
+        rename("LICENSE.txt", "LICENSE-SocialSDK4J.txt")
+    }
+
+    from("discord_social_sdk/License-Notices.txt") {
+        rename("License-Notices.txt", "LICENSE-DiscordSocialSdk.txt")
+    }
 
     from("discord_social_sdk/lib/release/libdiscord_partner_sdk.so")
     from(buildDir.file("libs/socialsdk4j/shared/libsocialsdk4j.so"))
@@ -199,7 +204,13 @@ def jarMacosBinaries = tasks.register("jarMacosBinaries", Jar) {
     archiveClassifier = "macos"
     dependsOn(socialSdkBinaries, socialSdkGrabLicense)
 
-    from("discord_social_sdk/License-Notices.txt")
+    from("LICENSE.txt") {
+        rename("LICENSE.txt", "LICENSE-SocialSDK4J.txt")
+    }
+
+    from("discord_social_sdk/License-Notices.txt") {
+        rename("License-Notices.txt", "LICENSE-DiscordSocialSdk.txt")
+    }
 
     from("discord_social_sdk/lib/release/libdiscord_partner_sdk.dylib")
     from(buildDir.file("libs/socialsdk4j/shared/libsocialsdk4j.dylib"))
@@ -212,7 +223,13 @@ def jarWindowsBinaries = tasks.register("jarWindowsBinaries", Jar) {
     archiveClassifier = "windows"
     dependsOn(socialSdkBinaries, socialSdkGrabLicense)
 
-    from("discord_social_sdk/License-Notices.txt")
+    from("LICENSE.txt") {
+        rename("LICENSE.txt", "LICENSE-SocialSDK4J.txt")
+    }
+
+    from("discord_social_sdk/License-Notices.txt") {
+        rename("License-Notices.txt", "LICENSE-DiscordSocialSdk.txt")
+    }
 
     from("discord_social_sdk/bin/release/discord_partner_sdk.dll")
     from(buildDir.file("libs/socialsdk4j/shared/socialsdk4j.dll"))
@@ -221,9 +238,28 @@ def jarWindowsBinaries = tasks.register("jarWindowsBinaries", Jar) {
         dependsOn("socialsdk4jSharedLibrary")
 }
 
+def generateNativeSourcesJar = tasks.register("generateNativeSourcesJar", Jar) {
+    archiveClassifier = "native-sources"
+
+    from("src/socialsdk4j/cpp") {
+        include("*.cpp", "*.hpp")
+    }
+}
+
+def generateDummyJar = tasks.register("generateDummyJar", Jar) {
+    archiveClassifier = "dummy"
+
+    from("DUMMY_README.md") {
+        rename("DUMMY_README.md", "README.md")
+    }
+}
+
 def discordPartnerSdkWindowsArtifact = artifacts.add('artifact', jarWindowsBinaries)
 def discordPartnerSdkLinuxArtifact = artifacts.add('artifact', jarLinuxBinaries)
 def discordPartnerSdkMacosArtifact = artifacts.add('artifact', jarMacosBinaries)
+
+def nativeSourcesJar = artifacts.add('artifact', generateNativeSourcesJar)
+def dummyJar = artifacts.add('artifact', generateDummyJar)
 
 publishing {
     publications {
@@ -232,24 +268,60 @@ publishing {
             artifactId = 'socialsdk4j'
 
             artifact(jar)
+            artifact(javadocJar)
+            artifact(sourcesJar)
 
             artifact(discordPartnerSdkLinuxArtifact) {
                 classifier = "linux"
+            }
+
+            artifact(nativeSourcesJar) {
+                classifier = "linux-sources"
+            }
+
+            artifact(dummyJar) {
+                classifier = "linux-javadoc"
             }
 
             artifact(discordPartnerSdkMacosArtifact) {
                 classifier = "macos"
             }
 
+            artifact(nativeSourcesJar) {
+                classifier = "macos-sources"
+            }
+
+            artifact(dummyJar) {
+                classifier = "macos-javadoc"
+            }
+
             artifact(discordPartnerSdkWindowsArtifact) {
                 classifier = "windows"
+            }
+
+            artifact(nativeSourcesJar) {
+                classifier = "windows-sources"
+            }
+
+            artifact(dummyJar) {
+                classifier = "windows-javadoc"
             }
         }
     }
 
     repositories {
         maven {
-            url = layout.buildDirectory.dir('staging-deploy')
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/der-fruhling-entertainment/socialsdk4j")
+            credentials {
+                username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+                password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
+            }
+        }
+
+        maven {
+            name = "TestDeploy"
+            url = layout.buildDirectory.file("test-deploy")
         }
     }
 }
