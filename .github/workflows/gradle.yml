@@ -28,7 +28,6 @@ jobs:
       uses: gradle/actions/setup-gradle@v4
       with:
         gradle-version: '8.14.1'
-        cache-disabled: true
 
     - name: Build with Gradle
       run: gradle unzipSocialSdk jar sourcesJar javadocJar socialsdk4jSharedLibrary test
