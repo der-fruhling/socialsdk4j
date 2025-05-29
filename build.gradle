@@ -116,8 +116,8 @@ model {
                 if (targetPlatform.operatingSystem.macOsX) {
                     cppCompiler.args '-I', "${jvmHome}/include"
                     cppCompiler.args '-I', "${jvmHome}/include/darwin"
-                    cppCompiler.args '-mmacosx-version-min=10.4'
-                    linker.args '-mmacosx-version-min=10.4'
+                    cppCompiler.args '-mmacosx-version-min=10.13'
+                    linker.args '-mmacosx-version-min=10.13'
                     linker.args '-stdlib=libc++'
 
                     it.tasks.configureEach {
