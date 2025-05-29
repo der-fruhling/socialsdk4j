@@ -41,7 +41,7 @@ jobs:
       uses: actions/upload-artifact@v4.6.2
       with:
         name: linux-natives
-        path: socialsdk4j/build/socialsdk4j-*.jar
+        path: socialsdk4j/build/libs/socialsdk4j-*.jar
         error: true
 
   build-macos:
