@@ -1,5 +1,4 @@
-#include <algorithm>
-#include <jni.h>
+#include <net_derfruhling_discord_socialsdk4j_Message.h>
 #include <discordpp.h>
 #include <optional>
 #include <vector>

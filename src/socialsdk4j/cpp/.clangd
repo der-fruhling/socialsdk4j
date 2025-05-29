@@ -1,6 +1,6 @@
 CompileFlags:
   Add:
-    - "-I../../../build/generated/jni-headers"
-    - "-I../headers"
+    - "-I../../../build/generated/sources/headers/java/main"
+    - "-I../../../discord_social_sdk/include"
     - "-I/usr/lib/jvm/java-21-openjdk/include/"
     - "-I/usr/lib/jvm/java-21-openjdk/include/linux/"

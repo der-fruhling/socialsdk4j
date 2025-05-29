@@ -194,7 +194,7 @@ model {
                 }
 
                 cppCompiler.args "-I${projectDir}/discord_social_sdk/include"
-//                cppCompiler.args "-I${buildDir}/generated/jni-headers"
+                cppCompiler.args "-I${buildDir}/generated/sources/headers/java/main"
             }
         }
     }

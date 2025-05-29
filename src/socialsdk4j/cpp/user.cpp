@@ -1,4 +1,4 @@
-#include <jni.h>
+#include <net_derfruhling_discord_socialsdk4j_User.h>
 #include <discordpp.h>
 #include <optional>
 #include <utility>
