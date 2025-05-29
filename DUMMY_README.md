@@ -1,4 +1,4 @@
-There aren't any javadocs for this jar because it only contains native code. Sorry!
+There aren't any javadocs for this jar because it only contains native code. If you're seeing this in a sources jar, it's because we don't have the source code for the jar. Sorry!
 
 You can find the SocialSDK documentation here: https://discord.com/developers/docs/discord-social-sdk/overview
 

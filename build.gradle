@@ -38,7 +38,7 @@ def socialSdkGrabLicense = tasks.register("socialSdkGrabLicense", Copy) {
     into "discord_social_sdk"
 }
 
-def socialSdkWindowsBinaries = tasks.register("socialSdkWindowsBinaries", Copy) {
+def socialSdkWindowsReleaseBinaries = tasks.register("socialSdkWindowsReleaseBinaries", Copy) {
     from(zipTree("discord-social-sdk.zip")) {
         include "discord_social_sdk/bin/release/discord_partner_sdk.dll"
         include "discord_social_sdk/lib/release/discord_partner_sdk.lib"
@@ -53,7 +53,7 @@ def socialSdkWindowsBinaries = tasks.register("socialSdkWindowsBinaries", Copy) 
     into "discord_social_sdk"
 }
 
-def socialSdkLinuxBinaries = tasks.register("socialSdkLinuxBinaries", Copy) {
+def socialSdkLinuxReleaseBinaries = tasks.register("socialSdkLinuxReleaseBinaries", Copy) {
     from(zipTree("discord-social-sdk.zip")) {
         include "discord_social_sdk/lib/release/libdiscord_partner_sdk.so"
 
@@ -67,9 +67,52 @@ def socialSdkLinuxBinaries = tasks.register("socialSdkLinuxBinaries", Copy) {
     into "discord_social_sdk"
 }
 
-def socialSdkMacosBinaries = tasks.register("socialSdkMacosBinaries", Copy) {
+def socialSdkMacosReleaseBinaries = tasks.register("socialSdkMacosReleaseBinaries", Copy) {
     from(zipTree("discord-social-sdk.zip")) {
         include "discord_social_sdk/lib/release/libdiscord_partner_sdk.dylib"
+
+        eachFile { f ->
+            f.relativePath = new RelativePath(true, f.relativePath.segments.drop(1))
+        }
+
+        includeEmptyDirs = false
+    }
+
+    into "discord_social_sdk"
+}
+
+def socialSdkWindowsDebugBinaries = tasks.register("socialSdkWindowsDebugBinaries", Copy) {
+    from(zipTree("discord-social-sdk.zip")) {
+        include "discord_social_sdk/bin/debug/discord_partner_sdk.dll"
+        include "discord_social_sdk/lib/debug/discord_partner_sdk.lib"
+
+        eachFile { f ->
+            f.relativePath = new RelativePath(true, f.relativePath.segments.drop(1))
+        }
+
+        includeEmptyDirs = false
+    }
+
+    into "discord_social_sdk"
+}
+
+def socialSdkLinuxDebugBinaries = tasks.register("socialSdkLinuxDebugBinaries", Copy) {
+    from(zipTree("discord-social-sdk.zip")) {
+        include "discord_social_sdk/lib/debug/libdiscord_partner_sdk.so"
+
+        eachFile { f ->
+            f.relativePath = new RelativePath(true, f.relativePath.segments.drop(1))
+        }
+
+        includeEmptyDirs = false
+    }
+
+    into "discord_social_sdk"
+}
+
+def socialSdkMacosDebugBinaries = tasks.register("socialSdkMacosDebugBinaries", Copy) {
+    from(zipTree("discord-social-sdk.zip")) {
+        include "discord_social_sdk/lib/debug/libdiscord_partner_sdk.dylib"
 
         eachFile { f ->
             f.relativePath = new RelativePath(true, f.relativePath.segments.drop(1))
@@ -120,7 +163,7 @@ model {
                     linker.args '-stdlib=libc++'
 
                     it.tasks.configureEach {
-                        it.dependsOn(socialSdkMacosBinaries)
+                        it.dependsOn(socialSdkMacosReleaseBinaries)
                     }
 
                     cppCompiler.args "--std=c++17"
@@ -132,7 +175,7 @@ model {
                     cppCompiler.args '-D_FILE_OFFSET_BITS=64'
 
                     it.tasks.configureEach {
-                        it.dependsOn(socialSdkLinuxBinaries)
+                        it.dependsOn(socialSdkLinuxReleaseBinaries)
                     }
 
                     cppCompiler.args "--std=c++17"
@@ -143,7 +186,7 @@ model {
                     cppCompiler.args "-I${jvmHome}/include/win32"
 
                     it.tasks.configureEach {
-                        it.dependsOn(socialSdkWindowsBinaries)
+                        it.dependsOn(socialSdkWindowsReleaseBinaries)
                     }
 
                     cppCompiler.args "/std:c++17"
@@ -178,60 +221,117 @@ dependencies {
 }
 
 def socialSdkBinaries = tasks.register("socialSdkBinaries") {
-    dependsOn(socialSdkLinuxBinaries, socialSdkMacosBinaries, socialSdkWindowsBinaries)
+    dependsOn(
+            socialSdkLinuxReleaseBinaries, socialSdkMacosReleaseBinaries, socialSdkWindowsReleaseBinaries,
+            socialSdkLinuxDebugBinaries, socialSdkMacosDebugBinaries, socialSdkWindowsDebugBinaries
+    )
 }
 
-def jarLinuxBinaries = tasks.register("jarLinuxBinaries", Jar) {
+def jarSocialSdkReleaseLinuxBinaries = tasks.register("jarSocialSdkReleaseLinuxBinaries", Jar) {
     archiveClassifier = "linux"
+    archiveBaseName = "socialsdk"
     dependsOn(socialSdkBinaries, socialSdkGrabLicense)
-
-    from("LICENSE.txt") {
-        rename("LICENSE.txt", "LICENSE-SocialSDK4J.txt")
-    }
 
     from("discord_social_sdk/License-Notices.txt") {
         rename("License-Notices.txt", "LICENSE-DiscordSocialSdk.txt")
     }
 
     from("discord_social_sdk/lib/release/libdiscord_partner_sdk.so")
+}
+
+def jarSocialSdkDebugLinuxBinaries = tasks.register("jarSocialSdkDebugLinuxBinaries", Jar) {
+    archiveClassifier = "linux"
+    archiveBaseName = "socialsdk-debug"
+    dependsOn(socialSdkBinaries, socialSdkGrabLicense)
+
+    from("discord_social_sdk/License-Notices.txt") {
+        rename("License-Notices.txt", "LICENSE-DiscordSocialSdk.txt")
+    }
+
+    from("discord_social_sdk/lib/debug/libdiscord_partner_sdk.so")
+}
+
+def jarSocialSdk4jLinuxBinaries = tasks.register("jarSocialSdk4jLinuxBinaries", Jar) {
+    archiveClassifier = "linux"
+
+    from("LICENSE.txt") {
+        rename("LICENSE.txt", "LICENSE-SocialSDK4J.txt")
+    }
+
     from(buildDir.file("libs/socialsdk4j/shared/libsocialsdk4j.so"))
 
     if(System.getProperty("ci") != "yes")
         dependsOn("socialsdk4jSharedLibrary")
 }
 
-def jarMacosBinaries = tasks.register("jarMacosBinaries", Jar) {
+def jarSocialSdkReleaseMacosBinaries = tasks.register("jarSocialSdkReleaseMacosBinaries", Jar) {
     archiveClassifier = "macos"
+    archiveBaseName = "socialsdk"
     dependsOn(socialSdkBinaries, socialSdkGrabLicense)
-
-    from("LICENSE.txt") {
-        rename("LICENSE.txt", "LICENSE-SocialSDK4J.txt")
-    }
 
     from("discord_social_sdk/License-Notices.txt") {
         rename("License-Notices.txt", "LICENSE-DiscordSocialSdk.txt")
     }
 
     from("discord_social_sdk/lib/release/libdiscord_partner_sdk.dylib")
+}
+
+def jarSocialSdkDebugMacosBinaries = tasks.register("jarSocialSdkDebugMacosBinaries", Jar) {
+    archiveClassifier = "macos"
+    archiveBaseName = "socialsdk-debug"
+    dependsOn(socialSdkBinaries, socialSdkGrabLicense)
+
+    from("discord_social_sdk/License-Notices.txt") {
+        rename("License-Notices.txt", "LICENSE-DiscordSocialSdk.txt")
+    }
+
+    from("discord_social_sdk/lib/debug/libdiscord_partner_sdk.dylib")
+}
+
+def jarSocialSdk4jMacosBinaries = tasks.register("jarSocialSdk4jMacosBinaries", Jar) {
+    archiveClassifier = "macos"
+
+    from("LICENSE.txt") {
+        rename("LICENSE.txt", "LICENSE-SocialSDK4J.txt")
+    }
+
     from(buildDir.file("libs/socialsdk4j/shared/libsocialsdk4j.dylib"))
 
     if(System.getProperty("ci") != "yes")
         dependsOn("socialsdk4jSharedLibrary")
 }
 
-def jarWindowsBinaries = tasks.register("jarWindowsBinaries", Jar) {
+def jarSocialSdkReleaseWindowsBinaries = tasks.register("jarSocialSdkReleaseWindowsBinaries", Jar) {
     archiveClassifier = "windows"
+    archiveBaseName = "socialsdk"
     dependsOn(socialSdkBinaries, socialSdkGrabLicense)
-
-    from("LICENSE.txt") {
-        rename("LICENSE.txt", "LICENSE-SocialSDK4J.txt")
-    }
 
     from("discord_social_sdk/License-Notices.txt") {
         rename("License-Notices.txt", "LICENSE-DiscordSocialSdk.txt")
     }
 
     from("discord_social_sdk/bin/release/discord_partner_sdk.dll")
+}
+
+def jarSocialSdkDebugWindowsBinaries = tasks.register("jarSocialSdkDebugWindowsBinaries", Jar) {
+    archiveClassifier = "windows"
+    archiveBaseName = "socialsdk-debug"
+    dependsOn(socialSdkBinaries, socialSdkGrabLicense)
+
+    from("discord_social_sdk/License-Notices.txt") {
+        rename("License-Notices.txt", "LICENSE-DiscordSocialSdk.txt")
+    }
+
+    from("discord_social_sdk/bin/debug/discord_partner_sdk.dll")
+}
+
+def jarSocialSdk4jWindowsBinaries = tasks.register("jarSocialSdk4jWindowsBinaries", Jar) {
+    archiveClassifier = "windows"
+
+    from("LICENSE.txt") {
+        rename("LICENSE.txt", "LICENSE-SocialSDK4J.txt")
+    }
+
     from(buildDir.file("libs/socialsdk4j/shared/socialsdk4j.dll"))
 
     if(System.getProperty("ci") != "yes")
@@ -254,24 +354,32 @@ def generateDummyJar = tasks.register("generateDummyJar", Jar) {
     }
 }
 
-def discordPartnerSdkWindowsArtifact = artifacts.add('artifact', jarWindowsBinaries)
-def discordPartnerSdkLinuxArtifact = artifacts.add('artifact', jarLinuxBinaries)
-def discordPartnerSdkMacosArtifact = artifacts.add('artifact', jarMacosBinaries)
+def discordPartnerSdkWindowsArtifact = artifacts.add('artifact', jarSocialSdkReleaseWindowsBinaries)
+def discordPartnerSdkLinuxArtifact = artifacts.add('artifact', jarSocialSdkReleaseLinuxBinaries)
+def discordPartnerSdkMacosArtifact = artifacts.add('artifact', jarSocialSdkReleaseMacosBinaries)
+
+def discordPartnerSdkDebugWindowsArtifact = artifacts.add('artifact', jarSocialSdkDebugWindowsBinaries)
+def discordPartnerSdkDebugLinuxArtifact = artifacts.add('artifact', jarSocialSdkDebugLinuxBinaries)
+def discordPartnerSdkDebugMacosArtifact = artifacts.add('artifact', jarSocialSdkDebugMacosBinaries)
+
+def socialSdk4jNativesWindowsArtifact = artifacts.add('artifact', jarSocialSdk4jWindowsBinaries)
+def socialSdk4jNativesLinuxArtifact = artifacts.add('artifact', jarSocialSdk4jLinuxBinaries)
+def socialSdk4jNativesMacosArtifact = artifacts.add('artifact', jarSocialSdk4jMacosBinaries)
 
 def nativeSourcesJar = artifacts.add('artifact', generateNativeSourcesJar)
 def dummyJar = artifacts.add('artifact', generateDummyJar)
 
 publishing {
     publications {
-        create("maven", MavenPublication) {
-            groupId = 'net.derfruhling.discord.socialsdk4j'
+        create("Maven", MavenPublication) {
+            groupId = 'net.derfruhling.discord'
             artifactId = 'socialsdk4j'
 
             artifact(jar)
             artifact(javadocJar)
             artifact(sourcesJar)
 
-            artifact(discordPartnerSdkLinuxArtifact) {
+            artifact(socialSdk4jNativesLinuxArtifact) {
                 classifier = "linux"
             }
 
@@ -283,7 +391,7 @@ publishing {
                 classifier = "linux-javadoc"
             }
 
-            artifact(discordPartnerSdkMacosArtifact) {
+            artifact(socialSdk4jNativesMacosArtifact) {
                 classifier = "macos"
             }
 
@@ -295,11 +403,95 @@ publishing {
                 classifier = "macos-javadoc"
             }
 
-            artifact(discordPartnerSdkWindowsArtifact) {
+            artifact(socialSdk4jNativesWindowsArtifact) {
                 classifier = "windows"
             }
 
             artifact(nativeSourcesJar) {
+                classifier = "windows-sources"
+            }
+
+            artifact(dummyJar) {
+                classifier = "windows-javadoc"
+            }
+        }
+
+        create("SocialSDK", MavenPublication) {
+            groupId = 'net.derfruhling.discord'
+            artifactId = 'socialsdk'
+            version = '1.2.8730'
+
+            artifact(discordPartnerSdkLinuxArtifact) {
+                classifier = "linux"
+            }
+
+            artifact(dummyJar) {
+                classifier = "linux-sources"
+            }
+
+            artifact(dummyJar) {
+                classifier = "linux-javadoc"
+            }
+
+            artifact(discordPartnerSdkMacosArtifact) {
+                classifier = "macos"
+            }
+
+            artifact(dummyJar) {
+                classifier = "macos-sources"
+            }
+
+            artifact(dummyJar) {
+                classifier = "macos-javadoc"
+            }
+
+            artifact(discordPartnerSdkWindowsArtifact) {
+                classifier = "windows"
+            }
+
+            artifact(dummyJar) {
+                classifier = "windows-sources"
+            }
+
+            artifact(dummyJar) {
+                classifier = "windows-javadoc"
+            }
+        }
+
+        create("SocialSDKDebug", MavenPublication) {
+            groupId = 'net.derfruhling.discord'
+            artifactId = 'socialsdk-debug'
+            version = '1.2.8730'
+
+            artifact(discordPartnerSdkDebugLinuxArtifact) {
+                classifier = "linux"
+            }
+
+            artifact(dummyJar) {
+                classifier = "linux-sources"
+            }
+
+            artifact(dummyJar) {
+                classifier = "linux-javadoc"
+            }
+
+            artifact(discordPartnerSdkDebugMacosArtifact) {
+                classifier = "macos"
+            }
+
+            artifact(dummyJar) {
+                classifier = "macos-sources"
+            }
+
+            artifact(dummyJar) {
+                classifier = "macos-javadoc"
+            }
+
+            artifact(discordPartnerSdkDebugWindowsArtifact) {
+                classifier = "windows"
+            }
+
+            artifact(dummyJar) {
                 classifier = "windows-sources"
             }
 
