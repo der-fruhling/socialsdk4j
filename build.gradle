@@ -125,6 +125,8 @@ model {
                     }
 
                     cppCompiler.args "--std=c++17"
+                    linker.args "-L${projectDir}/discord_social_sdk/lib/release"
+                    linker.args "-ldiscord_partner_sdk"
                 } else if (targetPlatform.operatingSystem.linux) {
                     cppCompiler.args '-I', "${jvmHome}/include"
                     cppCompiler.args '-I', "${jvmHome}/include/linux"
@@ -135,6 +137,8 @@ model {
                     }
 
                     cppCompiler.args "--std=c++17"
+                    linker.args "-L${projectDir}/discord_social_sdk/lib/release"
+                    linker.args "-ldiscord_partner_sdk"
                 } else if (targetPlatform.operatingSystem.windows) {
                     cppCompiler.args "-I${jvmHome}/include"
                     cppCompiler.args "-I${jvmHome}/include/win32"
@@ -144,12 +148,11 @@ model {
                     }
 
                     cppCompiler.args "/std:c++17"
+                    linker.args "${projectDir}/discord_social_sdk/lib/release/discord_partner_sdk.lib"
                 }
 
                 cppCompiler.args "-I${projectDir}/discord_social_sdk/include"
 //                cppCompiler.args "-I${buildDir}/generated/jni-headers"
-                linker.args "-L${projectDir}/discord_social_sdk/lib/release"
-                linker.args "-ldiscord_partner_sdk"
             }
         }
     }
