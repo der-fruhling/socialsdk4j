@@ -58,10 +58,10 @@ model {
                     cppCompiler.args "-I${jvmHome}/include/win32"
                 }
 
-                cppCompiler.args '-I', "${projectDir}/discord_social_sdk/include"
-                cppCompiler.args '-I', "${buildDir}/generated/jni-headers"
-                linker.args '-L', "${projectDir}/discord_social_sdk/lib/release"
-                linker.args '-l', "discord_partner_sdk"
+                cppCompiler.args "-I${projectDir}/discord_social_sdk/include"
+                cppCompiler.args "-I${buildDir}/generated/jni-headers"
+                linker.args "-L${projectDir}/discord_social_sdk/lib/release"
+                linker.args "-ldiscord_partner_sdk"
             }
         }
     }
