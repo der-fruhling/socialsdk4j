@@ -36,13 +36,13 @@ jobs:
       with:
         name: linux-natives
         path: build/libs/socialsdk4j/shared/libsocialsdk4j.so
-        error: true
+        if-no-files-found: error
     - name: Upload Jars
       uses: actions/upload-artifact@v4.6.2
       with:
-        name: linux-natives
+        name: jars
         path: build/libs/socialsdk4j-*.jar
-        error: true
+        if-no-files-found: error
 
   build-macos:
     runs-on: macos-latest
@@ -73,7 +73,7 @@ jobs:
       with:
         name: macos-natives
         path: build/libs/socialsdk4j/shared/libsocialsdk4j.dylib
-        error: true
+        if-no-files-found: error
     
   build-windows:
     runs-on: windows-latest
@@ -104,7 +104,7 @@ jobs:
       with:
         name: windows-natives
         path: build/libs/socialsdk4j/shared/socialsdk4j.dll
-        error: true
+        if-no-files-found: error
 
   build:
     needs:
