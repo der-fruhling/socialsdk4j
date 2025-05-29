@@ -5,6 +5,7 @@ on:
     branches: [ "master" ]
     paths:
       - discord-social-sdk.zip
+  workflow_dispatch: {}
 
 jobs:
   publish-socialsdk:
