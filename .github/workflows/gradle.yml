@@ -30,7 +30,7 @@ jobs:
         gradle-version: '8.14.1'
 
     - name: Build with Gradle
-      run: gradle unzipSocialSdk jar sourcesJar javadocJar socialsdk4jSharedLibrary test
+      run: gradle jar sourcesJar javadocJar socialsdk4jSharedLibrary test
     - name: Upload Linux Natives
       uses: actions/upload-artifact@v4.6.2
       with:
@@ -67,7 +67,7 @@ jobs:
         gradle-version: '8.14.1'
 
     - name: Build with Gradle
-      run: gradle unzipSocialSdk jar socialsdk4jSharedLibrary test
+      run: gradle jar socialsdk4jSharedLibrary test
     - name: Upload macOS Natives
       uses: actions/upload-artifact@v4.6.2
       with:
@@ -98,7 +98,7 @@ jobs:
         gradle-version: '8.14.1'
 
     - name: Build with Gradle
-      run: gradle unzipSocialSdk jar socialsdk4jSharedLibrary test
+      run: gradle jar socialsdk4jSharedLibrary test
     - name: Upload Windows Natives
       uses: actions/upload-artifact@v4.6.2
       with:
@@ -143,7 +143,7 @@ jobs:
         ls -l
 
     - name: Build with Gradle
-      run: gradle socialsdk4j:publish
+      run: gradle publish
 
   dependency-submission:
     runs-on: ubuntu-latest
