@@ -31,7 +31,7 @@ jobs:
         gradle-version: '8.14.1'
 
     - name: Build with Gradle
-      run: gradle -Dci=yes publishSocialSDKPublicationToTestDeployRepository publishSocialSDKDebugPublicationToTestDeployRepository
+      run: gradle -Dci=yes publishSocialSDKPublicationToGitHubPackagesRepository publishSocialSDKDebugPublicationToGitHubPackagesRepository
       env:
         USERNAME: ${{ github.actor }}
         TOKEN: ${{ secrets.GITHUB_TOKEN }}
