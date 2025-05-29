@@ -35,13 +35,13 @@ jobs:
       uses: actions/upload-artifact@v4.6.2
       with:
         name: linux-natives
-        path: socialsdk4j/build/libs/socialsdk4j/shared/libsocialsdk4j.so
+        path: build/libs/socialsdk4j/shared/libsocialsdk4j.so
         error: true
     - name: Upload Jars
       uses: actions/upload-artifact@v4.6.2
       with:
         name: linux-natives
-        path: socialsdk4j/build/libs/socialsdk4j-*.jar
+        path: build/libs/socialsdk4j-*.jar
         error: true
 
   build-macos:
@@ -72,7 +72,7 @@ jobs:
       uses: actions/upload-artifact@v4.6.2
       with:
         name: macos-natives
-        path: socialsdk4j/build/libs/socialsdk4j/shared/libsocialsdk4j.dylib
+        path: build/libs/socialsdk4j/shared/libsocialsdk4j.dylib
         error: true
     
   build-windows:
@@ -103,7 +103,7 @@ jobs:
       uses: actions/upload-artifact@v4.6.2
       with:
         name: windows-natives
-        path: socialsdk4j/build/libs/socialsdk4j/shared/socialsdk4j.dll
+        path: build/libs/socialsdk4j/shared/socialsdk4j.dll
         error: true
 
   build:
