@@ -375,6 +375,34 @@ publishing {
             groupId = 'net.derfruhling.discord'
             artifactId = 'socialsdk4j'
 
+            pom {
+                name = "SocialSDK4J"
+                description = "A Java wrapper over Discord's SocialSDK"
+                url = "https://github.com/der-fruhling-entertainment/socialsdk4j"
+
+                licenses {
+                    license {
+                        name = "3-Clause BSD License"
+                        url = "https://spdx.org/licenses/BSD-3-Clause.html"
+                    }
+                }
+
+                developers {
+                    developer {
+                        name = "der_frühling"
+                        email = "daedula@derfruhling.net"
+                        organization = "None"
+                        organizationUrl = "https://github.com/der-fruhling"
+                    }
+                }
+
+                scm {
+                    connection = "scm:git:git://github.com/der-fruhling-entertainment/socialsdk4j.git"
+                    developerConnection = "scm:git:ssh://github.com:der-fruhling-entertainment/socialsdk4j.git"
+                    url = "https://github.com/der-fruhling-entertainment/socialsdk4j"
+                }
+            }
+
             artifact(jar)
             artifact(javadocJar)
             artifact(sourcesJar)
@@ -421,6 +449,34 @@ publishing {
             artifactId = 'socialsdk'
             version = '1.2.8730'
 
+            pom {
+                name = "Discord SocialSDK"
+                description = "The natives required to use Discord's SocialSDK, in Linux, macOS, and Windows flavors"
+                url = "https://github.com/der-fruhling-entertainment/socialsdk4j"
+
+                licenses {
+                    license {
+                        name = "Discord SocialSDK terms"
+                        url = "https://support-dev.discord.com/hc/en-us/articles/30225844245271-Discord-Social-SDK-Terms"
+                    }
+                }
+
+                developers {
+                    developer {
+                        name = "der_frühling"
+                        email = "daedula@derfruhling.net"
+                        organization = "None"
+                        organizationUrl = "https://github.com/der-fruhling"
+                    }
+                }
+
+                scm {
+                    connection = "scm:git:git://github.com/der-fruhling-entertainment/socialsdk4j.git"
+                    developerConnection = "scm:git:ssh://github.com:der-fruhling-entertainment/socialsdk4j.git"
+                    url = "https://github.com/der-fruhling-entertainment/socialsdk4j"
+                }
+            }
+
             artifact(discordPartnerSdkLinuxArtifact) {
                 classifier = "linux"
             }
@@ -462,6 +518,34 @@ publishing {
             groupId = 'net.derfruhling.discord'
             artifactId = 'socialsdk-debug'
             version = '1.2.8730'
+
+            pom {
+                name = "Discord SocialSDK (Debug)"
+                description = "The natives required to use Discord's SocialSDK, in Linux, macOS, and Windows flavors"
+                url = "https://github.com/der-fruhling-entertainment/socialsdk4j"
+
+                licenses {
+                    license {
+                        name = "Discord SocialSDK terms"
+                        url = "https://support-dev.discord.com/hc/en-us/articles/30225844245271-Discord-Social-SDK-Terms"
+                    }
+                }
+
+                developers {
+                    developer {
+                        name = "der_frühling"
+                        email = "daedula@derfruhling.net"
+                        organization = "None"
+                        organizationUrl = "https://github.com/der-fruhling"
+                    }
+                }
+
+                scm {
+                    connection = "scm:git:git://github.com/der-fruhling-entertainment/socialsdk4j.git"
+                    developerConnection = "scm:git:ssh://github.com:der-fruhling-entertainment/socialsdk4j.git"
+                    url = "https://github.com/der-fruhling-entertainment/socialsdk4j"
+                }
+            }
 
             artifact(discordPartnerSdkDebugLinuxArtifact) {
                 classifier = "linux"
