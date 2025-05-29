@@ -1,7 +1,6 @@
 #define DISCORDPP_IMPLEMENTATION
 
 #include <jni.h>
-#include <net_derfruhling_discord_socialsdk4j_SocialSdk.h>
 #include <discordpp.h>
 #include <stdarg.h>
 

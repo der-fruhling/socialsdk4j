@@ -1,4 +1,4 @@
-#include <net_derfruhling_discord_socialsdk4j_ClientResult.h>
+#include <jni.h>
 #include <discordpp.h>
 
 JNIEXPORT jint JNICALL

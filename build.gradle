@@ -59,7 +59,7 @@ model {
                 }
 
                 cppCompiler.args "-I${projectDir}/discord_social_sdk/include"
-                cppCompiler.args "-I${buildDir}/generated/jni-headers"
+//                cppCompiler.args "-I${buildDir}/generated/jni-headers"
                 linker.args "-L${projectDir}/discord_social_sdk/lib/release"
                 linker.args "-ldiscord_partner_sdk"
             }

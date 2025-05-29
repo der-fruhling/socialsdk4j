@@ -1,4 +1,4 @@
-#include <net_derfruhling_discord_socialsdk4j_Activity.h>
+#include <jni.h>
 #include <discordpp.h>
 
 JNIEXPORT jlong JNICALL

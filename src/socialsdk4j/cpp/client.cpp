@@ -1,5 +1,5 @@
 #include <algorithm>
-#include <net_derfruhling_discord_socialsdk4j_Client.h>
+#include <jni.h>
 #include <discordpp.h>
 #include <optional>
 #include <unordered_map>
@@ -7,7 +7,6 @@
 #include <vector>
 #include "callbacks.hpp"
 #include "client_result.hpp"
-#include "jni.h"
 
 JNIEXPORT jobject JNICALL
 Java_net_derfruhling_discord_socialsdk4j_Client_createAuthorizationCodeVerifierNative
