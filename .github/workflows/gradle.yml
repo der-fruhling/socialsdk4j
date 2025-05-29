@@ -142,8 +142,13 @@ jobs:
       run: |
         ls -l
 
+    - name: Place natives in correct locations
+      run: |
+        mkdir -p build/libs/socialsdk4j/shared
+        cp *.so *.dylib *.dll build/libs/socialsdk4j/shared/
+
     - name: Build with Gradle
-      run: gradle publish
+      run: gradle -Dci=yes publish
 
   dependency-submission:
     runs-on: ubuntu-latest
