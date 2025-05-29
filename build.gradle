@@ -178,9 +178,13 @@ dependencies {
     compileOnly 'org.jetbrains:annotations:26.0.2'
 }
 
+def socialSdkBinaries = tasks.register("socialSdkBinaries") {
+    dependsOn(socialSdkLinuxBinaries, socialSdkMacosBinaries, socialSdkWindowsBinaries)
+}
+
 def jarLinuxBinaries = tasks.register("jarLinuxBinaries", Jar) {
     archiveClassifier = "linux"
-    dependsOn(socialSdkLinuxBinaries, socialSdkGrabLicense)
+    dependsOn(socialSdkBinaries, socialSdkGrabLicense)
 
     from("discord_social_sdk/License-Notices.txt")
 
@@ -193,7 +197,7 @@ def jarLinuxBinaries = tasks.register("jarLinuxBinaries", Jar) {
 
 def jarMacosBinaries = tasks.register("jarMacosBinaries", Jar) {
     archiveClassifier = "macos"
-    dependsOn(socialSdkMacosBinaries, socialSdkGrabLicense)
+    dependsOn(socialSdkBinaries, socialSdkGrabLicense)
 
     from("discord_social_sdk/License-Notices.txt")
 
@@ -206,7 +210,7 @@ def jarMacosBinaries = tasks.register("jarMacosBinaries", Jar) {
 
 def jarWindowsBinaries = tasks.register("jarWindowsBinaries", Jar) {
     archiveClassifier = "windows"
-    dependsOn(socialSdkWindowsBinaries, socialSdkGrabLicense)
+    dependsOn(socialSdkBinaries, socialSdkGrabLicense)
 
     from("discord_social_sdk/License-Notices.txt")
 
