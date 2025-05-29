@@ -1,0 +1,17 @@
+pluginManagement {
+    repositories {
+        maven { url "https://repo.nokee.dev/release" }
+        maven { url "https://repo.nokee.dev/snapshot" }
+        gradlePluginPortal()
+    }
+
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id.startsWith("dev.nokee.")) {
+                useModule("${requested.id.id}:${requested.id.id}.gradle.plugin:0.4.0")
+            }
+        }
+    }
+}
+
+rootProject.name = 'socialsdk4j'

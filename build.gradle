@@ -1,0 +1,180 @@
+import java.util.zip.ZipFile
+import org.gradle.internal.jvm.Jvm
+
+plugins {
+    id 'java'
+    id 'cpp'
+    id 'maven-publish'
+    id 'org.jreleaser' version '1.18.0'
+}
+
+group = "net.derfruhling.discord"
+version = "1.0-SNAPSHOT"
+
+tasks.register("unzipSocialSdk", Copy) {
+    from zipTree("discord-social-sdk.zip")
+    into "discord_social_sdk"
+}
+
+def buildDir = layout.buildDirectory.get()
+
+model {
+    platforms {
+        x64 {
+            architecture "x86_64"
+        }
+    }
+
+    components {
+        create("socialsdk4j", NativeLibrarySpec) {
+            targetPlatform "x64"
+
+            sources.cpp {
+                source {
+                    srcDir 'src/socialsdk4j/cpp'
+                    include '**/*.cpp', '**/*.cc'
+                }
+            }
+
+            binaries.all {
+                if(it instanceof StaticLibraryBinarySpec) {
+                    it.buildable = false
+                }
+
+                def jvmHome = Jvm.current().javaHome
+
+                if (targetPlatform.operatingSystem.macOsX) {
+                    cppCompiler.args '-I', "${jvmHome}/include"
+                    cppCompiler.args '-I', "${jvmHome}/include/darwin"
+                    cppCompiler.args '-mmacosx-version-min=10.4'
+                    linker.args '-mmacosx-version-min=10.4'
+                    linker.args '-stdlib=libc++'
+                } else if (targetPlatform.operatingSystem.linux) {
+                    cppCompiler.args '-I', "${jvmHome}/include"
+                    cppCompiler.args '-I', "${jvmHome}/include/linux"
+                    cppCompiler.args '-D_FILE_OFFSET_BITS=64'
+                } else if (targetPlatform.operatingSystem.windows) {
+                    cppCompiler.args "-I${jvmHome}/include"
+                    cppCompiler.args "-I${jvmHome}/include/win32"
+                }
+
+                cppCompiler.args '-I', "${projectDir}/discord_social_sdk/include"
+                cppCompiler.args '-I', "${buildDir}/generated/jni-headers"
+                linker.args '-L', "${projectDir}/discord_social_sdk/lib/release"
+                linker.args '-l', "discord_partner_sdk"
+            }
+        }
+    }
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    artifact
+}
+
+dependencies {
+    implementation platform('org.apache.logging.log4j:log4j-bom:2.24.3')
+    implementation 'org.apache.logging.log4j:log4j-api'
+    implementation 'org.apache.logging.log4j:log4j-core'
+    compileOnly 'org.jetbrains:annotations:26.0.2'
+}
+
+def jarLinuxBinaries = tasks.register("jarLinuxBinaries", Jar) {
+    archiveClassifier = "linux"
+    dependsOn("unzipSocialSdk")
+
+    from(rootProject.projectDir.toPath().resolve("LICENSE.txt"))
+
+    from("discord_social_sdk/License-Notices.txt") {
+        rename("License-Notices.txt", "LICENSE-DiscordSocialSdk.txt")
+    }
+
+    from("discord_social_sdk/lib/release/libdiscord_partner_sdk.so")
+    from(buildDir.file("libs/socialsdk4j/shared/libsocialsdk4j.so"))
+
+    if(System.getProperty("ci") != "yes")
+        dependsOn("socialsdk4jSharedLibrary")
+}
+
+def jarMacosBinaries = tasks.register("jarMacosBinaries", Jar) {
+    archiveClassifier = "macos"
+    dependsOn("unzipSocialSdk")
+
+    from(rootProject.projectDir.toPath().resolve("LICENSE.txt"))
+
+    from("discord_social_sdk/License-Notices.txt") {
+        rename("License-Notices.txt", "LICENSE-DiscordSocialSdk.txt")
+    }
+
+    from("discord_social_sdk/lib/release/libdiscord_partner_sdk.dylib")
+    from(buildDir.file("libs/socialsdk4j/shared/libsocialsdk4j.dylib"))
+
+    if(System.getProperty("ci") != "yes")
+        dependsOn("socialsdk4jSharedLibrary")
+}
+
+def jarWindowsBinaries = tasks.register("jarWindowsBinaries", Jar) {
+    archiveClassifier = "windows"
+    dependsOn("unzipSocialSdk")
+
+    from(rootProject.projectDir.toPath().resolve("LICENSE.txt"))
+
+    from("discord_social_sdk/License-Notices.txt") {
+        rename("License-Notices.txt", "LICENSE-DiscordSocialSdk.txt")
+    }
+
+    from("discord_social_sdk/bin/release/libdiscord_partner_sdk.dll")
+    from(buildDir.file("libs/socialsdk4j/shared/socialsdk4j.dll"))
+
+    if(System.getProperty("ci") != "yes")
+        dependsOn("socialsdk4jSharedLibrary")
+}
+
+def discordPartnerSdkWindowsArtifact = artifacts.add('artifact', jarWindowsBinaries)
+def discordPartnerSdkLinuxArtifact = artifacts.add('artifact', jarLinuxBinaries)
+def discordPartnerSdkMacosArtifact = artifacts.add('artifact', jarMacosBinaries)
+
+publishing {
+    publications {
+        create("maven", MavenPublication) {
+            groupId = 'net.derfruhling.discord.socialsdk4j'
+            artifactId = 'socialsdk4j'
+
+            artifact(jar)
+
+            artifact(discordPartnerSdkLinuxArtifact) {
+                classifier = "linux"
+            }
+
+            artifact(discordPartnerSdkMacosArtifact) {
+                classifier = "macos"
+            }
+
+            artifact(discordPartnerSdkWindowsArtifact) {
+                classifier = "windows"
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            url = layout.buildDirectory.dir('staging-deploy')
+        }
+    }
+}
+
+tasks.test {
+    useJUnitPlatform()
+}
+
+tasks.withType(LinkSharedLibrary).configureEach {
+    dependsOn("unzipSocialSdk")
+}
