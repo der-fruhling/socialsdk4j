@@ -11,9 +11,75 @@ plugins {
 group = "net.derfruhling.discord"
 version = "1.0-SNAPSHOT"
 
-def unzipSocialSdk = tasks.register("unzipSocialSdk", Copy) {
-    from zipTree("discord-social-sdk.zip")
-    into "."
+def socialSdkHeaders = tasks.register("socialSdkHeaders", Copy) {
+    from(zipTree("discord-social-sdk.zip")) {
+        include "discord_social_sdk/include/**"
+
+        eachFile { f ->
+            f.relativePath = new RelativePath(true, f.relativePath.segments.drop(1))
+        }
+
+        includeEmptyDirs = false
+    }
+
+    into "discord_social_sdk"
+}
+
+def socialSdkGrabLicense = tasks.register("socialSdkGrabLicense", Copy) {
+    from(zipTree("discord-social-sdk.zip")) {
+        include "discord_social_sdk/License-Notices.txt"
+
+        eachFile { f ->
+            f.relativePath = new RelativePath(true, f.relativePath.segments.drop(1))
+        }
+
+        includeEmptyDirs = false
+    }
+
+    into "discord_social_sdk"
+}
+
+def socialSdkWindowsBinaries = tasks.register("socialSdkWindowsBinaries", Copy) {
+    from(zipTree("discord-social-sdk.zip")) {
+        include "discord_social_sdk/bin/release/discord_partner_sdk.dll"
+        include "discord_social_sdk/lib/release/discord_partner_sdk.lib"
+
+        eachFile { f ->
+            f.relativePath = new RelativePath(true, f.relativePath.segments.drop(1))
+        }
+
+        includeEmptyDirs = false
+    }
+
+    into "discord_social_sdk"
+}
+
+def socialSdkLinuxBinaries = tasks.register("socialSdkLinuxBinaries", Copy) {
+    from(zipTree("discord-social-sdk.zip")) {
+        include "discord_social_sdk/lib/release/libdiscord_partner_sdk.so"
+
+        eachFile { f ->
+            f.relativePath = new RelativePath(true, f.relativePath.segments.drop(1))
+        }
+
+        includeEmptyDirs = false
+    }
+
+    into "discord_social_sdk"
+}
+
+def socialSdkMacosBinaries = tasks.register("socialSdkMacosBinaries", Copy) {
+    from(zipTree("discord-social-sdk.zip")) {
+        include "discord_social_sdk/lib/release/libdiscord_partner_sdk.dylib"
+
+        eachFile { f ->
+            f.relativePath = new RelativePath(true, f.relativePath.segments.drop(1))
+        }
+
+        includeEmptyDirs = false
+    }
+
+    into "discord_social_sdk"
 }
 
 def buildDir = layout.buildDirectory.get()
@@ -42,7 +108,7 @@ model {
                 }
 
                 it.tasks.configureEach {
-                    it.dependsOn(unzipSocialSdk)
+                    it.dependsOn(socialSdkHeaders)
                 }
 
                 def jvmHome = Jvm.current().javaHome
@@ -53,13 +119,25 @@ model {
                     cppCompiler.args '-mmacosx-version-min=10.4'
                     linker.args '-mmacosx-version-min=10.4'
                     linker.args '-stdlib=libc++'
+
+                    it.tasks.configureEach {
+                        it.dependsOn(socialSdkMacosBinaries)
+                    }
                 } else if (targetPlatform.operatingSystem.linux) {
                     cppCompiler.args '-I', "${jvmHome}/include"
                     cppCompiler.args '-I', "${jvmHome}/include/linux"
                     cppCompiler.args '-D_FILE_OFFSET_BITS=64'
+
+                    it.tasks.configureEach {
+                        it.dependsOn(socialSdkLinuxBinaries)
+                    }
                 } else if (targetPlatform.operatingSystem.windows) {
                     cppCompiler.args "-I${jvmHome}/include"
                     cppCompiler.args "-I${jvmHome}/include/win32"
+
+                    it.tasks.configureEach {
+                        it.dependsOn(socialSdkWindowsBinaries)
+                    }
                 }
 
                 cppCompiler.args "-I${projectDir}/discord_social_sdk/include"
@@ -93,13 +171,9 @@ dependencies {
 
 def jarLinuxBinaries = tasks.register("jarLinuxBinaries", Jar) {
     archiveClassifier = "linux"
-    dependsOn("unzipSocialSdk")
+    dependsOn(socialSdkLinuxBinaries, socialSdkGrabLicense)
 
-    from(rootProject.projectDir.toPath().resolve("LICENSE.txt"))
-
-    from("discord_social_sdk/License-Notices.txt") {
-        rename("License-Notices.txt", "LICENSE-DiscordSocialSdk.txt")
-    }
+    from("discord_social_sdk/License-Notices.txt")
 
     from("discord_social_sdk/lib/release/libdiscord_partner_sdk.so")
     from(buildDir.file("libs/socialsdk4j/shared/libsocialsdk4j.so"))
@@ -110,13 +184,9 @@ def jarLinuxBinaries = tasks.register("jarLinuxBinaries", Jar) {
 
 def jarMacosBinaries = tasks.register("jarMacosBinaries", Jar) {
     archiveClassifier = "macos"
-    dependsOn("unzipSocialSdk")
+    dependsOn(socialSdkMacosBinaries, socialSdkGrabLicense)
 
-    from(rootProject.projectDir.toPath().resolve("LICENSE.txt"))
-
-    from("discord_social_sdk/License-Notices.txt") {
-        rename("License-Notices.txt", "LICENSE-DiscordSocialSdk.txt")
-    }
+    from("discord_social_sdk/License-Notices.txt")
 
     from("discord_social_sdk/lib/release/libdiscord_partner_sdk.dylib")
     from(buildDir.file("libs/socialsdk4j/shared/libsocialsdk4j.dylib"))
@@ -127,15 +197,11 @@ def jarMacosBinaries = tasks.register("jarMacosBinaries", Jar) {
 
 def jarWindowsBinaries = tasks.register("jarWindowsBinaries", Jar) {
     archiveClassifier = "windows"
-    dependsOn("unzipSocialSdk")
+    dependsOn(socialSdkWindowsBinaries, socialSdkGrabLicense)
 
-    from(rootProject.projectDir.toPath().resolve("LICENSE.txt"))
+    from("discord_social_sdk/License-Notices.txt")
 
-    from("discord_social_sdk/License-Notices.txt") {
-        rename("License-Notices.txt", "LICENSE-DiscordSocialSdk.txt")
-    }
-
-    from("discord_social_sdk/bin/release/libdiscord_partner_sdk.dll")
+    from("discord_social_sdk/bin/release/discord_partner_sdk.dll")
     from(buildDir.file("libs/socialsdk4j/shared/socialsdk4j.dll"))
 
     if(System.getProperty("ci") != "yes")
@@ -177,8 +243,4 @@ publishing {
 
 tasks.test {
     useJUnitPlatform()
-}
-
-tasks.withType(LinkSharedLibrary).configureEach {
-    dependsOn("unzipSocialSdk")
 }
