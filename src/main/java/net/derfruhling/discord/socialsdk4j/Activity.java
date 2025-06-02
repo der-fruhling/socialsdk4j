@@ -9,8 +9,16 @@ public class Activity {
         Streaming,
         Listening,
         Watching,
+        /**
+         * @deprecated You probably don't want to use this.
+         */
+        @Deprecated
         CustomStatus,
         Competing,
+        /**
+         * @deprecated You probably don't want to use this.
+         */
+        @Deprecated
         HangStatus;
 
         public static Type from(int type) {
@@ -54,6 +62,10 @@ public class Activity {
         return this;
     }
 
+    /**
+     * @deprecated You probably don't want to use this.
+     */
+    @Deprecated
     public Activity setName(String name) {
         setName(pointer, name);
         return this;
