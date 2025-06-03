@@ -1,0 +1,71 @@
+plugins {
+    id 'java-platform'
+    id 'maven-publish'
+}
+
+group = 'net.derfruhling.discord'
+version = rootProject.version
+
+dependencies {
+    constraints {
+        runtime "net.derfruhling.discord:socialsdk4j:${rootProject.version}"
+        runtime "net.derfruhling.discord:socialsdk:${project.discordSocialSdkVersion}"
+        runtime "net.derfruhling.discord:socialsdk-debug:${project.discordSocialSdkVersion}"
+    }
+}
+
+publishing {
+    publications {
+        create("Bom", MavenPublication) {
+            groupId = 'net.derfruhling.discord'
+            artifactId = 'socialsdk4j-bom'
+
+            from components['javaPlatform']
+
+            pom {
+                name = "SocialSDK4J (BOM)"
+                description = "A Java wrapper over Discord's SocialSDK (BOM)"
+                url = "https://github.com/der-fruhling-entertainment/socialsdk4j"
+                packaging = "pom"
+
+                licenses {
+                    license {
+                        name = "3-Clause BSD License"
+                        url = "https://spdx.org/licenses/BSD-3-Clause.html"
+                    }
+                }
+
+                developers {
+                    developer {
+                        name = "der_frühling"
+                        email = "daedula@derfruhling.net"
+                        organization = "None"
+                        organizationUrl = "https://github.com/der-fruhling"
+                    }
+                }
+
+                scm {
+                    connection = "scm:git:git://github.com/der-fruhling-entertainment/socialsdk4j.git"
+                    developerConnection = "scm:git:ssh://github.com:der-fruhling-entertainment/socialsdk4j.git"
+                    url = "https://github.com/der-fruhling-entertainment/socialsdk4j"
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/der-fruhling-entertainment/socialsdk4j")
+            credentials {
+                username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+                password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
+            }
+        }
+
+        maven {
+            name = "TestDeploy"
+            url = layout.buildDirectory.file("test-deploy")
+        }
+    }
+}

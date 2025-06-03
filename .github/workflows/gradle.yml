@@ -151,7 +151,7 @@ jobs:
         cp *.so *.dylib *.dll build/libs/socialsdk4j/shared/
 
     - name: Build with Gradle
-      run: gradle -Dci=yes publishMavenPublicationToGitHubPackagesRepository
+      run: gradle -Dci=yes publishMavenPublicationToGitHubPackagesRepository publishBomPublicationToGitHubPackagesRepository
       env:
         USERNAME: ${{ github.actor }}
         TOKEN: ${{ secrets.GITHUB_TOKEN }}
