@@ -447,7 +447,7 @@ publishing {
         create("SocialSDK", MavenPublication) {
             groupId = 'net.derfruhling.discord'
             artifactId = 'socialsdk'
-            version = '1.2.8730'
+            version = project.discordSocialSdkVersion
 
             pom {
                 name = "Discord SocialSDK"
@@ -517,7 +517,7 @@ publishing {
         create("SocialSDKDebug", MavenPublication) {
             groupId = 'net.derfruhling.discord'
             artifactId = 'socialsdk-debug'
-            version = '1.2.8730'
+            version = project.discordSocialSdkVersion
 
             pom {
                 name = "Discord SocialSDK (Debug)"
