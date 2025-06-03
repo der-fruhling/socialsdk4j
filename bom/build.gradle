@@ -8,9 +8,23 @@ version = rootProject.version
 
 dependencies {
     constraints {
-        runtime "net.derfruhling.discord:socialsdk4j:${rootProject.version}"
-        runtime "net.derfruhling.discord:socialsdk:${project.discordSocialSdkVersion}"
-        runtime "net.derfruhling.discord:socialsdk-debug:${project.discordSocialSdkVersion}"
+        api("net.derfruhling.discord:socialsdk4j") {
+            version {
+                strictly rootProject.version as String
+            }
+        }
+
+        runtime("net.derfruhling.discord:socialsdk") {
+            version {
+                strictly project.discordSocialSdkVersion
+            }
+        }
+
+        runtime("net.derfruhling.discord:socialsdk-debug") {
+            version {
+                strictly project.discordSocialSdkVersion
+            }
+        }
     }
 }
 
