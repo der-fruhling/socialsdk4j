@@ -1,21 +1,21 @@
-#include <net_derfruhling_discord_socialsdk4j_Activity.h>
+#include <net_derfruhling_discord_socialsdk4j_ActivityBuilder.h>
 #include <discordpp.h>
 
 JNIEXPORT jlong JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Activity_createNewActivityNative
+Java_net_derfruhling_discord_socialsdk4j_ActivityBuilder_createNewActivityNative
 (JNIEnv *, jclass) {
     discordpp::Activity *activity = new discordpp::Activity;
     return reinterpret_cast<jlong>(activity);
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Activity_deleteActivityNative
+Java_net_derfruhling_discord_socialsdk4j_ActivityBuilder_deleteActivityNative
 (JNIEnv *, jclass, jlong ptr) {
     delete reinterpret_cast<discordpp::Activity *>(ptr);
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Activity_addButton
+Java_net_derfruhling_discord_socialsdk4j_ActivityBuilder_addButton
 (JNIEnv *env, jclass, jlong ptr, jstring label, jstring url) {
     discordpp::Activity *activity = reinterpret_cast<discordpp::Activity *>(ptr);
 
@@ -32,7 +32,7 @@ Java_net_derfruhling_discord_socialsdk4j_Activity_addButton
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Activity_setName
+Java_net_derfruhling_discord_socialsdk4j_ActivityBuilder_setName
 (JNIEnv *env, jclass, jlong ptr, jstring name) {
     discordpp::Activity *activity = reinterpret_cast<discordpp::Activity *>(ptr);
 
@@ -42,7 +42,7 @@ Java_net_derfruhling_discord_socialsdk4j_Activity_setName
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Activity_setType
+Java_net_derfruhling_discord_socialsdk4j_ActivityBuilder_setType
 (JNIEnv *, jclass, jlong ptr, jint type) {
     discordpp::Activity *activity = reinterpret_cast<discordpp::Activity *>(ptr);
 
@@ -50,7 +50,7 @@ Java_net_derfruhling_discord_socialsdk4j_Activity_setType
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Activity_setState
+Java_net_derfruhling_discord_socialsdk4j_ActivityBuilder_setState
 (JNIEnv *env, jclass, jlong ptr, jstring state) {
     discordpp::Activity *activity = reinterpret_cast<discordpp::Activity *>(ptr);
 
@@ -60,7 +60,7 @@ Java_net_derfruhling_discord_socialsdk4j_Activity_setState
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Activity_setDetails
+Java_net_derfruhling_discord_socialsdk4j_ActivityBuilder_setDetails
 (JNIEnv *env, jclass, jlong ptr, jstring details) {
     discordpp::Activity *activity = reinterpret_cast<discordpp::Activity *>(ptr);
 
@@ -70,7 +70,7 @@ Java_net_derfruhling_discord_socialsdk4j_Activity_setDetails
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Activity_setActivityAssets
+Java_net_derfruhling_discord_socialsdk4j_ActivityBuilder_setActivityAssets
 (JNIEnv *env, jclass, jlong ptr, jstring largeImage, jstring largeText, jstring smallImage, jstring smallText) {
     discordpp::Activity *activity = reinterpret_cast<discordpp::Activity *>(ptr);
 
@@ -93,7 +93,7 @@ Java_net_derfruhling_discord_socialsdk4j_Activity_setActivityAssets
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Activity_setTimestamps
+Java_net_derfruhling_discord_socialsdk4j_ActivityBuilder_setTimestamps
 (JNIEnv *, jclass, jlong ptr, jlong start, jlong end) {
     discordpp::Activity *activity = reinterpret_cast<discordpp::Activity *>(ptr);
 
@@ -103,7 +103,7 @@ Java_net_derfruhling_discord_socialsdk4j_Activity_setTimestamps
     activity->SetTimestamps(timestamps);
 }
 
-JNIEXPORT void JNICALL Java_net_derfruhling_discord_socialsdk4j_Activity_setParty
+JNIEXPORT void JNICALL Java_net_derfruhling_discord_socialsdk4j_ActivityBuilder_setParty
 (JNIEnv *env, jclass, jlong ptr, jstring id, jint size, jint maxSize, jboolean isPublic) {
     discordpp::Activity *activity = reinterpret_cast<discordpp::Activity *>(ptr);
 
@@ -122,7 +122,7 @@ JNIEXPORT void JNICALL Java_net_derfruhling_discord_socialsdk4j_Activity_setPart
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Activity_setSecrets
+Java_net_derfruhling_discord_socialsdk4j_ActivityBuilder_setSecrets
 (JNIEnv *env, jclass, jlong ptr, jstring joinSecret) {
     discordpp::Activity *activity = reinterpret_cast<discordpp::Activity *>(ptr);
 
