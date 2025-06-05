@@ -2,10 +2,6 @@ package net.derfruhling.discord.socialsdk4j;
 
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 public class User {
     long pointer;
     public final long id;
@@ -23,6 +19,6 @@ public class User {
     public native @Nullable String getGlobalName();
     public native boolean isProvisional();
     public native Relationship getRelationship();
-    public native StatusType getStatus();
+    public native UserStatus getStatus();
     public native String getUsername();
 }

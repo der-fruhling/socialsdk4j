@@ -3,13 +3,13 @@ package net.derfruhling.discord.socialsdk4j;
 import org.jetbrains.annotations.Nullable;
 
 public record ActivityInfo(
-        Activity.Type type,
+        ActivityType type,
         String name,
         @Nullable String state,
         @Nullable String details,
         Button[] buttons,
         long applicationId,
-        @Nullable Activity.Assets assets,
+        @Nullable ActivityBuilder.Assets assets,
         @Nullable Timestamps timestamps,
         @Nullable Party party,
         @Nullable Secrets secrets,
@@ -35,15 +35,15 @@ public record ActivityInfo(
                          @Nullable String joinSecret,
                          int supportedPlatforms) {
         this(
-                Activity.Type.from(type),
+                ActivityType.from(type),
                 name,
                 state,
                 details,
                 buttons,
                 applicationId,
-                largeImage != null || smallImage != null ? new Activity.Assets(
-                        largeImage != null ? new Activity.Asset(largeImage, largeText) : null,
-                        smallImage != null ? new Activity.Asset(smallImage, smallText) : null
+                largeImage != null || smallImage != null ? new ActivityBuilder.Assets(
+                        largeImage != null ? new ActivityBuilder.Asset(largeImage, largeText) : null,
+                        smallImage != null ? new ActivityBuilder.Asset(smallImage, smallText) : null
                 ) : null,
                 timestampStart != 0 ? new Timestamps(timestampStart, timestampEnd) : null,
                 partyId != null ? new Party(partyId, partySize, partyMaxSize, partyIsPublic) : null,

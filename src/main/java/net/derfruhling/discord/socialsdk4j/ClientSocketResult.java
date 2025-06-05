@@ -1,15 +1,17 @@
 package net.derfruhling.discord.socialsdk4j;
 
 /**
- * <a href="https://discord.com/developers/docs/social-sdk/classdiscordpp_1_1Client.html#ac8d8140b9e1251e59e59a267f8a6295f">discordpp::Client::Error</a>
+ * This is essentially a light {@link ClientResult} used for socket stuff.
+ * <a href="https://discord.com/developers/docs/social-sdk/classdiscordpp_1_1Client.html#ac8d8140b9e1251e59e59a267f8a6295f">See the official documentation.</a>
  */
-public enum ClientSocketError {
+@SuppressWarnings("MissingJavadoc")
+public enum ClientSocketResult {
     None,
     ConnectionFailed,
     UnexpectedClose,
     ConnectionCanceled;
 
-    public static ClientSocketError from(int error) {
+    static ClientSocketResult from(int error) {
         return switch (error) {
             case 0 -> None;
             case 1 -> ConnectionFailed;
@@ -19,6 +21,9 @@ public enum ClientSocketError {
         };
     }
 
+    /**
+     * @return {@code true} if this result is successful.
+     */
     public boolean isOk() {
         return this == None;
     }

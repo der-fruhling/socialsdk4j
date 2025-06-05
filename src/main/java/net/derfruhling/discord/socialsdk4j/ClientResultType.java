@@ -1,9 +1,10 @@
 package net.derfruhling.discord.socialsdk4j;
 
 /**
- * <a href="https://discord.com/developers/docs/social-sdk/namespacediscordpp.html#ae19a5aed498bc40359e4d89d14ffb446">discordpp::ErrorType</a>
+ * <a href="https://discord.com/developers/docs/social-sdk/namespacediscordpp.html#ae19a5aed498bc40359e4d89d14ffb446">See the official documentation.</a>
  */
-public enum ClientResultError {
+@SuppressWarnings("MissingJavadoc")
+public enum ClientResultType {
     None,
     NetworkError,
     HTTPError,
@@ -15,7 +16,7 @@ public enum ClientResultError {
     AuthorizationFailed,
     RPCError;
 
-    public static ClientResultError from(int errorType) {
+    static ClientResultType from(int errorType) {
         return switch (errorType) {
             case 0 -> None;
             case 1 -> NetworkError;

@@ -3,8 +3,6 @@ package net.derfruhling.discord.socialsdk4j;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Objects;
-
 public class TestMain {
     public static final long APP_ID = 1367390201621512313L;
 
@@ -24,10 +22,14 @@ public class TestMain {
 
         client.setStatusChangedCallback((status, error, errorDetail) -> {
             if(status == Client.Status.Ready) {
-                client.updateRichPresence(new Activity()
-                        .setType(Activity.Type.Playing)
+                client.updateRichPresence(new ActivityBuilder()
+                        .setType(ActivityType.Playing)
                         .setState("miawing")
-                        .setDetails("in test miaw"));
+                        .setDetails("in test miaw"), result -> {
+                    if(!result.isSuccess()) {
+                        log.error("Failed to update rich presence: {}", result.message());
+                    }
+                });
 
                 client.createOrJoinLobby("miaw-secret", (result, lobbyId) -> {
                     if (result.isSuccess()) {
