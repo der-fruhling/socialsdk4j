@@ -220,7 +220,7 @@ dependencies {
 }
 
 processResources {
-    filesMatching("socialsdk4j.properties") {
+    filesMatching("**/socialsdk4j.properties") {
         expand socialSdkVersion: discordSocialSdkVersion, version: version
     }
 }
