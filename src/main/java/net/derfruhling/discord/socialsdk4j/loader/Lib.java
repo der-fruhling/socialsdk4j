@@ -1,14 +1,7 @@
 package net.derfruhling.discord.socialsdk4j.loader;
 
-import net.derfruhling.discord.socialsdk4j.SocialSdk;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 
 class Lib {
     private static final Logger log = LogManager.getLogger();
