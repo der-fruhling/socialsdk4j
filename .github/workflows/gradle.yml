@@ -2,8 +2,20 @@ name: Java CI with Gradle
 
 on:
   push:
+    paths:
+      - "*.gradle"
+      - "bom/**"
+      - "src/**"
+      - "discord-social-sdk.zip"
+      - "gradle.properties"
   pull_request:
     branches: [ "master" ]
+    paths:
+      - "*.gradle"
+      - "bom/**"
+      - "src/**"
+      - "discord-social-sdk.zip"
+      - "gradle.properties"
 
 jobs:
   build-linux:
