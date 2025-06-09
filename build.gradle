@@ -212,19 +212,6 @@ configurations {
     artifact
 }
 
-dependencies {
-    implementation platform('org.apache.logging.log4j:log4j-bom:2.24.3')
-    implementation 'org.apache.logging.log4j:log4j-api'
-    implementation 'org.apache.logging.log4j:log4j-core'
-    compileOnly 'org.jetbrains:annotations:26.0.2'
-}
-
-processResources {
-    filesMatching("**/socialsdk4j.properties") {
-        expand socialSdkVersion: discordSocialSdkVersion, version: version
-    }
-}
-
 def socialSdkBinaries = tasks.register("socialSdkBinaries") {
     dependsOn(
             socialSdkLinuxReleaseBinaries, socialSdkMacosReleaseBinaries, socialSdkWindowsReleaseBinaries,
@@ -385,6 +372,47 @@ def socialSdk4jNativesMacosArtifact = artifacts.add('artifact', jarSocialSdk4jMa
 
 def nativeSourcesJar = artifacts.add('artifact', generateNativeSourcesJar)
 def dummyJar = artifacts.add('artifact', generateDummyJar)
+
+def setupTest = tasks.register("setupTest", Copy) {
+    def os = System.getProperty("os.name").toLowerCase()
+
+    if(os.contains("windows")) {
+        dependsOn socialSdkWindowsReleaseBinaries
+        from "discord_social_sdk/bin/release/discord_partner_sdk.dll", linkSocialsdk4jSharedLibrary
+    } else if(os.contains("nix") || os.contains("nux")) {
+        dependsOn socialSdkLinuxReleaseBinaries
+        from "discord_social_sdk/lib/release/libdiscord_partner_sdk.so", linkSocialsdk4jSharedLibrary
+    } else if(os.contains("macos")) {
+        dependsOn socialSdkMacosReleaseBinaries
+        from "discord_social_sdk/lib/release/libdiscord_partner_sdk.dylib", linkSocialsdk4jSharedLibrary
+    }
+
+    duplicatesStrategy DuplicatesStrategy.EXCLUDE
+
+    into layout.buildDirectory.dir("testEnv")
+}
+
+dependencies {
+    implementation platform('org.apache.logging.log4j:log4j-bom:2.24.3')
+    implementation 'org.apache.logging.log4j:log4j-api'
+    implementation 'org.apache.logging.log4j:log4j-core'
+    compileOnly 'org.jetbrains:annotations:26.0.2'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+}
+
+test {
+    useJUnitPlatform()
+
+    dependsOn setupTest
+}
+
+processResources {
+    filesMatching("**/socialsdk4j.properties") {
+        expand socialSdkVersion: discordSocialSdkVersion, version: version
+    }
+}
 
 publishing {
     publications {
