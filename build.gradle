@@ -219,6 +219,12 @@ dependencies {
     compileOnly 'org.jetbrains:annotations:26.0.2'
 }
 
+processResources {
+    filesMatching("socialsdk4j.properties") {
+        expand socialSdkVersion: discordSocialSdkVersion, version: version
+    }
+}
+
 def socialSdkBinaries = tasks.register("socialSdkBinaries") {
     dependsOn(
             socialSdkLinuxReleaseBinaries, socialSdkMacosReleaseBinaries, socialSdkWindowsReleaseBinaries,
@@ -229,7 +235,9 @@ def socialSdkBinaries = tasks.register("socialSdkBinaries") {
 def jarSocialSdkReleaseLinuxBinaries = tasks.register("jarSocialSdkReleaseLinuxBinaries", Jar) {
     archiveClassifier = "linux"
     archiveBaseName = "socialsdk"
-    dependsOn(socialSdkBinaries, socialSdkGrabLicense)
+    dependsOn socialSdkBinaries, socialSdkGrabLicense
+
+    mustRunAfter socialSdkHeaders
 
     from("discord_social_sdk/License-Notices.txt") {
         rename("License-Notices.txt", "LICENSE-DiscordSocialSdk.txt")
@@ -241,7 +249,9 @@ def jarSocialSdkReleaseLinuxBinaries = tasks.register("jarSocialSdkReleaseLinuxB
 def jarSocialSdkDebugLinuxBinaries = tasks.register("jarSocialSdkDebugLinuxBinaries", Jar) {
     archiveClassifier = "linux"
     archiveBaseName = "socialsdk-debug"
-    dependsOn(socialSdkBinaries, socialSdkGrabLicense)
+    dependsOn socialSdkBinaries, socialSdkGrabLicense
+
+    mustRunAfter socialSdkHeaders
 
     from("discord_social_sdk/License-Notices.txt") {
         rename("License-Notices.txt", "LICENSE-DiscordSocialSdk.txt")
@@ -266,7 +276,9 @@ def jarSocialSdk4jLinuxBinaries = tasks.register("jarSocialSdk4jLinuxBinaries", 
 def jarSocialSdkReleaseMacosBinaries = tasks.register("jarSocialSdkReleaseMacosBinaries", Jar) {
     archiveClassifier = "macos"
     archiveBaseName = "socialsdk"
-    dependsOn(socialSdkBinaries, socialSdkGrabLicense)
+    dependsOn socialSdkBinaries, socialSdkGrabLicense
+
+    mustRunAfter socialSdkHeaders
 
     from("discord_social_sdk/License-Notices.txt") {
         rename("License-Notices.txt", "LICENSE-DiscordSocialSdk.txt")
@@ -278,7 +290,9 @@ def jarSocialSdkReleaseMacosBinaries = tasks.register("jarSocialSdkReleaseMacosB
 def jarSocialSdkDebugMacosBinaries = tasks.register("jarSocialSdkDebugMacosBinaries", Jar) {
     archiveClassifier = "macos"
     archiveBaseName = "socialsdk-debug"
-    dependsOn(socialSdkBinaries, socialSdkGrabLicense)
+    dependsOn socialSdkBinaries, socialSdkGrabLicense
+
+    mustRunAfter socialSdkHeaders
 
     from("discord_social_sdk/License-Notices.txt") {
         rename("License-Notices.txt", "LICENSE-DiscordSocialSdk.txt")
@@ -303,7 +317,9 @@ def jarSocialSdk4jMacosBinaries = tasks.register("jarSocialSdk4jMacosBinaries", 
 def jarSocialSdkReleaseWindowsBinaries = tasks.register("jarSocialSdkReleaseWindowsBinaries", Jar) {
     archiveClassifier = "windows"
     archiveBaseName = "socialsdk"
-    dependsOn(socialSdkBinaries, socialSdkGrabLicense)
+    dependsOn socialSdkBinaries, socialSdkGrabLicense
+
+    mustRunAfter socialSdkHeaders
 
     from("discord_social_sdk/License-Notices.txt") {
         rename("License-Notices.txt", "LICENSE-DiscordSocialSdk.txt")
@@ -315,7 +331,9 @@ def jarSocialSdkReleaseWindowsBinaries = tasks.register("jarSocialSdkReleaseWind
 def jarSocialSdkDebugWindowsBinaries = tasks.register("jarSocialSdkDebugWindowsBinaries", Jar) {
     archiveClassifier = "windows"
     archiveBaseName = "socialsdk-debug"
-    dependsOn(socialSdkBinaries, socialSdkGrabLicense)
+    dependsOn socialSdkBinaries, socialSdkGrabLicense
+
+    mustRunAfter socialSdkHeaders
 
     from("discord_social_sdk/License-Notices.txt") {
         rename("License-Notices.txt", "LICENSE-DiscordSocialSdk.txt")
