@@ -22,12 +22,6 @@ Java_net_derfruhling_discord_socialsdk4j_SocialSdk_createClientNative
     return reinterpret_cast<jlong>(client);
 }
 
-JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_SocialSdk_deleteClientNative
-(JNIEnv *env, jclass cls, long client) {
-    delete reinterpret_cast<discordpp::Client*>(client);
-}
-
 JNIEnv *cbenv;
 
 JNIEXPORT void JNICALL
