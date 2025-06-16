@@ -85,8 +85,8 @@ Java_net_derfruhling_discord_socialsdk4j_User_getStatus
     discordpp::UserHandle *user = (discordpp::UserHandle *)env->GetLongField(obj, userPtrF);
 
     jclass clazz = env->FindClass("net/derfruhling/discord/socialsdk4j/StatusType");
-    jmethodID cons = env->GetMethodID(clazz, "from", "(I)Lnet/derfruhling/discord/socialsdk4j/StatusType;");
-    return env->NewObject(clazz, cons, (jint)user->Status());
+    jmethodID cons = env->GetStaticMethodID(clazz, "from", "(I)Lnet/derfruhling/discord/socialsdk4j/StatusType;");
+    return env->CallStaticObjectMethod(clazz, cons, (jint)user->Status());
 }
 
 JNIEXPORT jstring JNICALL
