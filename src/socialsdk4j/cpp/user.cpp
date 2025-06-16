@@ -84,8 +84,8 @@ Java_net_derfruhling_discord_socialsdk4j_User_getStatus
     if (!userPtrF) userPtrF = env->GetFieldID(env->GetObjectClass(obj), "pointer", "J");
     discordpp::UserHandle *user = (discordpp::UserHandle *)env->GetLongField(obj, userPtrF);
 
-    jclass clazz = env->FindClass("net/derfruhling/discord/socialsdk4j/StatusType");
-    jmethodID cons = env->GetStaticMethodID(clazz, "from", "(I)Lnet/derfruhling/discord/socialsdk4j/StatusType;");
+    jclass clazz = env->FindClass("net/derfruhling/discord/socialsdk4j/UserStatus");
+    jmethodID cons = env->GetStaticMethodID(clazz, "from", "(I)Lnet/derfruhling/discord/socialsdk4j/UserStatus;");
     return env->CallStaticObjectMethod(clazz, cons, (jint)user->Status());
 }
 
