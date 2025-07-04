@@ -5,19 +5,18 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.ref.Cleaner;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Properties;
+import java.util.function.BiConsumer;
 
 public class SocialSdk {
     private static final Logger log = LogManager.getLogger(SocialSdk.class);
     private static boolean isInitialized = false;
+
+    private static BiConsumer<Level, String> logCallback = (severity, message) -> {
+        log.log(severity, message.strip());
+    };
 
     static final Cleaner cleaner = Cleaner.create();
 
@@ -39,14 +38,18 @@ public class SocialSdk {
         if(!isInitialized) throw new IllegalStateException("SocialSDK4J not initialized");
     }
 
+    public static void setLogCallback(BiConsumer<Level, String> logCallback) {
+        SocialSdk.logCallback = logCallback;
+    }
+
     private static void javaLog(int severity, String message) {
-        log.log(switch(severity) {
+        logCallback.accept(switch (severity) {
             case 1 -> Level.DEBUG;
             case 2 -> Level.INFO;
             case 3 -> Level.WARN;
             case 4 -> Level.ERROR;
             default -> throw new IllegalStateException("Unexpected severity value: " + severity);
-        }, message.strip());
+        }, message);
     }
 
     static native long createClientNative();
