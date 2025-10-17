@@ -1,23 +1,23 @@
 package net.derfruhling.discord.socialsdk4j;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import net.derfruhling.discord.socialsdk4j.loader.ClasspathLoader;
+import net.derfruhling.discord.socialsdk4j.loader.DirectoryLoader;
+
+import java.nio.file.Path;
 
 public class TestMain {
     public static final long APP_ID = 1367390201621512313L;
 
     public static void main(String[] args) throws Exception {
-        Logger log = LogManager.getLogger();
-        log.info("miaw");
-
+        SocialSdk.initialize(new DirectoryLoader(Path.of("build", "testEnv")));
         Client client = new Client();
 
         client.setLobbyCreatedCallback(lobbyId -> {
-            log.info("lobby {} created", lobbyId);
+            System.out.printf("lobby %d created\n", lobbyId);
         });
 
         client.setLobbyDeletedCallback(lobbyId -> {
-            log.info("lobby {} deleted", lobbyId);
+            System.out.printf("lobby %d deleted\n", lobbyId);
         });
 
         client.setStatusChangedCallback((status, error, errorDetail) -> {
@@ -27,21 +27,21 @@ public class TestMain {
                         .setState("miawing")
                         .setDetails("in test miaw"), result -> {
                     if(!result.isSuccess()) {
-                        log.error("Failed to update rich presence: {}", result.message());
+                        System.out.printf("Failed to update rich presence: %s\n", result.message());
                     }
                 });
 
                 client.createOrJoinLobby("miaw-secret", (result, lobbyId) -> {
                     if (result.isSuccess()) {
-                        log.info("lobby {} created / joined", lobbyId);
+                        System.out.printf("lobby %d created / joined", lobbyId);
                     } else {
-                        log.info("lobby {} failed to create: {}", lobbyId, result);
+                        System.out.printf("lobby %d failed to create: %s", lobbyId, result);
                     }
                 });
 
                 client.openConnectedGameSettingsInDiscord(result -> {
                     if (!result.isSuccess()) {
-                        log.info("failed to open connected games settings: {}", result);
+                        System.out.printf("failed to open connected games settings: %s", result);
                     }
                 });
             }

@@ -1,10 +1,7 @@
 package net.derfruhling.discord.socialsdk4j.loader;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-class Lib {
-    private static final Logger log = LogManager.getLogger();
+final class Lib {
+    private Lib() {}
 
     static String name(String name) {
         String os = System.getProperty("os.name").toLowerCase();

@@ -1,8 +1,5 @@
 package net.derfruhling.discord.socialsdk4j.loader;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,15 +7,12 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 public class ClasspathLoader implements SocialSdkLoader {
-    private static final Logger log = LogManager.getLogger();
-
     private static void loadLibrary(String name) throws IOException {
         Path path = Path.of(".", Lib.name(name));
 
         try(var is = Lib.class.getResourceAsStream("/" + Lib.name(name))) {
             assert is != null;
 
-            log.info("Ensuring that component {} needs to be written again", name);
             byte[] bytes = is.readAllBytes();
 
             if(!Files.exists(path)) {
@@ -41,7 +35,6 @@ public class ClasspathLoader implements SocialSdkLoader {
                 }
 
                 if(differs) {
-                    log.info("Need to recopy component {}", name);
                     try {
                         Files.write(path, bytes);
                     } catch (IOException e) {

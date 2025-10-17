@@ -1,9 +1,6 @@
 package net.derfruhling.discord.socialsdk4j;
 
 import net.derfruhling.discord.socialsdk4j.loader.SocialSdkLoader;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.lang.ref.Cleaner;
@@ -11,12 +8,16 @@ import java.util.Properties;
 import java.util.function.BiConsumer;
 
 public class SocialSdk {
-    private static final Logger log = LogManager.getLogger(SocialSdk.class);
     private static boolean isInitialized = false;
 
-    private static BiConsumer<Level, String> logCallback = (severity, message) -> {
-        log.log(severity, message.strip());
-    };
+    public enum LogLevel {
+        DEBUG,
+        INFO,
+        WARN,
+        ERROR
+    }
+
+    private static BiConsumer<LogLevel, String> logCallback = (severity, message) -> {};
 
     static final Cleaner cleaner = Cleaner.create();
 
@@ -38,16 +39,16 @@ public class SocialSdk {
         if(!isInitialized) throw new IllegalStateException("SocialSDK4J not initialized");
     }
 
-    public static void setLogCallback(BiConsumer<Level, String> logCallback) {
+    public static void setLogCallback(BiConsumer<LogLevel, String> logCallback) {
         SocialSdk.logCallback = logCallback;
     }
 
     private static void javaLog(int severity, String message) {
         logCallback.accept(switch (severity) {
-            case 1 -> Level.DEBUG;
-            case 2 -> Level.INFO;
-            case 3 -> Level.WARN;
-            case 4 -> Level.ERROR;
+            case 1 -> LogLevel.DEBUG;
+            case 2 -> LogLevel.INFO;
+            case 3 -> LogLevel.WARN;
+            case 4 -> LogLevel.ERROR;
             default -> throw new IllegalStateException("Unexpected severity value: " + severity);
         }, message);
     }
