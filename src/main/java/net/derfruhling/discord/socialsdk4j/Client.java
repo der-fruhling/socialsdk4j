@@ -5,6 +5,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 /**
  * The main part of the SocialSDK. Most actions are initiated by calling
@@ -42,6 +44,8 @@ public class Client {
         void invoke(ClientResult result, String code, String redirectUri);
     }
 
+    public record AuthorizationResult(String code, String redirectUri) {}
+
     public interface StatusChangedCallbackNative {
         @SuppressWarnings({"unused", "MissingJavadoc"})
         void invoke(int status, int error, int errorDetail);
@@ -56,6 +60,8 @@ public class Client {
         @SuppressWarnings("MissingJavadoc")
         void invoke(ClientResult result, String accessToken, String refreshToken, AuthorizationTokenType type, int expiresIn, String[] scopes);
     }
+
+    public record TokenExchangeResult(String accessToken, String refreshToken, AuthorizationTokenType type, int expiresIn, String[] scopes) {}
 
     public interface StatusChangedCallback {
         @SuppressWarnings("MissingJavadoc")
@@ -318,6 +324,41 @@ public class Client {
     }
 
     /**
+     * Authorizes a standard Discord user.
+     *
+     * @param clientId The client ID of your application. You can find this in
+     *                 the developer panel.
+     * @param scopes The scopes to request. You can include most scopes here
+     *               as well as the SocialSDK scopes contained in
+     *               {@link Client#COMMUNICATIONS_SCOPES} and
+     *               {@link Client#PRESENCE_SCOPES}.
+     * @param state A randomized, unique state value used to correlate a user's
+     *              authorization request with their authenticated state. This
+     *              should be random and not predictable.
+     * @param challenge The challenge value retrieved from
+     *                  {@link CodeVerifier#challenge()}
+     *
+     * @return A future that completes with the {@link AuthorizationResult}, or
+     * a {@link DiscordException} on failure.
+     *
+     * @see Client#runCallbacks()
+     * @see Client#authorize(long, String[], String, CodeChallenge, AuthorizationCallback)
+     */
+    public CompletableFuture<AuthorizationResult> authorize(long clientId, @NotNull String[] scopes, @NotNull String state, @NotNull CodeChallenge challenge) {
+        var future = new CompletableFuture<AuthorizationResult>();
+
+        authorize(clientId, scopes, state, challenge, (result, code, redirectUri) -> {
+            if(result.isSuccess()) {
+                future.complete(new AuthorizationResult(code, redirectUri));
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
+    }
+
+    /**
      * Aborts the ongoing authorization.
      */
     public void abortAuthorize() {
@@ -349,6 +390,37 @@ public class Client {
     }
 
     /**
+     * Retrieves the provisional Discord account token.
+     *
+     * @param applicationId The application ID of your application. This can be
+     *                      found in the developer panel. AFAIK, this is always
+     *                      the same as a client ID.
+     * @param externalAuthType The kind of external auth service to try
+     *                         authorizing with.
+     * @param token The actual token acquired from the external auth service.
+     *              This will be sent to Discord.
+     *
+     * @return A future that is completed with a {@link TokenExchangeResult},
+     * or a {@link DiscordException} on failure.
+     *
+     * @see Client#runCallbacks()
+     * @see Client#getProvisionalToken(long, ExternalAuthType, String, TokenExchangeCallback)
+     */
+    public CompletableFuture<TokenExchangeResult> getProvisionalToken(long applicationId, @NotNull ExternalAuthType externalAuthType, @NotNull String token) {
+        var future = new CompletableFuture<TokenExchangeResult>();
+
+        getProvisionalToken(applicationId, externalAuthType, token, (result, accessToken, refreshToken, type, expiresIn, scopes) -> {
+            if(result.isSuccess()) {
+                future.complete(new TokenExchangeResult(accessToken, refreshToken, type, expiresIn, scopes));
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
+    }
+
+    /**
      * Retrieves the Discord bearer token after a successful authorization.
      * The documentation recommends using the provisional merge function if
      * you already have the token required to ensure that one user does not
@@ -368,6 +440,41 @@ public class Client {
      */
     public void getToken(long applicationId, @NotNull String code, @NotNull String codeVerifier, @NotNull String redirectUri, @NotNull TokenExchangeCallback callback) {
         getTokenNative(pointer, applicationId, code, codeVerifier, redirectUri, tokenExchangeCallback(callback));
+    }
+
+    /**
+     * Retrieves the Discord bearer token after a successful authorization.
+     * The documentation recommends using the provisional merge function if
+     * you already have the token required to ensure that one user does not
+     * end up with both a real account and a provisional account.
+     *
+     * @param applicationId The application ID of your application. This can be
+     *                      found in the developer panel. AFAIK, this is always
+     *                      the same as a client ID.
+     * @param code The code obtained from a successful authorization.
+     * @param codeVerifier The verifier retrieved from {@link CodeVerifier#verifier()}
+     * @param redirectUri The redirect URI used.
+     *
+     * @return A future that is completed with a {@link TokenExchangeResult},
+     * or a {@link DiscordException} on failure.
+     *
+     * @see Client#runCallbacks()
+     * @see Client#authorize(long, String[], String, CodeChallenge, AuthorizationCallback)
+     * @see Client#getTokenFromProvisionalMerge(long, String, String, String, ExternalAuthType, String, TokenExchangeCallback)
+     * @see Client#getToken(long, String, String, String, TokenExchangeCallback)
+     */
+    public CompletableFuture<TokenExchangeResult> getToken(long applicationId, @NotNull String code, @NotNull String codeVerifier, @NotNull String redirectUri) {
+        var future = new CompletableFuture<TokenExchangeResult>();
+
+        getToken(applicationId, code, codeVerifier, redirectUri, (result, accessToken, refreshToken, type, expiresIn, scopes) -> {
+            if(result.isSuccess()) {
+                future.complete(new TokenExchangeResult(accessToken, refreshToken, type, expiresIn, scopes));
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
     }
 
     /**
@@ -397,6 +504,45 @@ public class Client {
     }
 
     /**
+     * Retrieves the Discord bearer token after a successful authorization,
+     * additionally authorizing with the external auth service and merging
+     * the provisional account into this real account if necessary.
+     *
+     * @param applicationId The application ID of your application. This can be
+     *                      found in the developer panel. AFAIK, this is always
+     *                      the same as a client ID.
+     * @param code The code obtained from a successful authorization.
+     * @param codeVerifier The verifier retrieved from {@link CodeVerifier#verifier()}
+     * @param redirectUri The redirect URI used.
+     * @param externalAuthType The kind of external auth service to try
+     *                         authorizing with.
+     * @param externalAuthToken The actual token acquired from the external
+     *                          auth service. This will be sent to Discord.
+     *
+     * @return A future that is completed with a {@link TokenExchangeResult},
+     * or a {@link DiscordException} on failure.
+     *
+     * @see Client#runCallbacks()
+     * @see Client#authorize(long, String[], String, CodeChallenge, AuthorizationCallback)
+     * @see Client#getToken(long, String, String, String, TokenExchangeCallback)
+     * @see Client#getProvisionalToken(long, ExternalAuthType, String, TokenExchangeCallback)
+     * @see Client#getTokenFromProvisionalMerge(long, String, String, String, ExternalAuthType, String, TokenExchangeCallback)
+     */
+    public CompletableFuture<TokenExchangeResult> getTokenFromProvisionalMerge(long applicationId, @NotNull String code, @NotNull String codeVerifier, @NotNull String redirectUri, @NotNull ExternalAuthType externalAuthType, @NotNull String externalAuthToken) {
+        var future = new CompletableFuture<TokenExchangeResult>();
+
+        getTokenFromProvisionalMerge(applicationId, code, codeVerifier, redirectUri, externalAuthType, externalAuthToken, (result, accessToken, refreshToken, type, expiresIn, scopes) -> {
+            if(result.isSuccess()) {
+                future.complete(new TokenExchangeResult(accessToken, refreshToken, type, expiresIn, scopes));
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
+    }
+
+    /**
      * Updates the token used by this client. Call {@link Client#connect()}
      * afterward to connect to Discord.
      *
@@ -409,6 +555,33 @@ public class Client {
      */
     public void updateToken(@NotNull AuthorizationTokenType type, @NotNull String token, @NotNull GenericResultCallback callback) {
         updateTokenNative(pointer, type.ordinal(), token, callback);
+    }
+
+    /**
+     * Updates the token used by this client. Call {@link Client#connect()}
+     * afterward to connect to Discord.
+     *
+     * @param type Type of the token. You should set this to
+     *             {@link AuthorizationTokenType#Bearer}.
+     * @param token The Discord token obtained from the authorization flow.
+     *
+     * @return A future that is completed when the operation finishes,
+     * or a {@link DiscordException} on failure.
+     *
+     * @see Client#runCallbacks()
+     */
+    public CompletableFuture<Void> updateToken(@NotNull AuthorizationTokenType type, @NotNull String token) {
+        var future = new CompletableFuture<Void>();
+
+        updateToken(type, token, result -> {
+            if(result.isSuccess()) {
+                future.complete(null);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
     }
 
     /**
@@ -467,6 +640,36 @@ public class Client {
     }
 
     /**
+     * Refreshes the access token using a refresh token obtained from the
+     * authorization flow.
+     *
+     * @param applicationId The application ID of your application. This can be
+     *                      found in the developer panel. AFAIK, this is always
+     *                      the same as a client ID.
+     * @param refreshToken The refresh token, not the access token.
+     *
+     * @return A future that is completed with a {@link TokenExchangeResult},
+     * or a {@link DiscordException} on failure.
+     *
+     * @see Client#runCallbacks()
+     * @see Client#updateToken(AuthorizationTokenType, String, GenericResultCallback)
+     * @see Client#refreshToken(long, String, TokenExchangeCallback)
+     */
+    public CompletableFuture<TokenExchangeResult> refreshToken(long applicationId, @NotNull String refreshToken) {
+        var future = new CompletableFuture<TokenExchangeResult>();
+
+        refreshToken(applicationId, refreshToken, (result, accessToken, refreshToken1, type, expiresIn, scopes) -> {
+            if(result.isSuccess()) {
+                future.complete(new TokenExchangeResult(accessToken, refreshToken1, type, expiresIn, scopes));
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
+    }
+
+    /**
      * Opens the connected game settings in the Discord app if it is found,
      * otherwise opens a browser window. Only works for real Discord accounts.
      *
@@ -476,6 +679,29 @@ public class Client {
      */
     public void openConnectedGameSettingsInDiscord(@NotNull GenericResultCallback callback) {
         openConnectedGameSettingsInDiscordNative(pointer, callback);
+    }
+
+    /**
+     * Opens the connected game settings in the Discord app if it is found,
+     * otherwise opens a browser window. Only works for real Discord accounts.
+     *
+     * @return A future that completes when the operation finishes, or
+     * with {@link DiscordException} on failure.
+     *
+     * @see Client#runCallbacks()
+     */
+    public CompletableFuture<Void> openConnectedGameSettingsInDiscord() {
+        var future = new CompletableFuture<Void>();
+
+        openConnectedGameSettingsInDiscordNative(pointer, result -> {
+            if(result.isSuccess()) {
+                future.complete(null);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
     }
 
     /**
@@ -517,6 +743,30 @@ public class Client {
      */
     public void updateRichPresence(@NotNull ActivityBuilder activity, @NotNull GenericResultCallback callback) {
         updateRichPresenceNative(pointer, activity.pointer, callback);
+    }
+
+    /**
+     * Updates rich presence information.
+     *
+     * @param activity An {@link ActivityBuilder} object.
+     *
+     * @return A future that completes when the operation finishes, or
+     * with {@link DiscordException} on failure.
+     *
+     * @see Client#runCallbacks()
+     */
+    public CompletableFuture<Void> updateRichPresence(@NotNull ActivityBuilder activity) {
+        var future = new CompletableFuture<Void>();
+
+        updateRichPresenceNative(pointer, activity.pointer, result -> {
+            if(result.isSuccess()) {
+                future.complete(null);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
     }
 
     /**
@@ -566,6 +816,31 @@ public class Client {
     }
 
     /**
+     * Retrieves a list of guilds that the logged in user is a part of. Used
+     * for linking lobbies to channels.
+     * Must not be called before the client is ready. Additionally, this will
+     * probably fail if you use it on a provisional account.
+     *
+     * @return A future that completes with an array of {@link GuildMinimal},
+     * or with {@link DiscordException} on failure.
+     *
+     * @see Client#runCallbacks()
+     */
+    public CompletableFuture<GuildMinimal[]> getUserGuilds() {
+        var future = new CompletableFuture<GuildMinimal[]>();
+
+        getUserGuilds((result, guilds) -> {
+            if(result.isSuccess()) {
+                future.complete(guilds);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
+    }
+
+    /**
      * Retrieves a list of channels that the logged-in user can view in a
      * particular guild. Only text channels are returned.
      *
@@ -577,6 +852,32 @@ public class Client {
      */
     public void getGuildChannels(long guildId, GetGuildChannelsCallback callback) {
         getGuildChannelsNative(pointer, guildId, callback);
+    }
+
+    /**
+     * Retrieves a list of channels that the logged-in user can view in a
+     * particular guild. Only text channels are returned.
+     *
+     * @param guildId The guild ID.
+     *
+     * @return A future that completes with an array of {@link GuildChannel},
+     * or with {@link DiscordException} on failure.
+     *
+     * @see Client#runCallbacks()
+     * @see Client#getUserGuilds(GetUserGuildsCallback)
+     */
+    public CompletableFuture<GuildChannel[]> getGuildChannels(long guildId) {
+        var future = new CompletableFuture<GuildChannel[]>();
+
+        getGuildChannels(guildId, (result, channels) -> {
+            if(result.isSuccess()) {
+                future.complete(channels);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
     }
 
     /**
@@ -592,6 +893,33 @@ public class Client {
      */
     public void createOrJoinLobby(String secret, CreateOrJoinLobbyCallback callback) {
         createOrJoinLobbyNative(pointer, secret, callback);
+    }
+
+    /**
+     * Joins a lobby. If the lobby does not exist, creates it.
+     *
+     * @param secret A unique secret identifying the lobby. Any user with the
+     *               same secret can join the same lobby provided they're
+     *               using the same application.
+     *
+     * @return A future that completes with the ID of the lobby that was just
+     * joined, or with {@link DiscordException} on failure.
+     *
+     * @see Client#runCallbacks()
+     * @see Client#createOrJoinLobby(String, Map, Map, CreateOrJoinLobbyCallback)
+     */
+    public CompletableFuture<Long> createOrJoinLobby(String secret) {
+        var future = new CompletableFuture<Long>();
+
+        createOrJoinLobby(secret, (result, lobbyId) -> {
+            if(result.isSuccess()) {
+                future.complete(lobbyId);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
     }
 
     /**
@@ -624,6 +952,37 @@ public class Client {
     }
 
     /**
+     * Joins a lobby. If the lobby does not exist, creates it.
+     *
+     * @param secret A unique secret identifying the lobby. Any user with the
+     *               same secret can join the same lobby provided they're
+     *               using the same application.
+     * @param lobbyMeta If the lobby is created, this metadata will be stored.
+     *                  Otherwise, the existing metadata will be kept intact.
+     * @param memberMeta After joining the lobby, the new member will have
+     *                   this metadata.
+     *
+     * @return A future that completes with the ID of the lobby that was just
+     * joined, or with {@link DiscordException} on failure.
+     *
+     * @see Client#runCallbacks()
+     * @see Client#createOrJoinLobby(String, Map, Map, CreateOrJoinLobbyCallback)
+     */
+    public CompletableFuture<Long> createOrJoinLobby(String secret, Map<String, String> lobbyMeta, Map<String, String> memberMeta) {
+        var future = new CompletableFuture<Long>();
+
+        createOrJoinLobby(secret, lobbyMeta, memberMeta, (result, lobbyId) -> {
+            if(result.isSuccess()) {
+                future.complete(lobbyId);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
+    }
+
+    /**
      * Leaves a lobby.
      *
      * @param lobbyId The ID of the lobby to leave.
@@ -633,6 +992,30 @@ public class Client {
      */
     public void leaveLobby(long lobbyId, GenericResultCallback callback) {
         leaveLobbyNative(pointer, lobbyId, callback);
+    }
+
+    /**
+     * Leaves a lobby.
+     *
+     * @param lobbyId The ID of the lobby to leave.
+     *
+     * @return A future that is completed when the operation finishes, or
+     * is completed with {@link DiscordException} on failure.
+     *
+     * @see Client#runCallbacks()
+     */
+    public CompletableFuture<Void> leaveLobby(long lobbyId) {
+        var future = new CompletableFuture<Void>();
+
+        leaveLobbyNative(pointer, lobbyId, result -> {
+            if(result.isSuccess()) {
+                future.complete(null);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
     }
 
     /**
@@ -800,6 +1183,42 @@ public class Client {
     }
 
     /**
+     * Links a channel to a lobby. In order to do this, all of the following
+     * requirements must be met:
+     *
+     * <ul>
+     *     <li>the currently logged-in user must be a member of the lobby;</li>
+     *     <li>as a lobby member, the flag {@code 1 << 0} must be set (which
+     *     can only be achieved through the <a href="https://discord.com/developers/docs/social-sdk/server_apis.html">Server APIs</a>);</li>
+     *     <li>the channel must be a text channel and cannot be age-restricted;</li>
+     *     <li>the channel must not be linked to a lobby already;</li>
+     *     <li>the currently logged-in user must have the Manage Channels, View
+     *     Channel, and Send Messages permissions in the channel.</li>
+     * </ul>
+     *
+     * @param lobbyId The ID of the lobby to update.
+     * @param channelId The ID of the channel to link to.
+     *
+     * @return A future that is completed when the operation finishes, or with
+     * {@link DiscordException} on failure.
+     *
+     * @see Client#runCallbacks()
+     */
+    public CompletableFuture<Void> linkChannelToLobby(long lobbyId, long channelId) {
+        var future = new CompletableFuture<Void>();
+
+        linkChannelToLobbyNative(pointer, lobbyId, channelId, result -> {
+            if(result.isSuccess()) {
+                future.complete(null);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
+    }
+
+    /**
      * Unlinks a channel from the provided lobby. The currently logged-in user
      * must be a member of the lobby and have the flag {@code 1 << 0} set in
      * their lobby member info, which can only be achieved through the
@@ -812,6 +1231,33 @@ public class Client {
      */
     public void unlinkChannelFromLobby(long lobbyId, GenericResultCallback callback) {
         unlinkChannelFromLobbyNative(pointer, lobbyId, callback);
+    }
+
+    /**
+     * Unlinks a channel from the provided lobby. The currently logged-in user
+     * must be a member of the lobby and have the flag {@code 1 << 0} set in
+     * their lobby member info, which can only be achieved through the
+     * <a href="https://discord.com/developers/docs/social-sdk/server_apis.html">Server APIs</a>.
+     *
+     * @param lobbyId The ID of the lobby to update.
+     *
+     * @return A future that is completed when the operation finishes, or with
+     * {@link DiscordException} on failure.
+     *
+     * @see Client#runCallbacks()
+     */
+    public CompletableFuture<Void> unlinkChannelFromLobby(long lobbyId) {
+        var future = new CompletableFuture<Void>();
+
+        unlinkChannelFromLobbyNative(pointer, lobbyId, result -> {
+            if(result.isSuccess()) {
+                future.complete(null);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
     }
 
     /**
@@ -833,6 +1279,32 @@ public class Client {
      * member of the lobby.
      *
      * @param lobbyId The ID of the lobby to send a message to.
+     * @param message The message. Markdown and message formatting is supported.
+     *
+     * @return A future that completes with the ID of the message that was
+     * just created, or with {@link DiscordException} on failure.
+     *
+     * @see Client#runCallbacks()
+     */
+    public CompletableFuture<Long> sendLobbyMessage(long lobbyId, String message) {
+        var future = new CompletableFuture<Long>();
+
+        sendLobbyMessageNative(pointer, lobbyId, message, (result, messageId) -> {
+            if(result.isSuccess()) {
+                future.complete(messageId);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
+    }
+
+    /**
+     * Sends a message to a lobby. The currently logged-in user must be a
+     * member of the lobby.
+     *
+     * @param lobbyId The ID of the lobby to send a message to.
      * @param message The message, limited to 2,000 characters maximum.
      *                Markdown and message formatting is supported.
      * @param metadata Some metadata to include with the message. This will not
@@ -842,10 +1314,56 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void sendLobbyMessageWithMetadata(long lobbyId, String message, Map<String, String> metadata, SendMessageCallback callback) {
+    public void sendLobbyMessage(long lobbyId, String message, Map<String, String> metadata, SendMessageCallback callback) {
         sendLobbyMessageWithMetadataNative(pointer, lobbyId, message, metadata.entrySet().stream()
                 .map(v -> new StringPair(v.getKey(), v.getValue()))
                 .toArray(StringPair[]::new), callback);
+    }
+
+    /**
+     * Sends a message to a lobby. The currently logged-in user must be a
+     * member of the lobby.
+     *
+     * @param lobbyId The ID of the lobby to send a message to.
+     * @param message The message, limited to 2,000 characters maximum.
+     *                Markdown and message formatting is supported.
+     * @param metadata Some metadata to include with the message. This will not
+     *                 be visible to regular Discord users, but will be visible
+     *                 within the SDK.
+     * @param callback A callback that will be executed when the operation completes.
+     *
+     * @deprecated Use {@link Client#sendLobbyMessage(long, String, Map, SendMessageCallback)} instead.
+     * @see Client#runCallbacks()
+     */
+    @Deprecated(since = "SocialSDK4J 1.0")
+    public void sendLobbyMessageWithMetadata(long lobbyId, String message, Map<String, String> metadata, SendMessageCallback callback) {
+        sendLobbyMessage(lobbyId, message, metadata, callback);
+    }
+
+    /**
+     * Sends a message to a lobby. The currently logged-in user must be a
+     * member of the lobby.
+     *
+     * @param lobbyId The ID of the lobby to send a message to.
+     * @param message The message. Markdown and message formatting is supported.
+     *
+     * @return A future that completes with the ID of the message that was
+     * just created, or with {@link DiscordException} on failure.
+     *
+     * @see Client#runCallbacks()
+     */
+    public CompletableFuture<Long> sendLobbyMessage(long lobbyId, String message, Map<String, String> metadata) {
+        var future = new CompletableFuture<Long>();
+
+        sendLobbyMessage(lobbyId, message, metadata, (result, messageId) -> {
+            if(result.isSuccess()) {
+                future.complete(messageId);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
     }
 
     /**
@@ -890,6 +1408,43 @@ public class Client {
      * @param userId The ID of the user to send a message to.
      * @param message The message, limited to 2,000 characters maximum.
      *                Markdown and message formatting is supported.
+     *
+     * @return A future that completes with the ID of the message that was
+     * just created, or with {@link DiscordException} on failure.
+     *
+     * @see Client#runCallbacks()
+     */
+    public CompletableFuture<Long> sendUserMessage(long userId, String message) {
+        var future = new CompletableFuture<Long>();
+
+        sendUserMessageNative(pointer, userId, message, (result, messageId) -> {
+            if(result.isSuccess()) {
+                future.complete(messageId);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
+    }
+
+    /**
+     * Sends a message to a user.
+     *
+     * <p>
+     * From the SDK documentation:
+     * <blockquote>
+     *     A message can be sent between two users in the following situations:
+     *     <ol>
+     *         <li>Both users are online and in the game and have not blocked each other</li>
+     *         <li>Both users are friends with each other</li>
+     *         <li>Both users share a mutual Discord server and have previously DM'd each other on Discord</li>
+     *     </ol>
+     * </blockquote>
+     *
+     * @param userId The ID of the user to send a message to.
+     * @param message The message, limited to 2,000 characters maximum.
+     *                Markdown and message formatting is supported.
      * @param metadata Some metadata to include with the message. This will not
      *                 be visible to regular Discord users, but will be visible
      *                 within the SDK.
@@ -897,10 +1452,81 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void sendUserMessageWithMetadata(long userId, String message, Map<String, String> metadata, SendMessageCallback callback) {
+    public void sendUserMessage(long userId, String message, Map<String, String> metadata, SendMessageCallback callback) {
         sendUserMessageWithMetadataNative(pointer, userId, message, metadata.entrySet().stream()
                 .map(v -> new StringPair(v.getKey(), v.getValue()))
                 .toArray(StringPair[]::new), callback);
+    }
+
+    /**
+     * Sends a message to a user.
+     *
+     * <p>
+     * From the SDK documentation:
+     * <blockquote>
+     *     A message can be sent between two users in the following situations:
+     *     <ol>
+     *         <li>Both users are online and in the game and have not blocked each other</li>
+     *         <li>Both users are friends with each other</li>
+     *         <li>Both users share a mutual Discord server and have previously DM'd each other on Discord</li>
+     *     </ol>
+     * </blockquote>
+     *
+     * @param userId The ID of the user to send a message to.
+     * @param message The message, limited to 2,000 characters maximum.
+     *                Markdown and message formatting is supported.
+     * @param metadata Some metadata to include with the message. This will not
+     *                 be visible to regular Discord users, but will be visible
+     *                 within the SDK.
+     * @param callback A callback that will be executed when the operation completes.
+     *
+     * @deprecated Use {@link Client#sendUserMessage(long, String, Map, SendMessageCallback)} instead.
+     *
+     * @see Client#runCallbacks()
+     */
+    @Deprecated(since = "SocialSDK4J 1.0")
+    public void sendUserMessageWithMetadata(long userId, String message, Map<String, String> metadata, SendMessageCallback callback) {
+        sendUserMessage(userId, message, metadata, callback);
+    }
+
+    /**
+     * Sends a message to a user.
+     *
+     * <p>
+     * From the SDK documentation:
+     * <blockquote>
+     *     A message can be sent between two users in the following situations:
+     *     <ol>
+     *         <li>Both users are online and in the game and have not blocked each other</li>
+     *         <li>Both users are friends with each other</li>
+     *         <li>Both users share a mutual Discord server and have previously DM'd each other on Discord</li>
+     *     </ol>
+     * </blockquote>
+     *
+     * @param userId The ID of the user to send a message to.
+     * @param message The message, limited to 2,000 characters maximum.
+     *                Markdown and message formatting is supported.
+     * @param metadata Some metadata to include with the message. This will not
+     *                 be visible to regular Discord users, but will be visible
+     *                 within the SDK.
+     *
+     * @return A future that completes with the ID of the message that was
+     * just created, or with {@link DiscordException} on failure.
+     *
+     * @see Client#runCallbacks()
+     */
+    public CompletableFuture<Long> sendUserMessage(long userId, String message, Map<String, String> metadata) {
+        var future = new CompletableFuture<Long>();
+
+        sendUserMessage(userId, message, metadata, (result, messageId) -> {
+            if(result.isSuccess()) {
+                future.complete(messageId);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
     }
 
     /**
@@ -918,6 +1544,30 @@ public class Client {
     }
 
     /**
+     * Retrieves some messages from a lobby the user is a part of. From the SDK
+     * docs, max limit is 200 and messages from the last 72 hours are available.
+     *
+     * @param lobbyId ID of a lobby. The current user must be in this lobby.
+     * @param limit The maximum number of messages to retrieve, max 200.
+     *
+     * @return A future that is completed with an array of {@link Message},
+     * or with {@link DiscordException} on failure.
+     */
+    public CompletableFuture<Message[]> getLobbyMessagesWithLimit(long lobbyId, int limit) {
+        var future = new CompletableFuture<Message[]>();
+
+        getLobbyMessagesWithLimitNative(pointer, lobbyId, limit, (result, messages) -> {
+            if(result.isSuccess()) {
+                future.complete(messages);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
+    }
+
+    /**
      * Retrieves some messages from a DM the user is a part of. From the SDK
      * docs, max limit is 200 and messages from the last 72 hours are available.
      *
@@ -929,6 +1579,30 @@ public class Client {
      */
     public void getUserMessagesWithLimit(long userId, int limit, GetMessagesCallback callback) {
         getUserMessagesWithLimitNative(pointer, userId, limit, callback);
+    }
+
+    /**
+     * Retrieves some messages from a DM the user is a part of. From the SDK
+     * docs, max limit is 200 and messages from the last 72 hours are available.
+     *
+     * @param userId   ID of a user.
+     * @param limit    The maximum number of messages to retrieve, max 200.
+     *
+     * @return A future that is completed with an array of {@link Message},
+     * or with {@link DiscordException} on failure.
+     */
+    public CompletableFuture<Message[]> getUserMessagesWithLimit(long userId, int limit) {
+        var future = new CompletableFuture<Message[]>();
+
+        getUserMessagesWithLimitNative(pointer, userId, limit, (result, messages) -> {
+            if(result.isSuccess()) {
+                future.complete(messages);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
     }
 
     /**
@@ -958,6 +1632,23 @@ public class Client {
     }
 
     /**
+     * Ends the call in the specified channel.
+     *
+     * @param channelId ID of the channel to end the call in.
+     *
+     * @return A future that completes when the operation finishes.
+     * <b>Unlike the other functions, this one is infallible and will never
+     * complete exceptionally.</b>
+     *
+     * @see Client#runCallbacks()
+     */
+    public CompletableFuture<Void> endCall(long channelId) {
+        var future = new CompletableFuture<Void>();
+        endCallNative(pointer, channelId, () -> future.complete(null));
+        return future;
+    }
+
+    /**
      * Ends all calls managed by the SDK.
      *
      * @param callback A callback that will be executed when the operation completes.
@@ -966,6 +1657,21 @@ public class Client {
      */
     public void endCalls(CompletionCallback callback) {
         endCallsNative(pointer, callback);
+    }
+
+    /**
+     * Ends all calls managed by the SDK.
+     *
+     * @return A future that completes when the operation finishes.
+     * <b>Unlike the other functions, this one is infallible and will never
+     * complete exceptionally.</b>
+     *
+     * @see Client#runCallbacks()
+     */
+    public CompletableFuture<Void> endCalls() {
+        var future = new CompletableFuture<Void>();
+        endCallsNative(pointer, () -> future.complete(null));
+        return future;
     }
 
     /**
@@ -1002,6 +1708,31 @@ public class Client {
     }
 
     /**
+     * Sends a Discord friend request by username.
+     *
+     * @param username Unique username of the user to send a friend request to.
+     *
+     * @return A future that is completed when the operation finishes, or is
+     * completed with {@link DiscordException} on failure.
+     *
+     * @see Client#runCallbacks()
+     * @see Relationship#discordType()
+     */
+    public CompletableFuture<Void> sendDiscordFriendRequest(String username) {
+        var future = new CompletableFuture<Void>();
+
+        sendDiscordFriendRequestNative(pointer, username, result -> {
+            if(result.isSuccess()) {
+                future.complete(null);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
+    }
+
+    /**
      * Sends a Discord friend request by user ID.
      *
      * @param userId ID of the user to send a friend request to.
@@ -1012,6 +1743,31 @@ public class Client {
      */
     public void sendDiscordFriendRequest(long userId, GenericResultCallback callback) {
         sendDiscordFriendRequestByIdNative(pointer, userId, callback);
+    }
+
+    /**
+     * Sends a Discord friend request by user ID.
+     *
+     * @param userId ID of the user to send a friend request to.
+     *
+     * @return A future that is completed when the operation finishes, or is
+     * completed with {@link DiscordException} on failure.
+     *
+     * @see Client#runCallbacks()
+     * @see Relationship#discordType()
+     */
+    public CompletableFuture<Void> sendDiscordFriendRequest(long userId) {
+        var future = new CompletableFuture<Void>();
+
+        sendDiscordFriendRequestByIdNative(pointer, userId, result -> {
+            if(result.isSuccess()) {
+                future.complete(null);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
     }
 
     /**
@@ -1028,6 +1784,31 @@ public class Client {
     }
 
     /**
+     * Sends a game friend request by username.
+     *
+     * @param username Unique username of the user to send a friend request to.
+     *
+     * @return A future that is completed when the operation finishes, or is
+     * completed with {@link DiscordException} on failure.
+     *
+     * @see Client#runCallbacks()
+     * @see Relationship#gameType()
+     */
+    public CompletableFuture<Void> sendGameFriendRequest(String username) {
+        var future = new CompletableFuture<Void>();
+
+        sendGameFriendRequestNative(pointer, username, result -> {
+            if(result.isSuccess()) {
+                future.complete(null);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
+    }
+
+    /**
      * Sends a game friend request by user ID.
      *
      * @param userId ID of the user to send a friend request to.
@@ -1038,6 +1819,32 @@ public class Client {
      */
     public void sendGameFriendRequest(long userId, GenericResultCallback callback) {
         sendGameFriendRequestByIdNative(pointer, userId, callback);
+    }
+
+
+    /**
+     * Sends a game friend request by user ID.
+     *
+     * @param userId ID of the user to send a friend request to.
+     *
+     * @return A future that is completed when the operation finishes, or is
+     * completed with {@link DiscordException} on failure.
+     *
+     * @see Client#runCallbacks()
+     * @see Relationship#gameType()
+     */
+    public CompletableFuture<Void> sendGameFriendRequest(long userId) {
+        var future = new CompletableFuture<Void>();
+
+        sendDiscordFriendRequestByIdNative(pointer, userId, result -> {
+            if(result.isSuccess()) {
+                future.complete(null);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
     }
 
     /**
@@ -1053,6 +1860,30 @@ public class Client {
     }
 
     /**
+     * Accepts an incoming Discord friend request.
+     *
+     * @param userId ID of the user sending the request.
+     *
+     * @return A future that is completed when the operation finishes, or is
+     * completed with {@link DiscordException} on failure.
+     *
+     * @see Client#runCallbacks()
+     */
+    public CompletableFuture<Void> acceptDiscordFriendRequest(long userId) {
+        var future = new CompletableFuture<Void>();
+
+        acceptDiscordFriendRequestNative(pointer, userId, result -> {
+            if(result.isSuccess()) {
+                future.complete(null);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
+    }
+
+    /**
      * Accepts an incoming game friend request.
      *
      * @param userId ID of the user sending the request.
@@ -1062,6 +1893,30 @@ public class Client {
      */
     public void acceptGameFriendRequest(long userId, GenericResultCallback callback) {
         acceptGameFriendRequestNative(pointer, userId, callback);
+    }
+
+    /**
+     * Accepts an incoming game friend request.
+     *
+     * @param userId ID of the user sending the request.
+     *
+     * @return A future that is completed when the operation finishes, or is
+     * completed with {@link DiscordException} on failure.
+     *
+     * @see Client#runCallbacks()
+     */
+    public CompletableFuture<Void> acceptGameFriendRequest(long userId) {
+        var future = new CompletableFuture<Void>();
+
+        acceptDiscordFriendRequestNative(pointer, userId, result -> {
+            if(result.isSuccess()) {
+                future.complete(null);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
     }
 
     /**
@@ -1077,6 +1932,30 @@ public class Client {
     }
 
     /**
+     * Cancels an outgoing Discord friend request.
+     *
+     * @param userId ID of the user receiving the request.
+     *
+     * @return A future that is completed when the operation finishes, or is
+     * completed with {@link DiscordException} on failure.
+     *
+     * @see Client#runCallbacks()
+     */
+    public CompletableFuture<Void> cancelDiscordFriendRequest(long userId) {
+        var future = new CompletableFuture<Void>();
+
+        cancelDiscordFriendRequestNative(pointer, userId, result -> {
+            if(result.isSuccess()) {
+                future.complete(null);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
+    }
+
+    /**
      * Cancels an outgoing game friend request.
      *
      * @param userId ID of the user receiving the request.
@@ -1086,6 +1965,30 @@ public class Client {
      */
     public void cancelGameFriendRequest(long userId, GenericResultCallback callback) {
         cancelGameFriendRequestNative(pointer, userId, callback);
+    }
+
+    /**
+     * Cancels an outgoing game friend request.
+     *
+     * @param userId ID of the user receiving the request.
+     *
+     * @return A future that is completed when the operation finishes, or is
+     * completed with {@link DiscordException} on failure.
+     *
+     * @see Client#runCallbacks()
+     */
+    public CompletableFuture<Void> cancelGameFriendRequest(long userId) {
+        var future = new CompletableFuture<Void>();
+
+        cancelGameFriendRequestNative(pointer, userId, result -> {
+            if(result.isSuccess()) {
+                future.complete(null);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
     }
 
     /**
@@ -1126,6 +2029,30 @@ public class Client {
     }
 
     /**
+     * Rejects an incoming Discord friend request.
+     *
+     * @param userId ID of the user sending the request.
+     *
+     * @return A future that is completed when the operation finishes, or is
+     * completed with {@link DiscordException} on failure.
+     *
+     * @see Client#runCallbacks()
+     */
+    public CompletableFuture<Void> rejectDiscordFriendRequest(long userId) {
+        var future = new CompletableFuture<Void>();
+
+        rejectDiscordFriendRequestNative(pointer, userId, result -> {
+            if(result.isSuccess()) {
+                future.complete(null);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
+    }
+
+    /**
      * Rejects an incoming game friend request.
      *
      * @param userId ID of the user sending the request.
@@ -1135,6 +2062,30 @@ public class Client {
      */
     public void rejectGameFriendRequest(long userId, GenericResultCallback callback) {
         rejectGameFriendRequestNative(pointer, userId, callback);
+    }
+
+    /**
+     * Rejects an incoming game friend request.
+     *
+     * @param userId ID of the user sending the request.
+     *
+     * @return A future that is completed when the operation finishes, or is
+     * completed with {@link DiscordException} on failure.
+     *
+     * @see Client#runCallbacks()
+     */
+    public CompletableFuture<Void> rejectGameFriendRequest(long userId) {
+        var future = new CompletableFuture<Void>();
+
+        rejectGameFriendRequestNative(pointer, userId, result -> {
+            if(result.isSuccess()) {
+                future.complete(null);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
     }
 
     /**
@@ -1151,6 +2102,31 @@ public class Client {
     }
 
     /**
+     * Removes both Discord and game friend status with the specified user.
+     *
+     * @param userId ID of the user to sever the relationship with.
+     *
+     * @return A future that is completed when the operation finishes, or is
+     * completed with {@link DiscordException} on failure.
+     *
+     * @see Client#runCallbacks()
+     * @see Client#removeGameFriend(long, GenericResultCallback)
+     */
+    public CompletableFuture<Void> removeDiscordAndGameFriend(long userId) {
+        var future = new CompletableFuture<Void>();
+
+        removeDiscordAndGameFriendNative(pointer, userId, result -> {
+            if(result.isSuccess()) {
+                future.complete(null);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
+    }
+
+    /**
      * Removes just game friend status with the specified user.
      *
      * @param userId ID of the user to sever the relationship with.
@@ -1161,6 +2137,31 @@ public class Client {
      */
     public void removeGameFriend(long userId, GenericResultCallback callback) {
         removeGameFriendNative(pointer, userId, callback);
+    }
+
+    /**
+     * Removes just game friend status with the specified user.
+     *
+     * @param userId ID of the user to sever the relationship with.
+     *
+     * @return A future that is completed when the operation finishes, or is
+     * completed with {@link DiscordException} on failure.
+     *
+     * @see Client#runCallbacks()
+     * @see Client#removeDiscordAndGameFriend(long, GenericResultCallback)
+     */
+    public CompletableFuture<Void> removeGameFriend(long userId) {
+        var future = new CompletableFuture<Void>();
+
+        removeGameFriendNative(pointer, userId, result -> {
+            if(result.isSuccess()) {
+                future.complete(null);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
     }
 
     /**
@@ -1179,6 +2180,33 @@ public class Client {
     }
 
     /**
+     * Sends an activity invite to the specified user. You should have used
+     * {@link Client#updateRichPresence(ActivityBuilder, GenericResultCallback)} first
+     * to set additional fields required for invites to work.
+     *
+     * @param userId ID of the user to invite.
+     * @param content Optional message content to be included.
+     *
+     * @return A future that is completed when the operation finishes, or is
+     * completed with {@link DiscordException} on failure.
+     *
+     * @see Client#runCallbacks()
+     */
+    public CompletableFuture<Void> sendActivityInvite(long userId, @Nullable String content) {
+        var future = new CompletableFuture<Void>();
+
+        sendActivityInviteNative(pointer, userId, content == null ? "" : content, result -> {
+            if(result.isSuccess()) {
+                future.complete(null);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
+    }
+
+    /**
      * Accepts an incoming activity invite.
      *
      * @param invite An activity invite received from the SDK.
@@ -1188,6 +2216,30 @@ public class Client {
      */
     public void acceptActivityInvite(ActivityInvite invite, AcceptActivityInviteCallback callback) {
         acceptActivityInviteNative(pointer, invite, callback);
+    }
+
+    /**
+     * Accepts an incoming activity invite.
+     *
+     * @param invite An activity invite received from the SDK.
+     *
+     * @return A future that completes with the join secret passed through
+     * Discord by this invite, or with {@link DiscordException} on failure.
+     *
+     * @see Client#runCallbacks()
+     */
+    public CompletableFuture<String> acceptActivityInvite(ActivityInvite invite) {
+        var future = new CompletableFuture<String>();
+
+        acceptActivityInviteNative(pointer, invite, (result, joinSecret) -> {
+            if(result.isSuccess()) {
+                future.complete(joinSecret);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
     }
 
     /**
@@ -1203,6 +2255,30 @@ public class Client {
     }
 
     /**
+     * Sends an activity join request to the specified user.
+     *
+     * @param userId ID of the user to send a join request to.
+     *
+     * @return A future that is completed when the operation finishes, or is
+     * completed with {@link DiscordException} on failure.
+     *
+     * @see Client#runCallbacks()
+     */
+    public CompletableFuture<Void> sendActivityJoinRequest(long userId) {
+        var future = new CompletableFuture<Void>();
+
+        sendActivityJoinRequestNative(pointer, userId, result -> {
+            if(result.isSuccess()) {
+                future.complete(null);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
+    }
+
+    /**
      * Accepts an incoming activity invite.
      *
      * @param invite An activity invite received from the SDK.
@@ -1212,6 +2288,30 @@ public class Client {
      */
     public void sendActivityJoinRequestReply(ActivityInvite invite, GenericResultCallback callback) {
         sendActivityJoinRequestReplyNative(pointer, invite, callback);
+    }
+
+    /**
+     * Accepts an incoming activity invite.
+     *
+     * @param invite An activity invite received from the SDK.
+     *
+     * @return A future that is completed when the operation finishes, or is
+     * completed with {@link DiscordException} on failure.
+     *
+     * @see Client#runCallbacks()
+     */
+    public CompletableFuture<Void> sendActivityJoinRequestReply(ActivityInvite invite) {
+        var future = new CompletableFuture<Void>();
+
+        sendActivityJoinRequestReplyNative(pointer, invite, result -> {
+            if(result.isSuccess()) {
+                future.complete(null);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
     }
 
     /**
@@ -1271,7 +2371,33 @@ public class Client {
     }
 
     /**
-     * Unblocked the specified user.
+     * Blocks the specified user. Their friend status will be severed and their
+     * relationship will be updated to {@link Relationship.Type#Blocked}. The
+     * target user will not know that the player blocked them.
+     *
+     * @param userId ID of the user to block.
+     *
+     * @return A future that is completed when the operation finishes, or is
+     * completed with {@link DiscordException} on failure.
+     *
+     * @see Client#runCallbacks()
+     */
+    public CompletableFuture<Void> blockUser(long userId) {
+        var future = new CompletableFuture<Void>();
+
+        blockUserNative(pointer, userId, result -> {
+            if(result.isSuccess()) {
+                future.complete(null);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
+    }
+
+    /**
+     * Unblocks the specified user.
      *
      * @param userId ID of the user to unblock.
      * @param callback A callback that will be executed when the operation completes.
@@ -1280,5 +2406,29 @@ public class Client {
      */
     public void unblockUser(long userId, GenericResultCallback callback) {
         unblockUserNative(pointer, userId, callback);
+    }
+
+    /**
+     * Unblocks the specified user.
+     *
+     * @param userId ID of the user to unblock.
+     *
+     * @return A future that is completed when the operation finishes, or is
+     * completed with {@link DiscordException} on failure.
+     *
+     * @see Client#runCallbacks()
+     */
+    public CompletableFuture<Void> unblockUser(long userId) {
+        var future = new CompletableFuture<Void>();
+
+        unblockUserNative(pointer, userId, result -> {
+            if(result.isSuccess()) {
+                future.complete(null);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
     }
 }
