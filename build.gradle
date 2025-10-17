@@ -420,7 +420,7 @@ publishing {
             pom {
                 name = "SocialSDK4J"
                 description = "A Java wrapper over Discord's SocialSDK"
-                url = "https://github.com/der-fruhling-entertainment/socialsdk4j"
+                url = "https://github.com/der-fruhling/socialsdk4j"
 
                 licenses {
                     license {
@@ -439,9 +439,9 @@ publishing {
                 }
 
                 scm {
-                    connection = "scm:git:git://github.com/der-fruhling-entertainment/socialsdk4j.git"
-                    developerConnection = "scm:git:ssh://github.com:der-fruhling-entertainment/socialsdk4j.git"
-                    url = "https://github.com/der-fruhling-entertainment/socialsdk4j"
+                    connection = "scm:git:git://github.com/der-fruhling/socialsdk4j.git"
+                    developerConnection = "scm:git:ssh://github.com:der-fruhling/socialsdk4j.git"
+                    url = "https://github.com/der-fruhling/socialsdk4j"
                 }
             }
 
@@ -494,7 +494,7 @@ publishing {
             pom {
                 name = "Discord SocialSDK"
                 description = "The natives required to use Discord's SocialSDK, in Linux, macOS, and Windows flavors"
-                url = "https://github.com/der-fruhling-entertainment/socialsdk4j"
+                url = "https://github.com/der-fruhling/socialsdk4j"
 
                 licenses {
                     license {
@@ -513,9 +513,9 @@ publishing {
                 }
 
                 scm {
-                    connection = "scm:git:git://github.com/der-fruhling-entertainment/socialsdk4j.git"
-                    developerConnection = "scm:git:ssh://github.com:der-fruhling-entertainment/socialsdk4j.git"
-                    url = "https://github.com/der-fruhling-entertainment/socialsdk4j"
+                    connection = "scm:git:git://github.com/der-fruhling/socialsdk4j.git"
+                    developerConnection = "scm:git:ssh://github.com:der-fruhling/socialsdk4j.git"
+                    url = "https://github.com/der-fruhling/socialsdk4j"
                 }
             }
 
@@ -564,7 +564,7 @@ publishing {
             pom {
                 name = "Discord SocialSDK (Debug)"
                 description = "The natives required to use Discord's SocialSDK, in Linux, macOS, and Windows flavors"
-                url = "https://github.com/der-fruhling-entertainment/socialsdk4j"
+                url = "https://github.com/der-fruhling/socialsdk4j"
 
                 licenses {
                     license {
@@ -583,9 +583,9 @@ publishing {
                 }
 
                 scm {
-                    connection = "scm:git:git://github.com/der-fruhling-entertainment/socialsdk4j.git"
-                    developerConnection = "scm:git:ssh://github.com:der-fruhling-entertainment/socialsdk4j.git"
-                    url = "https://github.com/der-fruhling-entertainment/socialsdk4j"
+                    connection = "scm:git:git://github.com/der-fruhling/socialsdk4j.git"
+                    developerConnection = "scm:git:ssh://github.com:der-fruhling/socialsdk4j.git"
+                    url = "https://github.com/der-fruhling/socialsdk4j"
                 }
             }
 
@@ -630,7 +630,7 @@ publishing {
     repositories {
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/der-fruhling-entertainment/socialsdk4j")
+            url = uri("https://maven.pkg.github.com/der-fruhling/socialsdk4j")
             credentials {
                 username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
                 password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
