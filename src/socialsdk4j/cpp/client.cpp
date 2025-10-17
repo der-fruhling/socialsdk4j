@@ -523,6 +523,19 @@ Java_net_derfruhling_discord_socialsdk4j_Client_getCurrentUserNative
 }
 
 JNIEXPORT jobject JNICALL
+Java_net_derfruhling_discord_socialsdk4j_Client_getCurrentUserV2Native
+(JNIEnv *env, jclass, jlong ptr) {
+    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+    auto user = client->GetCurrentUserV2();
+    if(!user) return nullptr;
+    discordpp::UserHandle *handle = new discordpp::UserHandle(std::move(*user));
+
+    jclass clazz = env->FindClass("net/derfruhling/discord/socialsdk4j/User");
+    jmethodID method = env->GetMethodID(clazz, "<init>", "(JJ)V");
+    return env->NewObject(clazz, method, (jlong)handle, (jlong)handle->Id());
+}
+
+JNIEXPORT jobject JNICALL
 Java_net_derfruhling_discord_socialsdk4j_Client_getUserNative
 (JNIEnv *env, jclass, jlong ptr, jlong userId) {
     discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);

@@ -201,6 +201,7 @@ public class Client {
     private static native void setStatusChangedCallbackNative(long pointer, StatusChangedCallbackNative callback);
     private static native void updateRichPresenceNative(long pointer, long activity, @Nullable GenericResultCallback callback);
     private static native User getCurrentUserNative(long pointer);
+    private static native @Nullable User getCurrentUserV2Native(long pointer);
     private static native @Nullable User getUserNative(long pointer, long userId);
     private static native Relationship getRelationshipNative(long pointer, long userId);
     private static native Relationship[] getRelationshipsNative(long pointer);
@@ -523,9 +524,20 @@ public class Client {
      * not be called before the client is ready.
      *
      * @return A {@link User} object, never null.
+     * @deprecated Use {@link Client#getCurrentUser()} instead.
      */
+    @Deprecated(forRemoval = true, since = "SocialSDK 1.6, SocialSDK4J 1.0")
     public @NotNull User getUser() {
         return getCurrentUserNative(pointer);
+    }
+
+    /**
+     * Retrieves the current {@link User} that's logged in with the SDK.
+     *
+     * @return A {@link User} object. May be null if no value exists.
+     */
+    public @Nullable User getCurrentUser() {
+        return getCurrentUserV2Native(pointer);
     }
 
     /**
