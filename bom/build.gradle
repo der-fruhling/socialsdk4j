@@ -39,7 +39,7 @@ publishing {
             pom {
                 name = "SocialSDK4J (BOM)"
                 description = "A Java wrapper over Discord's SocialSDK (BOM)"
-                url = "https://github.com/der-fruhling-entertainment/socialsdk4j"
+                url = "https://github.com/der-fruhling/socialsdk4j"
                 packaging = "pom"
 
                 licenses {
@@ -59,9 +59,9 @@ publishing {
                 }
 
                 scm {
-                    connection = "scm:git:git://github.com/der-fruhling-entertainment/socialsdk4j.git"
-                    developerConnection = "scm:git:ssh://github.com:der-fruhling-entertainment/socialsdk4j.git"
-                    url = "https://github.com/der-fruhling-entertainment/socialsdk4j"
+                    connection = "scm:git:git://github.com/der-fruhling/socialsdk4j.git"
+                    developerConnection = "scm:git:ssh://github.com:der-fruhling/socialsdk4j.git"
+                    url = "https://github.com/der-fruhling/socialsdk4j"
                 }
             }
         }
@@ -70,7 +70,7 @@ publishing {
     repositories {
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/der-fruhling-entertainment/socialsdk4j")
+            url = uri("https://maven.pkg.github.com/der-fruhling/socialsdk4j")
             credentials {
                 username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
                 password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
