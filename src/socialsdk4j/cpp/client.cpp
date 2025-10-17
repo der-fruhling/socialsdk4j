@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <net_derfruhling_discord_socialsdk4j_Client.h>
 #include <discordpp.h>
 #include <optional>
@@ -6,6 +7,7 @@
 #include <vector>
 #include "callbacks.hpp"
 #include "client_result.hpp"
+#include "jni.h"
 
 JNIEXPORT jobject JNICALL
 Java_net_derfruhling_discord_socialsdk4j_Client_createAuthorizationCodeVerifierNative
@@ -1143,4 +1145,67 @@ JNIEXPORT jstring JNICALL
 Java_net_derfruhling_discord_socialsdk4j_Client_getDefaultPresenceScopesNative
 (JNIEnv *env, jclass) {
     return env->NewStringUTF(discordpp::Client::GetDefaultPresenceScopes().c_str());
+}
+
+JNIEXPORT void JNICALL Java_net_derfruhling_discord_socialsdk4j_Client_getLobbyMessagesWithLimitNative
+(JNIEnv *env, jclass, jlong ptr, jlong lobbyId, jint limit, jobject callback) {
+    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+    callback = env->NewGlobalRef(callback);
+
+    jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;[Lnet/derfruhling/discord/socialsdk4j/Message;])V");
+    client->GetLobbyMessagesWithLimit(lobbyId, limit, [method, callback](discordpp::ClientResult result, std::vector<discordpp::MessageHandle> messages) {
+        jclass clazz = cbenv->FindClass("Lnet/derfruhling/discord/socialsdk4j/Message;");
+        jmethodID cons = cbenv->GetMethodID(clazz, "<init>", "(JJ)V");
+        jobjectArray a = cbenv->NewObjectArray(messages.size(), clazz, nullptr);
+
+        for (int i = 0, len = messages.size(); i < len; i++) {
+            discordpp::MessageHandle *msg = new discordpp::MessageHandle(std::move(messages.back()));
+            cbenv->SetObjectArrayElement(a, len - i - 1, cbenv->NewObject(clazz, cons, (jlong)msg, (jlong)msg->Id()));
+        }
+
+        cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(result)), a);
+        cbenv->DeleteGlobalRef(callback);
+    });
+}
+
+JNIEXPORT void JNICALL Java_net_derfruhling_discord_socialsdk4j_Client_getUserMessagesWithLimitNative
+(JNIEnv *env, jclass, jlong ptr, jlong userId, jint limit, jobject callback) {
+    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+    callback = env->NewGlobalRef(callback);
+
+    jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;[Lnet/derfruhling/discord/socialsdk4j/Message;])V");
+    client->GetUserMessagesWithLimit(userId, limit, [method, callback](discordpp::ClientResult result, std::vector<discordpp::MessageHandle> messages) {
+        jclass clazz = cbenv->FindClass("Lnet/derfruhling/discord/socialsdk4j/Message;");
+        jmethodID cons = cbenv->GetMethodID(clazz, "<init>", "(JJ)V");
+        jobjectArray a = cbenv->NewObjectArray(messages.size(), clazz, nullptr);
+
+        for (int i = 0, len = messages.size(); i < len; i++) {
+            discordpp::MessageHandle *msg = new discordpp::MessageHandle(std::move(messages.back()));
+            cbenv->SetObjectArrayElement(a, len - i - 1, cbenv->NewObject(clazz, cons, (jlong)msg, (jlong)msg->Id()));
+        }
+
+        cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(result)), a);
+        cbenv->DeleteGlobalRef(callback);
+    });
+}
+
+JNIEXPORT void JNICALL Java_net_derfruhling_discord_socialsdk4j_Client_getUserMessageSummariesNative
+(JNIEnv *env, jclass, jlong ptr, jobject callback) {
+    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+    callback = env->NewGlobalRef(callback);
+
+    jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;[Lnet/derfruhling/discord/socialsdk4j/UserMessageSummary;])V");
+    client->GetUserMessageSummaries([method, callback](discordpp::ClientResult result, std::vector<discordpp::UserMessageSummary> summaries) {
+        jclass clazz = cbenv->FindClass("Lnet/derfruhling/discord/socialsdk4j/UserMessageSummary;");
+        jmethodID cons = cbenv->GetMethodID(clazz, "<init>", "(JJ)V");
+        jobjectArray a = cbenv->NewObjectArray(summaries.size(), clazz, nullptr);
+
+        for (int i = 0, len = summaries.size(); i < len; i++) {
+            auto s = summaries[i];
+            cbenv->SetObjectArrayElement(a, i, cbenv->NewObject(clazz, cons, (jlong)s.UserId(), (jlong)s.LastMessageId()));
+        }
+
+        cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(result)), a);
+        cbenv->DeleteGlobalRef(callback);
+    });
 }

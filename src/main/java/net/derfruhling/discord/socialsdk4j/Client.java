@@ -122,6 +122,16 @@ public class Client {
         void invoke(String joinSecret);
     }
 
+    public interface GetMessagesCallback {
+        @SuppressWarnings({"unused", "MissingJavadoc"})
+        void invoke(ClientResult result, Message[] messages);
+    }
+
+    public interface GetUserMessageSummariesCallback {
+        @SuppressWarnings({"unused", "MissingJavadoc"})
+        void invoke(ClientResult result, UserMessageSummary[] summaries);
+    }
+
     /**
      * Represents the status of this client. The most important status is
      * {@link Status#Ready} as almost nothing can be done (other than
@@ -233,6 +243,9 @@ public class Client {
     private static native void sendLobbyMessageWithMetadataNative(long pointer, long lobbyId, String message, StringPair[] metadata, SendMessageCallback callback);
     private static native void sendUserMessageNative(long pointer, long userId, String message, SendMessageCallback callback);
     private static native void sendUserMessageWithMetadataNative(long pointer, long userId, String message, StringPair[] metadata, SendMessageCallback callback);
+    private static native void getLobbyMessagesWithLimitNative(long pointer, long lobbyId, int limit, GetMessagesCallback callback);
+    private static native void getUserMessagesWithLimitNative(long pointer, long userId, int limit, GetMessagesCallback callback);
+    private static native void getUserMessageSummariesNative(long pointer, GetUserMessageSummariesCallback callback);
 
     private static native Call startCallNative(long pointer, long channelId);
     private static native void endCallNative(long pointer, long channelId, CompletionCallback callback);
@@ -876,6 +889,34 @@ public class Client {
         sendUserMessageWithMetadataNative(pointer, userId, message, metadata.entrySet().stream()
                 .map(v -> new StringPair(v.getKey(), v.getValue()))
                 .toArray(StringPair[]::new), callback);
+    }
+
+    /**
+     * Retrieves some messages from a lobby the user is a part of. From the SDK
+     * docs, max limit is 200 and messages from the last 72 hours are available.
+     *
+     * @param lobbyId ID of a lobby. The current user must be in this lobby.
+     * @param limit The maximum number of messages to retrieve, max 200.
+     * @param callback Called when the operation completes or fails. In case of
+     *                 failure, the array passed here will be empty and the
+     *                 result will contain info about the issue.
+     */
+    public void getLobbyMessagesWithLimit(long lobbyId, int limit, GetMessagesCallback callback) {
+        getLobbyMessagesWithLimitNative(pointer, lobbyId, limit, callback);
+    }
+
+    /**
+     * Retrieves some messages from a DM the user is a part of. From the SDK
+     * docs, max limit is 200 and messages from the last 72 hours are available.
+     *
+     * @param userId ID of a user.
+     * @param limit The maximum number of messages to retrieve, max 200.
+     * @param callback Called when the operation completes or fails. In case of
+     *                 failure, the array passed here will be empty and the
+     *                 result will contain info about the issue.
+     */
+    public void getUserMessagesWithLimit(long userId, int limit, GetMessagesCallback callback) {
+        getUserMessagesWithLimitNative(pointer, userId, limit, callback);
     }
 
     /**
