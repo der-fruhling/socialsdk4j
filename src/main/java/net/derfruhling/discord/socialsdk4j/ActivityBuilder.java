@@ -50,11 +50,12 @@ public class ActivityBuilder {
     /**
      * Sets the name field of the activity builder.
      *
+     * <p>This is now valid to use as of SocialSDK 1.6 (implemented in
+     * SocialSDK4J as of October 18, 2025)</p>
+     *
      * @param name The new value.
      * @return {@code this}
      *
-     * @apiNote This is now valid to use as of SocialSDK 1.6 (implemented in
-     * SocialSDK4J as of October 18, 2025)
      */
     public ActivityBuilder setName(String name) {
         setName(pointer, name);
