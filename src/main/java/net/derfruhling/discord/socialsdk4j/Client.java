@@ -1606,6 +1606,39 @@ public class Client {
     }
 
     /**
+     * Retrieves a list of users to display, along with the last message ID
+     * in the conversation.
+     *
+     * @param callback Called when the operation completes or fails. In case of
+     *                 failure, the array passed here will be empty and the
+     *                 result will contain info about the issue.
+     */
+    public void getUserMessageSummaries(GetUserMessageSummariesCallback callback) {
+        getUserMessageSummariesNative(pointer, callback);
+    }
+
+    /**
+     * Retrieves a list of users to display, along with the last message ID
+     * in the conversation.
+     *
+     * @return A future that is completed with an array of
+     * {@link UserMessageSummary}, or with {@link DiscordException} on failure.
+     */
+    public Future<UserMessageSummary[]> getUserMessageSummaries() {
+        var future = new CompletableFuture<UserMessageSummary[]>();
+
+        getUserMessageSummariesNative(pointer, (result, summaries) -> {
+            if(result.isSuccess()) {
+                future.complete(summaries);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
+    }
+
+    /**
      * <p>Starts a call in the specified voice channel. For a lobby, pass in the
      * lobby ID instead.</p>
      *
