@@ -1165,7 +1165,7 @@ JNIEXPORT void JNICALL Java_net_derfruhling_discord_socialsdk4j_Client_getLobbyM
     discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
     callback = env->NewGlobalRef(callback);
 
-    jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;[Lnet/derfruhling/discord/socialsdk4j/Message;])V");
+    jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;[Lnet/derfruhling/discord/socialsdk4j/Message;)V");
     client->GetLobbyMessagesWithLimit(lobbyId, limit, [method, callback](discordpp::ClientResult result, std::vector<discordpp::MessageHandle> messages) {
         jclass clazz = cbenv->FindClass("Lnet/derfruhling/discord/socialsdk4j/Message;");
         jmethodID cons = cbenv->GetMethodID(clazz, "<init>", "(JJ)V");
@@ -1186,7 +1186,7 @@ JNIEXPORT void JNICALL Java_net_derfruhling_discord_socialsdk4j_Client_getUserMe
     discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
     callback = env->NewGlobalRef(callback);
 
-    jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;[Lnet/derfruhling/discord/socialsdk4j/Message;])V");
+    jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;[Lnet/derfruhling/discord/socialsdk4j/Message;)V");
     client->GetUserMessagesWithLimit(userId, limit, [method, callback](discordpp::ClientResult result, std::vector<discordpp::MessageHandle> messages) {
         jclass clazz = cbenv->FindClass("Lnet/derfruhling/discord/socialsdk4j/Message;");
         jmethodID cons = cbenv->GetMethodID(clazz, "<init>", "(JJ)V");
@@ -1207,7 +1207,7 @@ JNIEXPORT void JNICALL Java_net_derfruhling_discord_socialsdk4j_Client_getUserMe
     discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
     callback = env->NewGlobalRef(callback);
 
-    jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;[Lnet/derfruhling/discord/socialsdk4j/UserMessageSummary;])V");
+    jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;[Lnet/derfruhling/discord/socialsdk4j/UserMessageSummary;)V");
     client->GetUserMessageSummaries([method, callback](discordpp::ClientResult result, std::vector<discordpp::UserMessageSummary> summaries) {
         jclass clazz = cbenv->FindClass("Lnet/derfruhling/discord/socialsdk4j/UserMessageSummary;");
         jmethodID cons = cbenv->GetMethodID(clazz, "<init>", "(JJ)V");
