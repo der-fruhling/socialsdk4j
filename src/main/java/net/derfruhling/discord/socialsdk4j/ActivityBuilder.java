@@ -48,16 +48,14 @@ public class ActivityBuilder {
     }
 
     /**
-     * Sets the name field of the activity builder. Provided for completeness.
-     * This is not useful for building activities, only used by the SDK to
-     * construct activities of other users it seems.
+     * Sets the name field of the activity builder.
      *
      * @param name The new value.
      * @return {@code this}
      *
-     * @deprecated You probably don't want to use this.
+     * @apiNote This is now valid to use as of SocialSDK 1.6 (implemented in
+     * SocialSDK4J as of October 18, 2025)
      */
-    @Deprecated
     public ActivityBuilder setName(String name) {
         setName(pointer, name);
         return this;
