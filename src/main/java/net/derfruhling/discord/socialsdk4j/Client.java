@@ -1,24 +1,26 @@
 package net.derfruhling.discord.socialsdk4j;
 
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * The main part of the SocialSDK. Most actions are initiated by calling
  * methods on this object.
  */
 public class Client {
+
     long pointer = SocialSdk.createClientNative();
 
     public Client() {
         SocialSdk.ensureInitialized();
         long pointer = this.pointer;
-        SocialSdk.cleaner.register(this, () -> SocialSdk.deleteClientNative(pointer));
+        SocialSdk.cleaner.register(this, () ->
+            SocialSdk.deleteClientNative(pointer)
+        );
     }
 
     /**
@@ -30,38 +32,58 @@ public class Client {
     }
 
     public interface CompletionCallback {
-        @SuppressWarnings({"unused", "MissingJavadoc"})
+        @SuppressWarnings({ "unused", "MissingJavadoc" })
         void invoke();
     }
 
     public interface GenericResultCallback {
-        @SuppressWarnings({"unused", "MissingJavadoc"})
+        @SuppressWarnings({ "unused", "MissingJavadoc" })
         void invoke(ClientResult result);
     }
 
     public interface AuthorizationCallback {
-        @SuppressWarnings({"unused", "MissingJavadoc"})
+        @SuppressWarnings({ "unused", "MissingJavadoc" })
         void invoke(ClientResult result, String code, String redirectUri);
     }
 
     public record AuthorizationResult(String code, String redirectUri) {}
 
     public interface StatusChangedCallbackNative {
-        @SuppressWarnings({"unused", "MissingJavadoc"})
+        @SuppressWarnings({ "unused", "MissingJavadoc" })
         void invoke(int status, int error, int errorDetail);
     }
 
     public interface TokenExchangeCallbackNative {
-        @SuppressWarnings({"unused", "MissingJavadoc"})
-        void invoke(ClientResult result, String accessToken, String refreshToken, int type, int expiresIn, String scopes);
+        @SuppressWarnings({ "unused", "MissingJavadoc" })
+        void invoke(
+            ClientResult result,
+            String accessToken,
+            String refreshToken,
+            int type,
+            int expiresIn,
+            String scopes
+        );
     }
 
     public interface TokenExchangeCallback {
         @SuppressWarnings("MissingJavadoc")
-        void invoke(ClientResult result, String accessToken, String refreshToken, AuthorizationTokenType type, int expiresIn, String[] scopes);
+        void invoke(
+            ClientResult result,
+            String accessToken,
+            String refreshToken,
+            AuthorizationTokenType type,
+            int expiresIn,
+            String[] scopes
+        );
     }
 
-    public record TokenExchangeResult(String accessToken, String refreshToken, AuthorizationTokenType type, int expiresIn, String[] scopes) {}
+    public record TokenExchangeResult(
+        String accessToken,
+        String refreshToken,
+        AuthorizationTokenType type,
+        int expiresIn,
+        String[] scopes
+    ) {}
 
     public interface StatusChangedCallback {
         @SuppressWarnings("MissingJavadoc")
@@ -69,72 +91,72 @@ public class Client {
     }
 
     public interface GetUserGuildsCallback {
-        @SuppressWarnings({"unused", "MissingJavadoc"})
+        @SuppressWarnings({ "unused", "MissingJavadoc" })
         void invoke(ClientResult result, GuildMinimal[] guilds);
     }
 
     public interface GetGuildChannelsCallback {
-        @SuppressWarnings({"unused", "MissingJavadoc"})
+        @SuppressWarnings({ "unused", "MissingJavadoc" })
         void invoke(ClientResult result, GuildChannel[] channels);
     }
 
     public interface CreateOrJoinLobbyCallback {
-        @SuppressWarnings({"unused", "MissingJavadoc"})
+        @SuppressWarnings({ "unused", "MissingJavadoc" })
         void invoke(ClientResult result, long lobbyId);
     }
 
     public interface LobbyExistenceChangedCallback {
-        @SuppressWarnings({"unused", "MissingJavadoc"})
+        @SuppressWarnings({ "unused", "MissingJavadoc" })
         void invoke(long lobbyId);
     }
 
     public interface LobbyMemberChangedCallback {
-        @SuppressWarnings({"unused", "MissingJavadoc"})
+        @SuppressWarnings({ "unused", "MissingJavadoc" })
         void invoke(long lobbyId, long userId);
     }
 
     public interface SendMessageCallback {
-        @SuppressWarnings({"unused", "MissingJavadoc"})
+        @SuppressWarnings({ "unused", "MissingJavadoc" })
         void invoke(ClientResult result, long messageId);
     }
 
     public interface MessageIdCallback {
-        @SuppressWarnings({"unused", "MissingJavadoc"})
+        @SuppressWarnings({ "unused", "MissingJavadoc" })
         void invoke(long messageId);
     }
 
     public interface MessageDeletedCallback {
-        @SuppressWarnings({"unused", "MissingJavadoc"})
+        @SuppressWarnings({ "unused", "MissingJavadoc" })
         void invoke(long messageId, long channelId);
     }
 
     public interface RelationshipChangedCallback {
-        @SuppressWarnings({"unused", "MissingJavadoc"})
+        @SuppressWarnings({ "unused", "MissingJavadoc" })
         void invoke(long userId, boolean isDiscordRelationshipUpdate);
     }
 
     public interface ActivityInviteCallback {
-        @SuppressWarnings({"unused", "MissingJavadoc"})
+        @SuppressWarnings({ "unused", "MissingJavadoc" })
         void invoke(ActivityInvite invite);
     }
 
     public interface AcceptActivityInviteCallback {
-        @SuppressWarnings({"unused", "MissingJavadoc"})
+        @SuppressWarnings({ "unused", "MissingJavadoc" })
         void invoke(ClientResult result, String joinSecret);
     }
 
     public interface ActivityJoinCallback {
-        @SuppressWarnings({"unused", "MissingJavadoc"})
+        @SuppressWarnings({ "unused", "MissingJavadoc" })
         void invoke(String joinSecret);
     }
 
     public interface GetMessagesCallback {
-        @SuppressWarnings({"unused", "MissingJavadoc"})
+        @SuppressWarnings({ "unused", "MissingJavadoc" })
         void invoke(ClientResult result, Message[] messages);
     }
 
     public interface GetUserMessageSummariesCallback {
-        @SuppressWarnings({"unused", "MissingJavadoc"})
+        @SuppressWarnings({ "unused", "MissingJavadoc" })
         void invoke(ClientResult result, UserMessageSummary[] summaries);
     }
 
@@ -184,89 +206,412 @@ public class Client {
                 case 4 -> Reconnecting;
                 case 5 -> Disconnecting;
                 case 6 -> HttpWait;
-                default -> throw new IllegalStateException("Unknown status: " + status);
+                default -> throw new IllegalStateException(
+                    "Unknown status: " + status
+                );
             };
         }
     }
 
-    private static native CodeVerifier createAuthorizationCodeVerifierNative(long pointer);
-    private static native void authorizeNative(long pointer, long clientId, String scopes, String state, long codeChallenge, AuthorizationCallback callback);
-    private static native void getProvisionalTokenNative(long pointer, long applicationId, int externalAuthType, String token, TokenExchangeCallbackNative callback);
-    private static native void getTokenNative(long pointer, long applicationId, String code, String codeVerifier, String redirectUri, TokenExchangeCallbackNative callback);
-    private static native void getTokenFromProvisionalMergeNative(long pointer, long applicationId, String code, String codeVerifier, String redirectUri, int externalAuthType, String externalAuthToken, TokenExchangeCallbackNative callback);
-    private static native void updateTokenNative(long pointer, int type, String token, GenericResultCallback callback);
+    private static native CodeVerifier createAuthorizationCodeVerifierNative(
+        long pointer
+    );
+
+    private static native void authorizeNative(
+        long pointer,
+        long clientId,
+        String scopes,
+        String state,
+        long codeChallenge,
+        AuthorizationCallback callback
+    );
+
+    private static native void getProvisionalTokenNative(
+        long pointer,
+        long applicationId,
+        int externalAuthType,
+        String token,
+        TokenExchangeCallbackNative callback
+    );
+
+    private static native void getTokenNative(
+        long pointer,
+        long applicationId,
+        String code,
+        String codeVerifier,
+        String redirectUri,
+        TokenExchangeCallbackNative callback
+    );
+
+    private static native void getTokenFromProvisionalMergeNative(
+        long pointer,
+        long applicationId,
+        String code,
+        String codeVerifier,
+        String redirectUri,
+        int externalAuthType,
+        String externalAuthToken,
+        TokenExchangeCallbackNative callback
+    );
+
+    private static native void updateTokenNative(
+        long pointer,
+        int type,
+        String token,
+        GenericResultCallback callback
+    );
+
     private static native void connectNative(long pointer);
+
     private static native void disconnectNative(long pointer);
+
     private static native void abortAuthorizeNative(long pointer);
+
     private static native boolean isAuthenticatedNative(long pointer);
-    private static native void provisionalMergeCompletedNative(long pointer, boolean success);
-    private static native void refreshTokenNative(long pointer, long applicationId, String refreshToken, TokenExchangeCallbackNative callback);
 
-    private static native void openConnectedGameSettingsInDiscordNative(long pointer, GenericResultCallback callback);
+    private static native void provisionalMergeCompletedNative(
+        long pointer,
+        boolean success
+    );
+
+    private static native void refreshTokenNative(
+        long pointer,
+        long applicationId,
+        String refreshToken,
+        TokenExchangeCallbackNative callback
+    );
+
+    private static native void openConnectedGameSettingsInDiscordNative(
+        long pointer,
+        GenericResultCallback callback
+    );
+
     private static native void setGameWindowPidNative(long pointer, int pid);
-    private static native void setStatusChangedCallbackNative(long pointer, StatusChangedCallbackNative callback);
-    private static native void updateRichPresenceNative(long pointer, long activity, @Nullable GenericResultCallback callback);
-    private static native User getCurrentUserNative(long pointer);
-    private static native @Nullable User getCurrentUserV2Native(long pointer);
-    private static native @Nullable User getUserNative(long pointer, long userId);
-    private static native Relationship getRelationshipNative(long pointer, long userId);
-    private static native Relationship[] getRelationshipsNative(long pointer);
-    private static native void sendDiscordFriendRequestNative(long pointer, String username, GenericResultCallback callback);
-    private static native void sendDiscordFriendRequestByIdNative(long pointer, long userId, GenericResultCallback callback);
-    private static native void sendGameFriendRequestNative(long pointer, String username, GenericResultCallback callback);
-    private static native void sendGameFriendRequestByIdNative(long pointer, long userId, GenericResultCallback callback);
-    private static native void acceptDiscordFriendRequestNative(long pointer, long userId, GenericResultCallback callback);
-    private static native void acceptGameFriendRequestNative(long pointer, long userId, GenericResultCallback callback);
-    private static native void cancelDiscordFriendRequestNative(long pointer, long userId, GenericResultCallback callback);
-    private static native void cancelGameFriendRequestNative(long pointer, long userId, GenericResultCallback callback);
-    private static native void setRelationshipCreatedCallbackNative(long pointer, RelationshipChangedCallback callback);
-    private static native void setRelationshipDeletedCallbackNative(long pointer, RelationshipChangedCallback callback);
-    private static native void rejectDiscordFriendRequestNative(long pointer, long userId, GenericResultCallback callback);
-    private static native void rejectGameFriendRequestNative(long pointer, long userId, GenericResultCallback callback);
-    private static native void removeDiscordAndGameFriendNative(long pointer, long userId, GenericResultCallback callback);
-    private static native void removeGameFriendNative(long pointer, long userId, GenericResultCallback callback);
-    private static native void blockUserNative(long pointer, long userId, GenericResultCallback callback);
-    private static native void unblockUserNative(long pointer, long userId, GenericResultCallback callback);
 
-    private static native void getUserGuildsNative(long pointer, GetUserGuildsCallback callback);
-    private static native void getGuildChannelsNative(long pointer, long guildId, GetGuildChannelsCallback callback);
-    private static native void createOrJoinLobbyNative(long pointer, String secret, CreateOrJoinLobbyCallback callback);
-    private static native void createOrJoinLobbyWithMetadataNative(long pointer, String secret, StringPair[] lobbyMeta, StringPair[] memberMeta, CreateOrJoinLobbyCallback callback);
-    private static native void leaveLobbyNative(long pointer, long lobbyId, GenericResultCallback callback);
-    private static native void setLobbyCreatedCallbackNative(long pointer, LobbyExistenceChangedCallback callback);
-    private static native void setLobbyDeletedCallbackNative(long pointer, LobbyExistenceChangedCallback callback);
-    private static native void setLobbyUpdatedCallbackNative(long pointer, LobbyExistenceChangedCallback callback);
-    private static native void setLobbyMemberAddedCallbackNative(long pointer, LobbyMemberChangedCallback callback);
-    private static native void setLobbyMemberRemovedCallbackNative(long pointer, LobbyMemberChangedCallback callback);
-    private static native void setLobbyMemberUpdatedCallbackNative(long pointer, LobbyMemberChangedCallback callback);
-    private static native void setMessageCreatedCallbackNative(long pointer, MessageIdCallback callback);
-    private static native void setMessageDeletedCallbackNative(long pointer, MessageDeletedCallback callback);
-    private static native void setMessageUpdatedCallbackNative(long pointer, MessageIdCallback callback);
-    private static native @Nullable Message getMessageNative(long pointer, long messageId);
-    private static native @Nullable Lobby getLobbyNative(long pointer, long lobbyId);
-    private static native void linkChannelToLobbyNative(long pointer, long lobbyId, long channelId, GenericResultCallback callback);
-    private static native void unlinkChannelFromLobbyNative(long pointer, long lobbyId, GenericResultCallback callback);
-    private static native void sendLobbyMessageNative(long pointer, long lobbyId, String message, SendMessageCallback callback);
-    private static native void sendLobbyMessageWithMetadataNative(long pointer, long lobbyId, String message, StringPair[] metadata, SendMessageCallback callback);
-    private static native void sendUserMessageNative(long pointer, long userId, String message, SendMessageCallback callback);
-    private static native void sendUserMessageWithMetadataNative(long pointer, long userId, String message, StringPair[] metadata, SendMessageCallback callback);
-    private static native void getLobbyMessagesWithLimitNative(long pointer, long lobbyId, int limit, GetMessagesCallback callback);
-    private static native void getUserMessagesWithLimitNative(long pointer, long userId, int limit, GetMessagesCallback callback);
-    private static native void getUserMessageSummariesNative(long pointer, GetUserMessageSummariesCallback callback);
+    private static native void setStatusChangedCallbackNative(
+        long pointer,
+        StatusChangedCallbackNative callback
+    );
+
+    private static native void updateRichPresenceNative(
+        long pointer,
+        long activity,
+        @Nullable GenericResultCallback callback
+    );
+
+    private static native User getCurrentUserNative(long pointer);
+
+    private static native @Nullable User getCurrentUserV2Native(long pointer);
+
+    private static native @Nullable User getUserNative(
+        long pointer,
+        long userId
+    );
+
+    private static native Relationship getRelationshipNative(
+        long pointer,
+        long userId
+    );
+
+    private static native Relationship[] getRelationshipsNative(long pointer);
+
+    private static native void sendDiscordFriendRequestNative(
+        long pointer,
+        String username,
+        GenericResultCallback callback
+    );
+
+    private static native void sendDiscordFriendRequestByIdNative(
+        long pointer,
+        long userId,
+        GenericResultCallback callback
+    );
+
+    private static native void sendGameFriendRequestNative(
+        long pointer,
+        String username,
+        GenericResultCallback callback
+    );
+
+    private static native void sendGameFriendRequestByIdNative(
+        long pointer,
+        long userId,
+        GenericResultCallback callback
+    );
+
+    private static native void acceptDiscordFriendRequestNative(
+        long pointer,
+        long userId,
+        GenericResultCallback callback
+    );
+
+    private static native void acceptGameFriendRequestNative(
+        long pointer,
+        long userId,
+        GenericResultCallback callback
+    );
+
+    private static native void cancelDiscordFriendRequestNative(
+        long pointer,
+        long userId,
+        GenericResultCallback callback
+    );
+
+    private static native void cancelGameFriendRequestNative(
+        long pointer,
+        long userId,
+        GenericResultCallback callback
+    );
+
+    private static native void setRelationshipCreatedCallbackNative(
+        long pointer,
+        RelationshipChangedCallback callback
+    );
+
+    private static native void setRelationshipDeletedCallbackNative(
+        long pointer,
+        RelationshipChangedCallback callback
+    );
+
+    private static native void rejectDiscordFriendRequestNative(
+        long pointer,
+        long userId,
+        GenericResultCallback callback
+    );
+
+    private static native void rejectGameFriendRequestNative(
+        long pointer,
+        long userId,
+        GenericResultCallback callback
+    );
+
+    private static native void removeDiscordAndGameFriendNative(
+        long pointer,
+        long userId,
+        GenericResultCallback callback
+    );
+
+    private static native void removeGameFriendNative(
+        long pointer,
+        long userId,
+        GenericResultCallback callback
+    );
+
+    private static native void blockUserNative(
+        long pointer,
+        long userId,
+        GenericResultCallback callback
+    );
+
+    private static native void unblockUserNative(
+        long pointer,
+        long userId,
+        GenericResultCallback callback
+    );
+
+    private static native void getUserGuildsNative(
+        long pointer,
+        GetUserGuildsCallback callback
+    );
+
+    private static native void getGuildChannelsNative(
+        long pointer,
+        long guildId,
+        GetGuildChannelsCallback callback
+    );
+
+    private static native void createOrJoinLobbyNative(
+        long pointer,
+        String secret,
+        CreateOrJoinLobbyCallback callback
+    );
+
+    private static native void createOrJoinLobbyWithMetadataNative(
+        long pointer,
+        String secret,
+        StringPair[] lobbyMeta,
+        StringPair[] memberMeta,
+        CreateOrJoinLobbyCallback callback
+    );
+
+    private static native void leaveLobbyNative(
+        long pointer,
+        long lobbyId,
+        GenericResultCallback callback
+    );
+
+    private static native void setLobbyCreatedCallbackNative(
+        long pointer,
+        LobbyExistenceChangedCallback callback
+    );
+
+    private static native void setLobbyDeletedCallbackNative(
+        long pointer,
+        LobbyExistenceChangedCallback callback
+    );
+
+    private static native void setLobbyUpdatedCallbackNative(
+        long pointer,
+        LobbyExistenceChangedCallback callback
+    );
+
+    private static native void setLobbyMemberAddedCallbackNative(
+        long pointer,
+        LobbyMemberChangedCallback callback
+    );
+
+    private static native void setLobbyMemberRemovedCallbackNative(
+        long pointer,
+        LobbyMemberChangedCallback callback
+    );
+
+    private static native void setLobbyMemberUpdatedCallbackNative(
+        long pointer,
+        LobbyMemberChangedCallback callback
+    );
+
+    private static native void setMessageCreatedCallbackNative(
+        long pointer,
+        MessageIdCallback callback
+    );
+
+    private static native void setMessageDeletedCallbackNative(
+        long pointer,
+        MessageDeletedCallback callback
+    );
+
+    private static native void setMessageUpdatedCallbackNative(
+        long pointer,
+        MessageIdCallback callback
+    );
+
+    private static native @Nullable Message getMessageNative(
+        long pointer,
+        long messageId
+    );
+
+    private static native @Nullable Lobby getLobbyNative(
+        long pointer,
+        long lobbyId
+    );
+
+    private static native void linkChannelToLobbyNative(
+        long pointer,
+        long lobbyId,
+        long channelId,
+        GenericResultCallback callback
+    );
+
+    private static native void unlinkChannelFromLobbyNative(
+        long pointer,
+        long lobbyId,
+        GenericResultCallback callback
+    );
+
+    private static native void sendLobbyMessageNative(
+        long pointer,
+        long lobbyId,
+        String message,
+        SendMessageCallback callback
+    );
+
+    private static native void sendLobbyMessageWithMetadataNative(
+        long pointer,
+        long lobbyId,
+        String message,
+        StringPair[] metadata,
+        SendMessageCallback callback
+    );
+
+    private static native void sendUserMessageNative(
+        long pointer,
+        long userId,
+        String message,
+        SendMessageCallback callback
+    );
+
+    private static native void sendUserMessageWithMetadataNative(
+        long pointer,
+        long userId,
+        String message,
+        StringPair[] metadata,
+        SendMessageCallback callback
+    );
+
+    private static native void getLobbyMessagesWithLimitNative(
+        long pointer,
+        long lobbyId,
+        int limit,
+        GetMessagesCallback callback
+    );
+
+    private static native void getUserMessagesWithLimitNative(
+        long pointer,
+        long userId,
+        int limit,
+        GetMessagesCallback callback
+    );
+
+    private static native void getUserMessageSummariesNative(
+        long pointer,
+        GetUserMessageSummariesCallback callback
+    );
 
     private static native Call startCallNative(long pointer, long channelId);
-    private static native void endCallNative(long pointer, long channelId, CompletionCallback callback);
-    private static native void endCallsNative(long pointer, CompletionCallback callback);
 
-    private static native void sendActivityInviteNative(long pointer, long userId, String content, GenericResultCallback callback);
-    private static native void acceptActivityInviteNative(long pointer, ActivityInvite invite, AcceptActivityInviteCallback callback);
-    private static native void sendActivityJoinRequestNative(long pointer, long userId, GenericResultCallback callback);
-    private static native void sendActivityJoinRequestReplyNative(long pointer, ActivityInvite invite, GenericResultCallback callback);
-    private static native void setActivityInviteCreatedCallbackNative(long pointer, ActivityInviteCallback callback);
-    private static native void setActivityInviteUpdatedCallbackNative(long pointer, ActivityInviteCallback callback);
-    private static native void setActivityJoinCallbackNative(long pointer, ActivityJoinCallback callback);
+    private static native void endCallNative(
+        long pointer,
+        long channelId,
+        CompletionCallback callback
+    );
+
+    private static native void endCallsNative(
+        long pointer,
+        CompletionCallback callback
+    );
+
+    private static native void sendActivityInviteNative(
+        long pointer,
+        long userId,
+        String content,
+        GenericResultCallback callback
+    );
+
+    private static native void acceptActivityInviteNative(
+        long pointer,
+        ActivityInvite invite,
+        AcceptActivityInviteCallback callback
+    );
+
+    private static native void sendActivityJoinRequestNative(
+        long pointer,
+        long userId,
+        GenericResultCallback callback
+    );
+
+    private static native void sendActivityJoinRequestReplyNative(
+        long pointer,
+        ActivityInvite invite,
+        GenericResultCallback callback
+    );
+
+    private static native void setActivityInviteCreatedCallbackNative(
+        long pointer,
+        ActivityInviteCallback callback
+    );
+
+    private static native void setActivityInviteUpdatedCallbackNative(
+        long pointer,
+        ActivityInviteCallback callback
+    );
+
+    private static native void setActivityJoinCallbackNative(
+        long pointer,
+        ActivityJoinCallback callback
+    );
 
     private static native String getDefaultCommunicationsScopesNative();
+
     private static native String getDefaultPresenceScopesNative();
 
     static {
@@ -277,7 +622,8 @@ public class Client {
      * Contains the default communications scopes. If you want to include
      * the SocialSDK's chat features in your game, you'll want to use this.
      */
-    public static final String[] COMMUNICATIONS_SCOPES = getDefaultCommunicationsScopesNative().split(" ");
+    public static final String[] COMMUNICATIONS_SCOPES =
+        getDefaultCommunicationsScopesNative().split(" ");
 
     /**
      * Contains the default presence scopes. If you just want to use the
@@ -287,7 +633,8 @@ public class Client {
      * using a smaller-sized and more dedicated library if you just want
      * rich-presence.
      */
-    public static final String[] PRESENCE_SCOPES = getDefaultPresenceScopesNative().split(" ");
+    public static final String[] PRESENCE_SCOPES =
+        getDefaultPresenceScopesNative().split(" ");
 
     /**
      * Creates a {@link CodeVerifier} that can be used to authenticate a
@@ -319,8 +666,21 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void authorize(long clientId, @NotNull String[] scopes, @NotNull String state, @NotNull CodeChallenge challenge, @NotNull AuthorizationCallback callback) {
-        authorizeNative(pointer, clientId, String.join(" ", scopes), state, challenge.pointer, callback);
+    public void authorize(
+        long clientId,
+        @NotNull String[] scopes,
+        @NotNull String state,
+        @NotNull CodeChallenge challenge,
+        @NotNull AuthorizationCallback callback
+    ) {
+        authorizeNative(
+            pointer,
+            clientId,
+            String.join(" ", scopes),
+            state,
+            challenge.pointer,
+            callback
+        );
     }
 
     /**
@@ -344,16 +704,27 @@ public class Client {
      * @see Client#runCallbacks()
      * @see Client#authorize(long, String[], String, CodeChallenge, AuthorizationCallback)
      */
-    public CompletableFuture<AuthorizationResult> authorize(long clientId, @NotNull String[] scopes, @NotNull String state, @NotNull CodeChallenge challenge) {
+    public CompletableFuture<AuthorizationResult> authorize(
+        long clientId,
+        @NotNull String[] scopes,
+        @NotNull String state,
+        @NotNull CodeChallenge challenge
+    ) {
         var future = new CompletableFuture<AuthorizationResult>();
 
-        authorize(clientId, scopes, state, challenge, (result, code, redirectUri) -> {
-            if(result.isSuccess()) {
-                future.complete(new AuthorizationResult(code, redirectUri));
-            } else {
-                future.completeExceptionally(new DiscordException(result));
+        authorize(
+            clientId,
+            scopes,
+            state,
+            challenge,
+            (result, code, redirectUri) -> {
+                if (result.isSuccess()) {
+                    future.complete(new AuthorizationResult(code, redirectUri));
+                } else {
+                    future.completeExceptionally(new DiscordException(result));
+                }
             }
-        });
+        );
 
         return future;
     }
@@ -365,9 +736,18 @@ public class Client {
         abortAuthorizeNative(pointer);
     }
 
-    private static @NotNull TokenExchangeCallbackNative tokenExchangeCallback(@NotNull TokenExchangeCallback callback) {
+    private static @NotNull TokenExchangeCallbackNative tokenExchangeCallback(
+        @NotNull TokenExchangeCallback callback
+    ) {
         return (result, accessToken, refreshToken, type, expiresIn, scopes) -> {
-            callback.invoke(result, accessToken, refreshToken, AuthorizationTokenType.from(type), expiresIn, scopes != null ? scopes.split(" ") : null);
+            callback.invoke(
+                result,
+                accessToken,
+                refreshToken,
+                AuthorizationTokenType.from(type),
+                expiresIn,
+                scopes != null ? scopes.split(" ") : null
+            );
         };
     }
 
@@ -385,8 +765,19 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void getProvisionalToken(long applicationId, @NotNull ExternalAuthType externalAuthType, @NotNull String token, @NotNull TokenExchangeCallback callback) {
-        getProvisionalTokenNative(pointer, applicationId, externalAuthType.ordinal(), token, tokenExchangeCallback(callback));
+    public void getProvisionalToken(
+        long applicationId,
+        @NotNull ExternalAuthType externalAuthType,
+        @NotNull String token,
+        @NotNull TokenExchangeCallback callback
+    ) {
+        getProvisionalTokenNative(
+            pointer,
+            applicationId,
+            externalAuthType.ordinal(),
+            token,
+            tokenExchangeCallback(callback)
+        );
     }
 
     /**
@@ -406,16 +797,33 @@ public class Client {
      * @see Client#runCallbacks()
      * @see Client#getProvisionalToken(long, ExternalAuthType, String, TokenExchangeCallback)
      */
-    public CompletableFuture<TokenExchangeResult> getProvisionalToken(long applicationId, @NotNull ExternalAuthType externalAuthType, @NotNull String token) {
+    public CompletableFuture<TokenExchangeResult> getProvisionalToken(
+        long applicationId,
+        @NotNull ExternalAuthType externalAuthType,
+        @NotNull String token
+    ) {
         var future = new CompletableFuture<TokenExchangeResult>();
 
-        getProvisionalToken(applicationId, externalAuthType, token, (result, accessToken, refreshToken, type, expiresIn, scopes) -> {
-            if(result.isSuccess()) {
-                future.complete(new TokenExchangeResult(accessToken, refreshToken, type, expiresIn, scopes));
-            } else {
-                future.completeExceptionally(new DiscordException(result));
+        getProvisionalToken(
+            applicationId,
+            externalAuthType,
+            token,
+            (result, accessToken, refreshToken, type, expiresIn, scopes) -> {
+                if (result.isSuccess()) {
+                    future.complete(
+                        new TokenExchangeResult(
+                            accessToken,
+                            refreshToken,
+                            type,
+                            expiresIn,
+                            scopes
+                        )
+                    );
+                } else {
+                    future.completeExceptionally(new DiscordException(result));
+                }
             }
-        });
+        );
 
         return future;
     }
@@ -438,8 +846,21 @@ public class Client {
      * @see Client#authorize(long, String[], String, CodeChallenge, AuthorizationCallback)
      * @see Client#getTokenFromProvisionalMerge(long, String, String, String, ExternalAuthType, String, TokenExchangeCallback)
      */
-    public void getToken(long applicationId, @NotNull String code, @NotNull String codeVerifier, @NotNull String redirectUri, @NotNull TokenExchangeCallback callback) {
-        getTokenNative(pointer, applicationId, code, codeVerifier, redirectUri, tokenExchangeCallback(callback));
+    public void getToken(
+        long applicationId,
+        @NotNull String code,
+        @NotNull String codeVerifier,
+        @NotNull String redirectUri,
+        @NotNull TokenExchangeCallback callback
+    ) {
+        getTokenNative(
+            pointer,
+            applicationId,
+            code,
+            codeVerifier,
+            redirectUri,
+            tokenExchangeCallback(callback)
+        );
     }
 
     /**
@@ -463,16 +884,35 @@ public class Client {
      * @see Client#getTokenFromProvisionalMerge(long, String, String, String, ExternalAuthType, String, TokenExchangeCallback)
      * @see Client#getToken(long, String, String, String, TokenExchangeCallback)
      */
-    public CompletableFuture<TokenExchangeResult> getToken(long applicationId, @NotNull String code, @NotNull String codeVerifier, @NotNull String redirectUri) {
+    public CompletableFuture<TokenExchangeResult> getToken(
+        long applicationId,
+        @NotNull String code,
+        @NotNull String codeVerifier,
+        @NotNull String redirectUri
+    ) {
         var future = new CompletableFuture<TokenExchangeResult>();
 
-        getToken(applicationId, code, codeVerifier, redirectUri, (result, accessToken, refreshToken, type, expiresIn, scopes) -> {
-            if(result.isSuccess()) {
-                future.complete(new TokenExchangeResult(accessToken, refreshToken, type, expiresIn, scopes));
-            } else {
-                future.completeExceptionally(new DiscordException(result));
+        getToken(
+            applicationId,
+            code,
+            codeVerifier,
+            redirectUri,
+            (result, accessToken, refreshToken, type, expiresIn, scopes) -> {
+                if (result.isSuccess()) {
+                    future.complete(
+                        new TokenExchangeResult(
+                            accessToken,
+                            refreshToken,
+                            type,
+                            expiresIn,
+                            scopes
+                        )
+                    );
+                } else {
+                    future.completeExceptionally(new DiscordException(result));
+                }
             }
-        });
+        );
 
         return future;
     }
@@ -499,8 +939,25 @@ public class Client {
      * @see Client#getToken(long, String, String, String, TokenExchangeCallback)
      * @see Client#getProvisionalToken(long, ExternalAuthType, String, TokenExchangeCallback)
      */
-    public void getTokenFromProvisionalMerge(long applicationId, @NotNull String code, @NotNull String codeVerifier, @NotNull String redirectUri, @NotNull ExternalAuthType externalAuthType, @NotNull String externalAuthToken, @NotNull TokenExchangeCallback callback) {
-        getTokenFromProvisionalMergeNative(pointer, applicationId, code, codeVerifier, redirectUri, externalAuthType.ordinal(), externalAuthToken, tokenExchangeCallback(callback));
+    public void getTokenFromProvisionalMerge(
+        long applicationId,
+        @NotNull String code,
+        @NotNull String codeVerifier,
+        @NotNull String redirectUri,
+        @NotNull ExternalAuthType externalAuthType,
+        @NotNull String externalAuthToken,
+        @NotNull TokenExchangeCallback callback
+    ) {
+        getTokenFromProvisionalMergeNative(
+            pointer,
+            applicationId,
+            code,
+            codeVerifier,
+            redirectUri,
+            externalAuthType.ordinal(),
+            externalAuthToken,
+            tokenExchangeCallback(callback)
+        );
     }
 
     /**
@@ -528,16 +985,39 @@ public class Client {
      * @see Client#getProvisionalToken(long, ExternalAuthType, String, TokenExchangeCallback)
      * @see Client#getTokenFromProvisionalMerge(long, String, String, String, ExternalAuthType, String, TokenExchangeCallback)
      */
-    public CompletableFuture<TokenExchangeResult> getTokenFromProvisionalMerge(long applicationId, @NotNull String code, @NotNull String codeVerifier, @NotNull String redirectUri, @NotNull ExternalAuthType externalAuthType, @NotNull String externalAuthToken) {
+    public CompletableFuture<TokenExchangeResult> getTokenFromProvisionalMerge(
+        long applicationId,
+        @NotNull String code,
+        @NotNull String codeVerifier,
+        @NotNull String redirectUri,
+        @NotNull ExternalAuthType externalAuthType,
+        @NotNull String externalAuthToken
+    ) {
         var future = new CompletableFuture<TokenExchangeResult>();
 
-        getTokenFromProvisionalMerge(applicationId, code, codeVerifier, redirectUri, externalAuthType, externalAuthToken, (result, accessToken, refreshToken, type, expiresIn, scopes) -> {
-            if(result.isSuccess()) {
-                future.complete(new TokenExchangeResult(accessToken, refreshToken, type, expiresIn, scopes));
-            } else {
-                future.completeExceptionally(new DiscordException(result));
+        getTokenFromProvisionalMerge(
+            applicationId,
+            code,
+            codeVerifier,
+            redirectUri,
+            externalAuthType,
+            externalAuthToken,
+            (result, accessToken, refreshToken, type, expiresIn, scopes) -> {
+                if (result.isSuccess()) {
+                    future.complete(
+                        new TokenExchangeResult(
+                            accessToken,
+                            refreshToken,
+                            type,
+                            expiresIn,
+                            scopes
+                        )
+                    );
+                } else {
+                    future.completeExceptionally(new DiscordException(result));
+                }
             }
-        });
+        );
 
         return future;
     }
@@ -553,7 +1033,11 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void updateToken(@NotNull AuthorizationTokenType type, @NotNull String token, @NotNull GenericResultCallback callback) {
+    public void updateToken(
+        @NotNull AuthorizationTokenType type,
+        @NotNull String token,
+        @NotNull GenericResultCallback callback
+    ) {
         updateTokenNative(pointer, type.ordinal(), token, callback);
     }
 
@@ -570,11 +1054,14 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public CompletableFuture<Void> updateToken(@NotNull AuthorizationTokenType type, @NotNull String token) {
+    public CompletableFuture<Void> updateToken(
+        @NotNull AuthorizationTokenType type,
+        @NotNull String token
+    ) {
         var future = new CompletableFuture<Void>();
 
         updateToken(type, token, result -> {
-            if(result.isSuccess()) {
+            if (result.isSuccess()) {
                 future.complete(null);
             } else {
                 future.completeExceptionally(new DiscordException(result));
@@ -635,8 +1122,17 @@ public class Client {
      * @see Client#runCallbacks()
      * @see Client#updateToken(AuthorizationTokenType, String, GenericResultCallback)
      */
-    public void refreshToken(long applicationId, @NotNull String refreshToken, @NotNull TokenExchangeCallback callback) {
-        refreshTokenNative(pointer, applicationId, refreshToken, tokenExchangeCallback(callback));
+    public void refreshToken(
+        long applicationId,
+        @NotNull String refreshToken,
+        @NotNull TokenExchangeCallback callback
+    ) {
+        refreshTokenNative(
+            pointer,
+            applicationId,
+            refreshToken,
+            tokenExchangeCallback(callback)
+        );
     }
 
     /**
@@ -655,16 +1151,31 @@ public class Client {
      * @see Client#updateToken(AuthorizationTokenType, String, GenericResultCallback)
      * @see Client#refreshToken(long, String, TokenExchangeCallback)
      */
-    public CompletableFuture<TokenExchangeResult> refreshToken(long applicationId, @NotNull String refreshToken) {
+    public CompletableFuture<TokenExchangeResult> refreshToken(
+        long applicationId,
+        @NotNull String refreshToken
+    ) {
         var future = new CompletableFuture<TokenExchangeResult>();
 
-        refreshToken(applicationId, refreshToken, (result, accessToken, refreshToken1, type, expiresIn, scopes) -> {
-            if(result.isSuccess()) {
-                future.complete(new TokenExchangeResult(accessToken, refreshToken1, type, expiresIn, scopes));
-            } else {
-                future.completeExceptionally(new DiscordException(result));
+        refreshToken(
+            applicationId,
+            refreshToken,
+            (result, accessToken, refreshToken1, type, expiresIn, scopes) -> {
+                if (result.isSuccess()) {
+                    future.complete(
+                        new TokenExchangeResult(
+                            accessToken,
+                            refreshToken1,
+                            type,
+                            expiresIn,
+                            scopes
+                        )
+                    );
+                } else {
+                    future.completeExceptionally(new DiscordException(result));
+                }
             }
-        });
+        );
 
         return future;
     }
@@ -677,7 +1188,9 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void openConnectedGameSettingsInDiscord(@NotNull GenericResultCallback callback) {
+    public void openConnectedGameSettingsInDiscord(
+        @NotNull GenericResultCallback callback
+    ) {
         openConnectedGameSettingsInDiscordNative(pointer, callback);
     }
 
@@ -694,7 +1207,7 @@ public class Client {
         var future = new CompletableFuture<Void>();
 
         openConnectedGameSettingsInDiscordNative(pointer, result -> {
-            if(result.isSuccess()) {
+            if (result.isSuccess()) {
                 future.complete(null);
             } else {
                 future.completeExceptionally(new DiscordException(result));
@@ -727,10 +1240,19 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void setStatusChangedCallback(@NotNull StatusChangedCallback callback) {
-        setStatusChangedCallbackNative(pointer, (status, error, errorDetail) -> {
-            callback.invoke(Status.from(status), ClientSocketResult.from(error), errorDetail);
-        });
+    public void setStatusChangedCallback(
+        @NotNull StatusChangedCallback callback
+    ) {
+        setStatusChangedCallbackNative(
+            pointer,
+            (status, error, errorDetail) -> {
+                callback.invoke(
+                    Status.from(status),
+                    ClientSocketResult.from(error),
+                    errorDetail
+                );
+            }
+        );
     }
 
     /**
@@ -741,7 +1263,10 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void updateRichPresence(@NotNull ActivityBuilder activity, @NotNull GenericResultCallback callback) {
+    public void updateRichPresence(
+        @NotNull ActivityBuilder activity,
+        @NotNull GenericResultCallback callback
+    ) {
         updateRichPresenceNative(pointer, activity.pointer, callback);
     }
 
@@ -755,11 +1280,13 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public CompletableFuture<Void> updateRichPresence(@NotNull ActivityBuilder activity) {
+    public CompletableFuture<Void> updateRichPresence(
+        @NotNull ActivityBuilder activity
+    ) {
         var future = new CompletableFuture<Void>();
 
         updateRichPresenceNative(pointer, activity.pointer, result -> {
-            if(result.isSuccess()) {
+            if (result.isSuccess()) {
                 future.complete(null);
             } else {
                 future.completeExceptionally(new DiscordException(result));
@@ -830,7 +1357,7 @@ public class Client {
         var future = new CompletableFuture<GuildMinimal[]>();
 
         getUserGuilds((result, guilds) -> {
-            if(result.isSuccess()) {
+            if (result.isSuccess()) {
                 future.complete(guilds);
             } else {
                 future.completeExceptionally(new DiscordException(result));
@@ -850,7 +1377,10 @@ public class Client {
      * @see Client#runCallbacks()
      * @see Client#getUserGuilds(GetUserGuildsCallback)
      */
-    public void getGuildChannels(long guildId, GetGuildChannelsCallback callback) {
+    public void getGuildChannels(
+        long guildId,
+        GetGuildChannelsCallback callback
+    ) {
         getGuildChannelsNative(pointer, guildId, callback);
     }
 
@@ -870,7 +1400,7 @@ public class Client {
         var future = new CompletableFuture<GuildChannel[]>();
 
         getGuildChannels(guildId, (result, channels) -> {
-            if(result.isSuccess()) {
+            if (result.isSuccess()) {
                 future.complete(channels);
             } else {
                 future.completeExceptionally(new DiscordException(result));
@@ -891,7 +1421,10 @@ public class Client {
      * @see Client#runCallbacks()
      * @see Client#createOrJoinLobby(String, Map, Map, CreateOrJoinLobbyCallback)
      */
-    public void createOrJoinLobby(String secret, CreateOrJoinLobbyCallback callback) {
+    public void createOrJoinLobby(
+        String secret,
+        CreateOrJoinLobbyCallback callback
+    ) {
         createOrJoinLobbyNative(pointer, secret, callback);
     }
 
@@ -912,7 +1445,7 @@ public class Client {
         var future = new CompletableFuture<Long>();
 
         createOrJoinLobby(secret, (result, lobbyId) -> {
-            if(result.isSuccess()) {
+            if (result.isSuccess()) {
                 future.complete(lobbyId);
             } else {
                 future.completeExceptionally(new DiscordException(result));
@@ -937,17 +1470,26 @@ public class Client {
      * @see Client#runCallbacks()
      * @see Client#createOrJoinLobby(String, CreateOrJoinLobbyCallback)
      */
-    public void createOrJoinLobby(String secret, Map<String, String> lobbyMeta, Map<String, String> memberMeta, CreateOrJoinLobbyCallback callback) {
+    public void createOrJoinLobby(
+        String secret,
+        Map<String, String> lobbyMeta,
+        Map<String, String> memberMeta,
+        CreateOrJoinLobbyCallback callback
+    ) {
         createOrJoinLobbyWithMetadataNative(
-                pointer,
-                secret,
-                lobbyMeta.entrySet().stream()
-                        .map(v -> new StringPair(v.getKey(), v.getValue()))
-                        .toArray(StringPair[]::new),
-                memberMeta.entrySet().stream()
-                        .map(v -> new StringPair(v.getKey(), v.getValue()))
-                        .toArray(StringPair[]::new),
-                callback
+            pointer,
+            secret,
+            lobbyMeta
+                .entrySet()
+                .stream()
+                .map(v -> new StringPair(v.getKey(), v.getValue()))
+                .toArray(StringPair[]::new),
+            memberMeta
+                .entrySet()
+                .stream()
+                .map(v -> new StringPair(v.getKey(), v.getValue()))
+                .toArray(StringPair[]::new),
+            callback
         );
     }
 
@@ -968,11 +1510,15 @@ public class Client {
      * @see Client#runCallbacks()
      * @see Client#createOrJoinLobby(String, Map, Map, CreateOrJoinLobbyCallback)
      */
-    public CompletableFuture<Long> createOrJoinLobby(String secret, Map<String, String> lobbyMeta, Map<String, String> memberMeta) {
+    public CompletableFuture<Long> createOrJoinLobby(
+        String secret,
+        Map<String, String> lobbyMeta,
+        Map<String, String> memberMeta
+    ) {
         var future = new CompletableFuture<Long>();
 
         createOrJoinLobby(secret, lobbyMeta, memberMeta, (result, lobbyId) -> {
-            if(result.isSuccess()) {
+            if (result.isSuccess()) {
                 future.complete(lobbyId);
             } else {
                 future.completeExceptionally(new DiscordException(result));
@@ -1008,7 +1554,7 @@ public class Client {
         var future = new CompletableFuture<Void>();
 
         leaveLobbyNative(pointer, lobbyId, result -> {
-            if(result.isSuccess()) {
+            if (result.isSuccess()) {
                 future.complete(null);
             } else {
                 future.completeExceptionally(new DiscordException(result));
@@ -1025,7 +1571,9 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void setLobbyCreatedCallback(LobbyExistenceChangedCallback callback) {
+    public void setLobbyCreatedCallback(
+        LobbyExistenceChangedCallback callback
+    ) {
         setLobbyCreatedCallbackNative(pointer, callback);
     }
 
@@ -1037,7 +1585,9 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void setLobbyDeletedCallback(LobbyExistenceChangedCallback callback) {
+    public void setLobbyDeletedCallback(
+        LobbyExistenceChangedCallback callback
+    ) {
         setLobbyDeletedCallbackNative(pointer, callback);
     }
 
@@ -1049,7 +1599,9 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void setLobbyUpdatedCallback(LobbyExistenceChangedCallback callback) {
+    public void setLobbyUpdatedCallback(
+        LobbyExistenceChangedCallback callback
+    ) {
         setLobbyUpdatedCallbackNative(pointer, callback);
     }
 
@@ -1062,7 +1614,9 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void setLobbyMemberAddedCallback(LobbyMemberChangedCallback callback) {
+    public void setLobbyMemberAddedCallback(
+        LobbyMemberChangedCallback callback
+    ) {
         setLobbyMemberAddedCallbackNative(pointer, callback);
     }
 
@@ -1075,7 +1629,9 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void setLobbyMemberRemovedCallback(LobbyMemberChangedCallback callback) {
+    public void setLobbyMemberRemovedCallback(
+        LobbyMemberChangedCallback callback
+    ) {
         setLobbyMemberRemovedCallbackNative(pointer, callback);
     }
 
@@ -1088,7 +1644,9 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void setLobbyMemberUpdatedCallback(LobbyMemberChangedCallback callback) {
+    public void setLobbyMemberUpdatedCallback(
+        LobbyMemberChangedCallback callback
+    ) {
         setLobbyMemberUpdatedCallbackNative(pointer, callback);
     }
 
@@ -1178,7 +1736,11 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void linkChannelToLobby(long lobbyId, long channelId, GenericResultCallback callback) {
+    public void linkChannelToLobby(
+        long lobbyId,
+        long channelId,
+        GenericResultCallback callback
+    ) {
         linkChannelToLobbyNative(pointer, lobbyId, channelId, callback);
     }
 
@@ -1204,11 +1766,14 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public CompletableFuture<Void> linkChannelToLobby(long lobbyId, long channelId) {
+    public CompletableFuture<Void> linkChannelToLobby(
+        long lobbyId,
+        long channelId
+    ) {
         var future = new CompletableFuture<Void>();
 
         linkChannelToLobbyNative(pointer, lobbyId, channelId, result -> {
-            if(result.isSuccess()) {
+            if (result.isSuccess()) {
                 future.complete(null);
             } else {
                 future.completeExceptionally(new DiscordException(result));
@@ -1229,7 +1794,10 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void unlinkChannelFromLobby(long lobbyId, GenericResultCallback callback) {
+    public void unlinkChannelFromLobby(
+        long lobbyId,
+        GenericResultCallback callback
+    ) {
         unlinkChannelFromLobbyNative(pointer, lobbyId, callback);
     }
 
@@ -1250,7 +1818,7 @@ public class Client {
         var future = new CompletableFuture<Void>();
 
         unlinkChannelFromLobbyNative(pointer, lobbyId, result -> {
-            if(result.isSuccess()) {
+            if (result.isSuccess()) {
                 future.complete(null);
             } else {
                 future.completeExceptionally(new DiscordException(result));
@@ -1270,7 +1838,11 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void sendLobbyMessage(long lobbyId, String message, SendMessageCallback callback) {
+    public void sendLobbyMessage(
+        long lobbyId,
+        String message,
+        SendMessageCallback callback
+    ) {
         sendLobbyMessageNative(pointer, lobbyId, message, callback);
     }
 
@@ -1286,16 +1858,24 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public CompletableFuture<Long> sendLobbyMessage(long lobbyId, String message) {
+    public CompletableFuture<Long> sendLobbyMessage(
+        long lobbyId,
+        String message
+    ) {
         var future = new CompletableFuture<Long>();
 
-        sendLobbyMessageNative(pointer, lobbyId, message, (result, messageId) -> {
-            if(result.isSuccess()) {
-                future.complete(messageId);
-            } else {
-                future.completeExceptionally(new DiscordException(result));
+        sendLobbyMessageNative(
+            pointer,
+            lobbyId,
+            message,
+            (result, messageId) -> {
+                if (result.isSuccess()) {
+                    future.complete(messageId);
+                } else {
+                    future.completeExceptionally(new DiscordException(result));
+                }
             }
-        });
+        );
 
         return future;
     }
@@ -1314,10 +1894,23 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void sendLobbyMessage(long lobbyId, String message, Map<String, String> metadata, SendMessageCallback callback) {
-        sendLobbyMessageWithMetadataNative(pointer, lobbyId, message, metadata.entrySet().stream()
+    public void sendLobbyMessage(
+        long lobbyId,
+        String message,
+        Map<String, String> metadata,
+        SendMessageCallback callback
+    ) {
+        sendLobbyMessageWithMetadataNative(
+            pointer,
+            lobbyId,
+            message,
+            metadata
+                .entrySet()
+                .stream()
                 .map(v -> new StringPair(v.getKey(), v.getValue()))
-                .toArray(StringPair[]::new), callback);
+                .toArray(StringPair[]::new),
+            callback
+        );
     }
 
     /**
@@ -1336,7 +1929,12 @@ public class Client {
      * @see Client#runCallbacks()
      */
     @Deprecated(since = "SocialSDK4J 1.0")
-    public void sendLobbyMessageWithMetadata(long lobbyId, String message, Map<String, String> metadata, SendMessageCallback callback) {
+    public void sendLobbyMessageWithMetadata(
+        long lobbyId,
+        String message,
+        Map<String, String> metadata,
+        SendMessageCallback callback
+    ) {
         sendLobbyMessage(lobbyId, message, metadata, callback);
     }
 
@@ -1352,11 +1950,15 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public CompletableFuture<Long> sendLobbyMessage(long lobbyId, String message, Map<String, String> metadata) {
+    public CompletableFuture<Long> sendLobbyMessage(
+        long lobbyId,
+        String message,
+        Map<String, String> metadata
+    ) {
         var future = new CompletableFuture<Long>();
 
         sendLobbyMessage(lobbyId, message, metadata, (result, messageId) -> {
-            if(result.isSuccess()) {
+            if (result.isSuccess()) {
                 future.complete(messageId);
             } else {
                 future.completeExceptionally(new DiscordException(result));
@@ -1387,7 +1989,11 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void sendUserMessage(long userId, String message, SendMessageCallback callback) {
+    public void sendUserMessage(
+        long userId,
+        String message,
+        SendMessageCallback callback
+    ) {
         sendUserMessageNative(pointer, userId, message, callback);
     }
 
@@ -1414,11 +2020,14 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public CompletableFuture<Long> sendUserMessage(long userId, String message) {
+    public CompletableFuture<Long> sendUserMessage(
+        long userId,
+        String message
+    ) {
         var future = new CompletableFuture<Long>();
 
         sendUserMessageNative(pointer, userId, message, (result, messageId) -> {
-            if(result.isSuccess()) {
+            if (result.isSuccess()) {
                 future.complete(messageId);
             } else {
                 future.completeExceptionally(new DiscordException(result));
@@ -1452,10 +2061,23 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void sendUserMessage(long userId, String message, Map<String, String> metadata, SendMessageCallback callback) {
-        sendUserMessageWithMetadataNative(pointer, userId, message, metadata.entrySet().stream()
+    public void sendUserMessage(
+        long userId,
+        String message,
+        Map<String, String> metadata,
+        SendMessageCallback callback
+    ) {
+        sendUserMessageWithMetadataNative(
+            pointer,
+            userId,
+            message,
+            metadata
+                .entrySet()
+                .stream()
                 .map(v -> new StringPair(v.getKey(), v.getValue()))
-                .toArray(StringPair[]::new), callback);
+                .toArray(StringPair[]::new),
+            callback
+        );
     }
 
     /**
@@ -1485,7 +2107,12 @@ public class Client {
      * @see Client#runCallbacks()
      */
     @Deprecated(since = "SocialSDK4J 1.0")
-    public void sendUserMessageWithMetadata(long userId, String message, Map<String, String> metadata, SendMessageCallback callback) {
+    public void sendUserMessageWithMetadata(
+        long userId,
+        String message,
+        Map<String, String> metadata,
+        SendMessageCallback callback
+    ) {
         sendUserMessage(userId, message, metadata, callback);
     }
 
@@ -1515,11 +2142,15 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public CompletableFuture<Long> sendUserMessage(long userId, String message, Map<String, String> metadata) {
+    public CompletableFuture<Long> sendUserMessage(
+        long userId,
+        String message,
+        Map<String, String> metadata
+    ) {
         var future = new CompletableFuture<Long>();
 
         sendUserMessage(userId, message, metadata, (result, messageId) -> {
-            if(result.isSuccess()) {
+            if (result.isSuccess()) {
                 future.complete(messageId);
             } else {
                 future.completeExceptionally(new DiscordException(result));
@@ -1539,7 +2170,11 @@ public class Client {
      *                 failure, the array passed here will be empty and the
      *                 result will contain info about the issue.
      */
-    public void getLobbyMessagesWithLimit(long lobbyId, int limit, GetMessagesCallback callback) {
+    public void getLobbyMessagesWithLimit(
+        long lobbyId,
+        int limit,
+        GetMessagesCallback callback
+    ) {
         getLobbyMessagesWithLimitNative(pointer, lobbyId, limit, callback);
     }
 
@@ -1553,16 +2188,24 @@ public class Client {
      * @return A future that is completed with an array of {@link Message},
      * or with {@link DiscordException} on failure.
      */
-    public CompletableFuture<Message[]> getLobbyMessagesWithLimit(long lobbyId, int limit) {
+    public CompletableFuture<Message[]> getLobbyMessagesWithLimit(
+        long lobbyId,
+        int limit
+    ) {
         var future = new CompletableFuture<Message[]>();
 
-        getLobbyMessagesWithLimitNative(pointer, lobbyId, limit, (result, messages) -> {
-            if(result.isSuccess()) {
-                future.complete(messages);
-            } else {
-                future.completeExceptionally(new DiscordException(result));
+        getLobbyMessagesWithLimitNative(
+            pointer,
+            lobbyId,
+            limit,
+            (result, messages) -> {
+                if (result.isSuccess()) {
+                    future.complete(messages);
+                } else {
+                    future.completeExceptionally(new DiscordException(result));
+                }
             }
-        });
+        );
 
         return future;
     }
@@ -1577,7 +2220,11 @@ public class Client {
      *                 failure, the array passed here will be empty and the
      *                 result will contain info about the issue.
      */
-    public void getUserMessagesWithLimit(long userId, int limit, GetMessagesCallback callback) {
+    public void getUserMessagesWithLimit(
+        long userId,
+        int limit,
+        GetMessagesCallback callback
+    ) {
         getUserMessagesWithLimitNative(pointer, userId, limit, callback);
     }
 
@@ -1591,16 +2238,24 @@ public class Client {
      * @return A future that is completed with an array of {@link Message},
      * or with {@link DiscordException} on failure.
      */
-    public CompletableFuture<Message[]> getUserMessagesWithLimit(long userId, int limit) {
+    public CompletableFuture<Message[]> getUserMessagesWithLimit(
+        long userId,
+        int limit
+    ) {
         var future = new CompletableFuture<Message[]>();
 
-        getUserMessagesWithLimitNative(pointer, userId, limit, (result, messages) -> {
-            if(result.isSuccess()) {
-                future.complete(messages);
-            } else {
-                future.completeExceptionally(new DiscordException(result));
+        getUserMessagesWithLimitNative(
+            pointer,
+            userId,
+            limit,
+            (result, messages) -> {
+                if (result.isSuccess()) {
+                    future.complete(messages);
+                } else {
+                    future.completeExceptionally(new DiscordException(result));
+                }
             }
-        });
+        );
 
         return future;
     }
@@ -1613,7 +2268,9 @@ public class Client {
      *                 failure, the array passed here will be empty and the
      *                 result will contain info about the issue.
      */
-    public void getUserMessageSummaries(GetUserMessageSummariesCallback callback) {
+    public void getUserMessageSummaries(
+        GetUserMessageSummariesCallback callback
+    ) {
         getUserMessageSummariesNative(pointer, callback);
     }
 
@@ -1628,7 +2285,7 @@ public class Client {
         var future = new CompletableFuture<UserMessageSummary[]>();
 
         getUserMessageSummariesNative(pointer, (result, summaries) -> {
-            if(result.isSuccess()) {
+            if (result.isSuccess()) {
                 future.complete(summaries);
             } else {
                 future.completeExceptionally(new DiscordException(result));
@@ -1736,7 +2393,10 @@ public class Client {
      * @see Client#runCallbacks()
      * @see Relationship#discordType()
      */
-    public void sendDiscordFriendRequest(String username, GenericResultCallback callback) {
+    public void sendDiscordFriendRequest(
+        String username,
+        GenericResultCallback callback
+    ) {
         sendDiscordFriendRequestNative(pointer, username, callback);
     }
 
@@ -1755,7 +2415,7 @@ public class Client {
         var future = new CompletableFuture<Void>();
 
         sendDiscordFriendRequestNative(pointer, username, result -> {
-            if(result.isSuccess()) {
+            if (result.isSuccess()) {
                 future.complete(null);
             } else {
                 future.completeExceptionally(new DiscordException(result));
@@ -1774,7 +2434,10 @@ public class Client {
      * @see Client#runCallbacks()
      * @see Relationship#discordType()
      */
-    public void sendDiscordFriendRequest(long userId, GenericResultCallback callback) {
+    public void sendDiscordFriendRequest(
+        long userId,
+        GenericResultCallback callback
+    ) {
         sendDiscordFriendRequestByIdNative(pointer, userId, callback);
     }
 
@@ -1793,7 +2456,7 @@ public class Client {
         var future = new CompletableFuture<Void>();
 
         sendDiscordFriendRequestByIdNative(pointer, userId, result -> {
-            if(result.isSuccess()) {
+            if (result.isSuccess()) {
                 future.complete(null);
             } else {
                 future.completeExceptionally(new DiscordException(result));
@@ -1812,7 +2475,10 @@ public class Client {
      * @see Client#runCallbacks()
      * @see Relationship#gameType()
      */
-    public void sendGameFriendRequest(String username, GenericResultCallback callback) {
+    public void sendGameFriendRequest(
+        String username,
+        GenericResultCallback callback
+    ) {
         sendGameFriendRequestNative(pointer, username, callback);
     }
 
@@ -1831,7 +2497,7 @@ public class Client {
         var future = new CompletableFuture<Void>();
 
         sendGameFriendRequestNative(pointer, username, result -> {
-            if(result.isSuccess()) {
+            if (result.isSuccess()) {
                 future.complete(null);
             } else {
                 future.completeExceptionally(new DiscordException(result));
@@ -1850,10 +2516,12 @@ public class Client {
      * @see Client#runCallbacks()
      * @see Relationship#gameType()
      */
-    public void sendGameFriendRequest(long userId, GenericResultCallback callback) {
+    public void sendGameFriendRequest(
+        long userId,
+        GenericResultCallback callback
+    ) {
         sendGameFriendRequestByIdNative(pointer, userId, callback);
     }
-
 
     /**
      * Sends a game friend request by user ID.
@@ -1870,7 +2538,7 @@ public class Client {
         var future = new CompletableFuture<Void>();
 
         sendDiscordFriendRequestByIdNative(pointer, userId, result -> {
-            if(result.isSuccess()) {
+            if (result.isSuccess()) {
                 future.complete(null);
             } else {
                 future.completeExceptionally(new DiscordException(result));
@@ -1888,7 +2556,10 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void acceptDiscordFriendRequest(long userId, GenericResultCallback callback) {
+    public void acceptDiscordFriendRequest(
+        long userId,
+        GenericResultCallback callback
+    ) {
         acceptDiscordFriendRequestNative(pointer, userId, callback);
     }
 
@@ -1906,7 +2577,7 @@ public class Client {
         var future = new CompletableFuture<Void>();
 
         acceptDiscordFriendRequestNative(pointer, userId, result -> {
-            if(result.isSuccess()) {
+            if (result.isSuccess()) {
                 future.complete(null);
             } else {
                 future.completeExceptionally(new DiscordException(result));
@@ -1924,7 +2595,10 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void acceptGameFriendRequest(long userId, GenericResultCallback callback) {
+    public void acceptGameFriendRequest(
+        long userId,
+        GenericResultCallback callback
+    ) {
         acceptGameFriendRequestNative(pointer, userId, callback);
     }
 
@@ -1942,7 +2616,7 @@ public class Client {
         var future = new CompletableFuture<Void>();
 
         acceptDiscordFriendRequestNative(pointer, userId, result -> {
-            if(result.isSuccess()) {
+            if (result.isSuccess()) {
                 future.complete(null);
             } else {
                 future.completeExceptionally(new DiscordException(result));
@@ -1960,7 +2634,10 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void cancelDiscordFriendRequest(long userId, GenericResultCallback callback) {
+    public void cancelDiscordFriendRequest(
+        long userId,
+        GenericResultCallback callback
+    ) {
         cancelDiscordFriendRequestNative(pointer, userId, callback);
     }
 
@@ -1978,7 +2655,7 @@ public class Client {
         var future = new CompletableFuture<Void>();
 
         cancelDiscordFriendRequestNative(pointer, userId, result -> {
-            if(result.isSuccess()) {
+            if (result.isSuccess()) {
                 future.complete(null);
             } else {
                 future.completeExceptionally(new DiscordException(result));
@@ -1996,7 +2673,10 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void cancelGameFriendRequest(long userId, GenericResultCallback callback) {
+    public void cancelGameFriendRequest(
+        long userId,
+        GenericResultCallback callback
+    ) {
         cancelGameFriendRequestNative(pointer, userId, callback);
     }
 
@@ -2014,7 +2694,7 @@ public class Client {
         var future = new CompletableFuture<Void>();
 
         cancelGameFriendRequestNative(pointer, userId, result -> {
-            if(result.isSuccess()) {
+            if (result.isSuccess()) {
                 future.complete(null);
             } else {
                 future.completeExceptionally(new DiscordException(result));
@@ -2033,7 +2713,9 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void setRelationshipCreatedCallback(RelationshipChangedCallback callback) {
+    public void setRelationshipCreatedCallback(
+        RelationshipChangedCallback callback
+    ) {
         setRelationshipCreatedCallbackNative(pointer, callback);
     }
 
@@ -2045,7 +2727,9 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void setRelationshipDeletedCallback(RelationshipChangedCallback callback) {
+    public void setRelationshipDeletedCallback(
+        RelationshipChangedCallback callback
+    ) {
         setRelationshipDeletedCallbackNative(pointer, callback);
     }
 
@@ -2057,7 +2741,10 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void rejectDiscordFriendRequest(long userId, GenericResultCallback callback) {
+    public void rejectDiscordFriendRequest(
+        long userId,
+        GenericResultCallback callback
+    ) {
         rejectDiscordFriendRequestNative(pointer, userId, callback);
     }
 
@@ -2075,7 +2762,7 @@ public class Client {
         var future = new CompletableFuture<Void>();
 
         rejectDiscordFriendRequestNative(pointer, userId, result -> {
-            if(result.isSuccess()) {
+            if (result.isSuccess()) {
                 future.complete(null);
             } else {
                 future.completeExceptionally(new DiscordException(result));
@@ -2093,7 +2780,10 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void rejectGameFriendRequest(long userId, GenericResultCallback callback) {
+    public void rejectGameFriendRequest(
+        long userId,
+        GenericResultCallback callback
+    ) {
         rejectGameFriendRequestNative(pointer, userId, callback);
     }
 
@@ -2111,7 +2801,7 @@ public class Client {
         var future = new CompletableFuture<Void>();
 
         rejectGameFriendRequestNative(pointer, userId, result -> {
-            if(result.isSuccess()) {
+            if (result.isSuccess()) {
                 future.complete(null);
             } else {
                 future.completeExceptionally(new DiscordException(result));
@@ -2130,7 +2820,10 @@ public class Client {
      * @see Client#runCallbacks()
      * @see Client#removeGameFriend(long, GenericResultCallback)
      */
-    public void removeDiscordAndGameFriend(long userId, GenericResultCallback callback) {
+    public void removeDiscordAndGameFriend(
+        long userId,
+        GenericResultCallback callback
+    ) {
         removeDiscordAndGameFriendNative(pointer, userId, callback);
     }
 
@@ -2149,7 +2842,7 @@ public class Client {
         var future = new CompletableFuture<Void>();
 
         removeDiscordAndGameFriendNative(pointer, userId, result -> {
-            if(result.isSuccess()) {
+            if (result.isSuccess()) {
                 future.complete(null);
             } else {
                 future.completeExceptionally(new DiscordException(result));
@@ -2187,7 +2880,7 @@ public class Client {
         var future = new CompletableFuture<Void>();
 
         removeGameFriendNative(pointer, userId, result -> {
-            if(result.isSuccess()) {
+            if (result.isSuccess()) {
                 future.complete(null);
             } else {
                 future.completeExceptionally(new DiscordException(result));
@@ -2208,8 +2901,17 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void sendActivityInvite(long userId, @Nullable String content, GenericResultCallback callback) {
-        sendActivityInviteNative(pointer, userId, content == null ? "" : content, callback);
+    public void sendActivityInvite(
+        long userId,
+        @Nullable String content,
+        GenericResultCallback callback
+    ) {
+        sendActivityInviteNative(
+            pointer,
+            userId,
+            content == null ? "" : content,
+            callback
+        );
     }
 
     /**
@@ -2225,16 +2927,24 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public CompletableFuture<Void> sendActivityInvite(long userId, @Nullable String content) {
+    public CompletableFuture<Void> sendActivityInvite(
+        long userId,
+        @Nullable String content
+    ) {
         var future = new CompletableFuture<Void>();
 
-        sendActivityInviteNative(pointer, userId, content == null ? "" : content, result -> {
-            if(result.isSuccess()) {
-                future.complete(null);
-            } else {
-                future.completeExceptionally(new DiscordException(result));
+        sendActivityInviteNative(
+            pointer,
+            userId,
+            content == null ? "" : content,
+            result -> {
+                if (result.isSuccess()) {
+                    future.complete(null);
+                } else {
+                    future.completeExceptionally(new DiscordException(result));
+                }
             }
-        });
+        );
 
         return future;
     }
@@ -2247,7 +2957,10 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void acceptActivityInvite(ActivityInvite invite, AcceptActivityInviteCallback callback) {
+    public void acceptActivityInvite(
+        ActivityInvite invite,
+        AcceptActivityInviteCallback callback
+    ) {
         acceptActivityInviteNative(pointer, invite, callback);
     }
 
@@ -2261,11 +2974,13 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public CompletableFuture<String> acceptActivityInvite(ActivityInvite invite) {
+    public CompletableFuture<String> acceptActivityInvite(
+        ActivityInvite invite
+    ) {
         var future = new CompletableFuture<String>();
 
         acceptActivityInviteNative(pointer, invite, (result, joinSecret) -> {
-            if(result.isSuccess()) {
+            if (result.isSuccess()) {
                 future.complete(joinSecret);
             } else {
                 future.completeExceptionally(new DiscordException(result));
@@ -2283,7 +2998,10 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void sendActivityJoinRequest(long userId, GenericResultCallback callback) {
+    public void sendActivityJoinRequest(
+        long userId,
+        GenericResultCallback callback
+    ) {
         sendActivityJoinRequestNative(pointer, userId, callback);
     }
 
@@ -2301,7 +3019,7 @@ public class Client {
         var future = new CompletableFuture<Void>();
 
         sendActivityJoinRequestNative(pointer, userId, result -> {
-            if(result.isSuccess()) {
+            if (result.isSuccess()) {
                 future.complete(null);
             } else {
                 future.completeExceptionally(new DiscordException(result));
@@ -2319,7 +3037,10 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void sendActivityJoinRequestReply(ActivityInvite invite, GenericResultCallback callback) {
+    public void sendActivityJoinRequestReply(
+        ActivityInvite invite,
+        GenericResultCallback callback
+    ) {
         sendActivityJoinRequestReplyNative(pointer, invite, callback);
     }
 
@@ -2333,11 +3054,13 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public CompletableFuture<Void> sendActivityJoinRequestReply(ActivityInvite invite) {
+    public CompletableFuture<Void> sendActivityJoinRequestReply(
+        ActivityInvite invite
+    ) {
         var future = new CompletableFuture<Void>();
 
         sendActivityJoinRequestReplyNative(pointer, invite, result -> {
-            if(result.isSuccess()) {
+            if (result.isSuccess()) {
                 future.complete(null);
             } else {
                 future.completeExceptionally(new DiscordException(result));
@@ -2357,7 +3080,9 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void setActivityInviteCreatedCallback(ActivityInviteCallback callback) {
+    public void setActivityInviteCreatedCallback(
+        ActivityInviteCallback callback
+    ) {
         setActivityInviteCreatedCallbackNative(pointer, callback);
     }
 
@@ -2371,7 +3096,9 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void setActivityInviteUpdatedCallback(ActivityInviteCallback callback) {
+    public void setActivityInviteUpdatedCallback(
+        ActivityInviteCallback callback
+    ) {
         setActivityInviteUpdatedCallbackNative(pointer, callback);
     }
 
@@ -2419,7 +3146,7 @@ public class Client {
         var future = new CompletableFuture<Void>();
 
         blockUserNative(pointer, userId, result -> {
-            if(result.isSuccess()) {
+            if (result.isSuccess()) {
                 future.complete(null);
             } else {
                 future.completeExceptionally(new DiscordException(result));
@@ -2455,7 +3182,7 @@ public class Client {
         var future = new CompletableFuture<Void>();
 
         unblockUserNative(pointer, userId, result -> {
-            if(result.isSuccess()) {
+            if (result.isSuccess()) {
                 future.complete(null);
             } else {
                 future.completeExceptionally(new DiscordException(result));

@@ -7,8 +7,4 @@ package net.derfruhling.discord.socialsdk4j;
  * @param challenge A challenge passed to {@link Client#authorize}
  * @param verifier A verifier passed to {@link Client#getToken} or {@link Client#getTokenFromProvisionalMerge}
  */
-public record CodeVerifier(
-        CodeChallenge challenge,
-        String verifier
-) {
-}
+public record CodeVerifier(CodeChallenge challenge, String verifier) {}

@@ -28,7 +28,9 @@ public enum ClientResultType {
             case 7 -> Aborted;
             case 8 -> AuthorizationFailed;
             case 9 -> RPCError;
-            default -> throw new RuntimeException("illegal error type: " + errorType);
+            default -> throw new RuntimeException(
+                "illegal error type: " + errorType
+            );
         };
     }
 }

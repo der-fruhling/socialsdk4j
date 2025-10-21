@@ -11,13 +11,18 @@ import org.jetbrains.annotations.Nullable;
  * @param user Optional {@link User} handle.
  */
 public record Relationship(
-        Type discordType,
-        Type gameType,
-        long id,
-        @Nullable User user
+    Type discordType,
+    Type gameType,
+    long id,
+    @Nullable User user
 ) {
     Relationship(int discord, int game, long id, long userPointer) {
-        this(Type.fromId(discord), Type.fromId(game), id, userPointer != 0 ? new User(userPointer, id) : null);
+        this(
+            Type.fromId(discord),
+            Type.fromId(game),
+            id,
+            userPointer != 0 ? new User(userPointer, id) : null
+        );
     }
 
     /**
@@ -80,7 +85,7 @@ public record Relationship(
         Suggestion;
 
         static Type fromId(int id) {
-            return switch(id) {
+            return switch (id) {
                 case 0 -> None;
                 case 1 -> Friend;
                 case 2 -> Blocked;
@@ -88,7 +93,9 @@ public record Relationship(
                 case 4 -> PendingOutgoing;
                 case 5 -> Implicit;
                 case 6 -> Suggestion;
-                default -> throw new RuntimeException("Invalid relationship enum value: " + id);
+                default -> throw new RuntimeException(
+                    "Invalid relationship enum value: " + id
+                );
             };
         }
     }

@@ -1,14 +1,14 @@
 package net.derfruhling.discord.socialsdk4j;
 
 public record ActivityInvite(
-        long senderId,
-        long channelId,
-        long messageId,
-        Type type,
-        long applicationId,
-        String partyId,
-        String sessionId,
-        boolean isValid
+    long senderId,
+    long channelId,
+    long messageId,
+    Type type,
+    long applicationId,
+    String partyId,
+    String sessionId,
+    boolean isValid
 ) {
     /**
      * Constructs a new activity invite.
@@ -21,12 +21,47 @@ public record ActivityInvite(
      * @param partyId Party ID set by the application in it's rich presence code.
      * @param sessionId Session ID of the user who sent the invite.
      */
-    public ActivityInvite(long senderId, long channelId, long messageId, Type type, long applicationId, String partyId, String sessionId) {
-        this(senderId, channelId, messageId, type, applicationId, partyId, sessionId, true);
+    public ActivityInvite(
+        long senderId,
+        long channelId,
+        long messageId,
+        Type type,
+        long applicationId,
+        String partyId,
+        String sessionId
+    ) {
+        this(
+            senderId,
+            channelId,
+            messageId,
+            type,
+            applicationId,
+            partyId,
+            sessionId,
+            true
+        );
     }
 
-    ActivityInvite(long senderId, long channelId, long messageId, int type, long applicationId, String partyId, String sessionId, boolean isValid) {
-        this(senderId, channelId, messageId, Type.from(type), applicationId, partyId, sessionId, isValid);
+    ActivityInvite(
+        long senderId,
+        long channelId,
+        long messageId,
+        int type,
+        long applicationId,
+        String partyId,
+        String sessionId,
+        boolean isValid
+    ) {
+        this(
+            senderId,
+            channelId,
+            messageId,
+            Type.from(type),
+            applicationId,
+            partyId,
+            sessionId,
+            isValid
+        );
     }
 
     /**
@@ -59,7 +94,9 @@ public record ActivityInvite(
             return switch (type) {
                 case 1 -> Join;
                 case 5 -> JoinRequest;
-                default -> throw new IllegalArgumentException("Unknown activity invite type: " + type);
+                default -> throw new IllegalArgumentException(
+                    "Unknown activity invite type: " + type
+                );
             };
         }
     }

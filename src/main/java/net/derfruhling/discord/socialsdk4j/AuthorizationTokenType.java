@@ -24,7 +24,9 @@ public enum AuthorizationTokenType {
         return switch (type) {
             case 0 -> User;
             case 1 -> Bearer;
-            default -> throw new RuntimeException("unknown authorization token type: " + type);
+            default -> throw new RuntimeException(
+                "unknown authorization token type: " + type
+            );
         };
     }
 }

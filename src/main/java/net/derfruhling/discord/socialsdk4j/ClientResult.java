@@ -7,6 +7,7 @@ package net.derfruhling.discord.socialsdk4j;
  * <a href="https://discord.com/developers/docs/social-sdk/classdiscordpp_1_1ClientResult.html">See the official documentation.</a>
  */
 public class ClientResult {
+
     private final long pointer;
 
     ClientResult(long pointer) {
@@ -14,8 +15,11 @@ public class ClientResult {
     }
 
     private static native int errorCode0(long pointer);
+
     private static native String errorMessage0(long pointer);
+
     private static native boolean isRetryable0(long pointer);
+
     private static native float getRetryDelay0(long pointer);
 
     /**

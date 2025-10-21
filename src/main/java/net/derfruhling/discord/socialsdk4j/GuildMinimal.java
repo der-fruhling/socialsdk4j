@@ -5,8 +5,4 @@ package net.derfruhling.discord.socialsdk4j;
  * @param id ID of the guild.
  * @param name Name of the guild.
  */
-public record GuildMinimal(
-        long id,
-        String name
-) {
-}
+public record GuildMinimal(long id, String name) {}

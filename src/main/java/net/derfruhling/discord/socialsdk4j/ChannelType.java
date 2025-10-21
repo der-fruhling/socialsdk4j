@@ -76,7 +76,9 @@ public enum ChannelType {
             case 16 -> GuildMedia;
             case 17 -> Lobby;
             case 18 -> EphemeralDirectMessage;
-            default -> throw new IllegalArgumentException("Unknown channel type: " + type);
+            default -> throw new IllegalArgumentException(
+                "Unknown channel type: " + type
+            );
         };
     }
 

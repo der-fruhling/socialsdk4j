@@ -1,12 +1,12 @@
 package net.derfruhling.discord.socialsdk4j;
 
-import org.jetbrains.annotations.Nullable;
-
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.jetbrains.annotations.Nullable;
 
 public class Message {
+
     long pointer;
 
     /**
@@ -18,7 +18,9 @@ public class Message {
         this.id = id;
         SocialSdk.ensureInitialized();
         this.pointer = pointer;
-        SocialSdk.cleaner.register(this, () -> SocialSdk.deleteMessageNative(pointer));
+        SocialSdk.cleaner.register(this, () ->
+            SocialSdk.deleteMessageNative(pointer)
+        );
     }
 
     /**
@@ -70,7 +72,9 @@ public class Message {
                 case 4 -> Thread;
                 case 5 -> Embed;
                 case 6 -> Sticker;
-                default -> throw new IllegalArgumentException("Unknown additional content type: " + type);
+                default -> throw new IllegalArgumentException(
+                    "Unknown additional content type: " + type
+                );
             };
         }
     }
@@ -82,7 +86,11 @@ public class Message {
      * @param title An optional name, may be {@code null}.
      * @param count The count of this item in the message.
      */
-    public record AdditionalContent(AdditionalContentType type, @Nullable String title, int count) {
+    public record AdditionalContent(
+        AdditionalContentType type,
+        @Nullable String title,
+        int count
+    ) {
         AdditionalContent(int type, @Nullable String title, int count) {
             this(AdditionalContentType.from(type), title, count);
         }
@@ -95,7 +103,9 @@ public class Message {
         static DisclosureType from(int type) {
             return switch (type) {
                 case 3 -> MessageDataVisibleOnDiscord;
-                default -> throw new IllegalArgumentException("Unknown disclosure type: " + type);
+                default -> throw new IllegalArgumentException(
+                    "Unknown disclosure type: " + type
+                );
             };
         }
     }
@@ -188,7 +198,7 @@ public class Message {
     public @Nullable DisclosureType getDisclosureType() {
         int v = getDisclosureTypeNative();
 
-        if(v == -1) {
+        if (v == -1) {
             return null;
         } else {
             return DisclosureType.from(v);
@@ -199,7 +209,8 @@ public class Message {
      * @return The metadata associated with the message.
      */
     public Map<String, String> getMetadata() {
-        return Arrays.stream(getMetadataNative())
-                .collect(Collectors.toMap(StringPair::key, StringPair::value));
+        return Arrays.stream(getMetadataNative()).collect(
+            Collectors.toMap(StringPair::key, StringPair::value)
+        );
     }
 }

@@ -7,38 +7,49 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 public class ClasspathLoader implements SocialSdkLoader {
+
     private static void loadLibrary(String name) throws IOException {
         Path path = Path.of(".", Lib.name(name));
 
-        try(var is = Lib.class.getResourceAsStream("/" + Lib.name(name))) {
+        try (var is = Lib.class.getResourceAsStream("/" + Lib.name(name))) {
             assert is != null;
 
             byte[] bytes = is.readAllBytes();
 
-            if(!Files.exists(path)) {
+            if (!Files.exists(path)) {
                 try {
                     Files.write(path, bytes);
                 } catch (IOException e) {
-                    throw new RuntimeException("Failed to write component " + name, e);
+                    throw new RuntimeException(
+                        "Failed to write component " + name,
+                        e
+                    );
                 }
             } else {
                 byte[] real = Files.readAllBytes(path);
 
-                byte[] hashA = MessageDigest.getInstance("SHA-256").digest(bytes);
-                byte[] hashB = MessageDigest.getInstance("SHA-256").digest(real);
+                byte[] hashA = MessageDigest.getInstance("SHA-256").digest(
+                    bytes
+                );
+                byte[] hashB = MessageDigest.getInstance("SHA-256").digest(
+                    real
+                );
 
                 boolean differs = false;
 
                 for (int i = 0; i < hashA.length; i++) {
                     differs = hashA[i] != hashB[i];
-                    if(differs) break;
+                    if (differs) break;
                 }
 
-                if(differs) {
+                if (differs) {
                     try {
                         Files.write(path, bytes);
                     } catch (IOException e) {
-                        throw new RuntimeException("Failed to write component " + name, e);
+                        throw new RuntimeException(
+                            "Failed to write component " + name,
+                            e
+                        );
                     }
                 }
             }

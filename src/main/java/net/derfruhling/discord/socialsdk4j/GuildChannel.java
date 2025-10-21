@@ -16,10 +16,9 @@ import org.jetbrains.annotations.Nullable;
  * @param linkedLobby The linked lobby, or {@code null} if no lobby is linked.
  */
 public record GuildChannel(
-        long id,
-        String name,
-        boolean isLinkable,
-        boolean isFullyPublic,
-        @Nullable LinkedLobby linkedLobby
-) {
-}
+    long id,
+    String name,
+    boolean isLinkable,
+    boolean isFullyPublic,
+    @Nullable LinkedLobby linkedLobby
+) {}

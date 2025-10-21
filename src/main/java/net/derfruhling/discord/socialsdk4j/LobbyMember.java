@@ -1,15 +1,15 @@
 package net.derfruhling.discord.socialsdk4j;
 
-import org.jetbrains.annotations.Nullable;
-
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Represents a lobby member handle.
  */
 public class LobbyMember {
+
     long pointer;
 
     /**
@@ -21,7 +21,9 @@ public class LobbyMember {
         this.id = id;
         SocialSdk.ensureInitialized();
         this.pointer = pointer;
-        SocialSdk.cleaner.register(this, () -> SocialSdk.deleteLobbyMemberNative(pointer));
+        SocialSdk.cleaner.register(this, () ->
+            SocialSdk.deleteLobbyMemberNative(pointer)
+        );
     }
 
     /**
@@ -45,7 +47,8 @@ public class LobbyMember {
      * @return The metadata associated with this member.
      */
     public Map<String, String> getMetadata() {
-        return Arrays.stream(getMetadataNative())
-                .collect(Collectors.toMap(StringPair::key, StringPair::value));
+        return Arrays.stream(getMetadataNative()).collect(
+            Collectors.toMap(StringPair::key, StringPair::value)
+        );
     }
 }

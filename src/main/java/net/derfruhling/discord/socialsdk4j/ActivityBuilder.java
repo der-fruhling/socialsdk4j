@@ -9,7 +9,9 @@ import org.jetbrains.annotations.Nullable;
  * @see Client#updateRichPresence(ActivityBuilder, Client.GenericResultCallback)
  */
 public class ActivityBuilder {
+
     private static native long createNewActivityNative();
+
     private static native void deleteActivityNative(long pointer);
 
     final long pointer = createNewActivityNative();
@@ -24,14 +26,42 @@ public class ActivityBuilder {
         });
     }
 
-    private static native void addButton(long pointer, String label, String url);
+    private static native void addButton(
+        long pointer,
+        String label,
+        String url
+    );
+
     private static native void setName(long pointer, String name);
+
     private static native void setType(long pointer, int type);
+
     private static native void setState(long pointer, String state);
+
     private static native void setDetails(long pointer, String details);
-    private static native void setActivityAssets(long pointer, @Nullable String largeImage, @Nullable String largeText, @Nullable String smallImage, @Nullable String smallText);
-    private static native void setTimestamps(long pointer, long start, long end);
-    private static native void setParty(long pointer, String id, int size, int maxSize, boolean isPublic);
+
+    private static native void setActivityAssets(
+        long pointer,
+        @Nullable String largeImage,
+        @Nullable String largeText,
+        @Nullable String smallImage,
+        @Nullable String smallText
+    );
+
+    private static native void setTimestamps(
+        long pointer,
+        long start,
+        long end
+    );
+
+    private static native void setParty(
+        long pointer,
+        String id,
+        int size,
+        int maxSize,
+        boolean isPublic
+    );
+
     private static native void setSecrets(long pointer, String joinSecret);
 
     /**
@@ -73,7 +103,8 @@ public class ActivityBuilder {
      */
     @SuppressWarnings("deprecation")
     public ActivityBuilder setType(ActivityType type) {
-        assert type != ActivityType.HangStatus && type != ActivityType.CustomStatus;
+        assert type != ActivityType.HangStatus &&
+        type != ActivityType.CustomStatus;
 
         setType(pointer, type.ordinal());
         return this;
@@ -105,16 +136,10 @@ public class ActivityBuilder {
     }
 
     @SuppressWarnings("MissingJavadoc")
-    public record Assets(
-            @Nullable Asset large,
-            @Nullable Asset small
-    ) {}
+    public record Assets(@Nullable Asset large, @Nullable Asset small) {}
 
     @SuppressWarnings("MissingJavadoc")
-    public record Asset(
-            @NotNull String image,
-            @Nullable String text
-    ) {}
+    public record Asset(@NotNull String image, @Nullable String text) {}
 
     /**
      * Sets assets for this presence. The large image will replace the default
@@ -160,7 +185,12 @@ public class ActivityBuilder {
      * @param isPublic If this is {@code true}, this party is public.
      * @return {@code this}
      */
-    public ActivityBuilder setParty(String id, int size, int maxSize, boolean isPublic) {
+    public ActivityBuilder setParty(
+        String id,
+        int size,
+        int maxSize,
+        boolean isPublic
+    ) {
         setParty(pointer, id, size, maxSize, isPublic);
         return this;
     }

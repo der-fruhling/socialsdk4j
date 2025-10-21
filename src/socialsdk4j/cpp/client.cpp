@@ -1,4 +1,3 @@
-#include <algorithm>
 #include <net_derfruhling_discord_socialsdk4j_Client.h>
 #include <discordpp.h>
 #include <optional>

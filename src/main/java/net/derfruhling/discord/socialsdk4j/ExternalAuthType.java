@@ -22,13 +22,15 @@ public enum ExternalAuthType {
     public static final ExternalAuthType OIDC = OpenIDConnect;
 
     public static ExternalAuthType from(int type) {
-        return switch(type) {
+        return switch (type) {
             case 0 -> OpenIDConnect;
             case 1 -> EpicOnlineServicesAccessToken;
             case 2 -> EpicOnlineServicesIdToken;
             case 3 -> SteamSessionTicket;
             case 4 -> UnityServicesIdToken;
-            default -> throw new RuntimeException("invalid external auth type: " + type);
+            default -> throw new RuntimeException(
+                "invalid external auth type: " + type
+            );
         };
     }
 }
