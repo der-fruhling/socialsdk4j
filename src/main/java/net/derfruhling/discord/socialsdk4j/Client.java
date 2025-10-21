@@ -213,12 +213,7 @@ public class Client {
         }
     }
 
-    private static native CodeVerifier createAuthorizationCodeVerifierNative(
-        long pointer
-    );
-
-    private static native void authorizeNative(
-        long pointer,
+    private native void authorizeNative(
         long clientId,
         String scopes,
         String state,
@@ -226,16 +221,14 @@ public class Client {
         AuthorizationCallback callback
     );
 
-    private static native void getProvisionalTokenNative(
-        long pointer,
+    private native void getProvisionalTokenNative(
         long applicationId,
         int externalAuthType,
         String token,
         TokenExchangeCallbackNative callback
     );
 
-    private static native void getTokenNative(
-        long pointer,
+    private native void getTokenNative(
         long applicationId,
         String code,
         String codeVerifier,
@@ -243,8 +236,7 @@ public class Client {
         TokenExchangeCallbackNative callback
     );
 
-    private static native void getTokenFromProvisionalMergeNative(
-        long pointer,
+    private native void getTokenFromProvisionalMergeNative(
         long applicationId,
         String code,
         String codeVerifier,
@@ -254,360 +246,41 @@ public class Client {
         TokenExchangeCallbackNative callback
     );
 
-    private static native void updateTokenNative(
-        long pointer,
+    private native void updateTokenNative(
         int type,
         String token,
         GenericResultCallback callback
     );
 
-    private static native void connectNative(long pointer);
-
-    private static native void disconnectNative(long pointer);
-
-    private static native void abortAuthorizeNative(long pointer);
-
-    private static native boolean isAuthenticatedNative(long pointer);
-
-    private static native void provisionalMergeCompletedNative(
-        long pointer,
-        boolean success
-    );
-
-    private static native void refreshTokenNative(
-        long pointer,
+    private native void refreshTokenNative(
         long applicationId,
         String refreshToken,
         TokenExchangeCallbackNative callback
     );
 
-    private static native void openConnectedGameSettingsInDiscordNative(
-        long pointer,
-        GenericResultCallback callback
-    );
-
-    private static native void setGameWindowPidNative(long pointer, int pid);
-
-    private static native void setStatusChangedCallbackNative(
-        long pointer,
+    private native void setStatusChangedCallbackNative(
         StatusChangedCallbackNative callback
     );
 
-    private static native void updateRichPresenceNative(
-        long pointer,
-        long activity,
-        @Nullable GenericResultCallback callback
-    );
-
-    private static native User getCurrentUserNative(long pointer);
-
-    private static native @Nullable User getCurrentUserV2Native(long pointer);
-
-    private static native @Nullable User getUserNative(
-        long pointer,
-        long userId
-    );
-
-    private static native Relationship getRelationshipNative(
-        long pointer,
-        long userId
-    );
-
-    private static native Relationship[] getRelationshipsNative(long pointer);
-
-    private static native void sendDiscordFriendRequestNative(
-        long pointer,
-        String username,
-        GenericResultCallback callback
-    );
-
-    private static native void sendDiscordFriendRequestByIdNative(
-        long pointer,
-        long userId,
-        GenericResultCallback callback
-    );
-
-    private static native void sendGameFriendRequestNative(
-        long pointer,
-        String username,
-        GenericResultCallback callback
-    );
-
-    private static native void sendGameFriendRequestByIdNative(
-        long pointer,
-        long userId,
-        GenericResultCallback callback
-    );
-
-    private static native void acceptDiscordFriendRequestNative(
-        long pointer,
-        long userId,
-        GenericResultCallback callback
-    );
-
-    private static native void acceptGameFriendRequestNative(
-        long pointer,
-        long userId,
-        GenericResultCallback callback
-    );
-
-    private static native void cancelDiscordFriendRequestNative(
-        long pointer,
-        long userId,
-        GenericResultCallback callback
-    );
-
-    private static native void cancelGameFriendRequestNative(
-        long pointer,
-        long userId,
-        GenericResultCallback callback
-    );
-
-    private static native void setRelationshipCreatedCallbackNative(
-        long pointer,
-        RelationshipChangedCallback callback
-    );
-
-    private static native void setRelationshipDeletedCallbackNative(
-        long pointer,
-        RelationshipChangedCallback callback
-    );
-
-    private static native void rejectDiscordFriendRequestNative(
-        long pointer,
-        long userId,
-        GenericResultCallback callback
-    );
-
-    private static native void rejectGameFriendRequestNative(
-        long pointer,
-        long userId,
-        GenericResultCallback callback
-    );
-
-    private static native void removeDiscordAndGameFriendNative(
-        long pointer,
-        long userId,
-        GenericResultCallback callback
-    );
-
-    private static native void removeGameFriendNative(
-        long pointer,
-        long userId,
-        GenericResultCallback callback
-    );
-
-    private static native void blockUserNative(
-        long pointer,
-        long userId,
-        GenericResultCallback callback
-    );
-
-    private static native void unblockUserNative(
-        long pointer,
-        long userId,
-        GenericResultCallback callback
-    );
-
-    private static native void getUserGuildsNative(
-        long pointer,
-        GetUserGuildsCallback callback
-    );
-
-    private static native void getGuildChannelsNative(
-        long pointer,
-        long guildId,
-        GetGuildChannelsCallback callback
-    );
-
-    private static native void createOrJoinLobbyNative(
-        long pointer,
-        String secret,
-        CreateOrJoinLobbyCallback callback
-    );
-
-    private static native void createOrJoinLobbyWithMetadataNative(
-        long pointer,
+    private native void createOrJoinLobbyWithMetadataNative(
         String secret,
         StringPair[] lobbyMeta,
         StringPair[] memberMeta,
         CreateOrJoinLobbyCallback callback
     );
 
-    private static native void leaveLobbyNative(
-        long pointer,
-        long lobbyId,
-        GenericResultCallback callback
-    );
-
-    private static native void setLobbyCreatedCallbackNative(
-        long pointer,
-        LobbyExistenceChangedCallback callback
-    );
-
-    private static native void setLobbyDeletedCallbackNative(
-        long pointer,
-        LobbyExistenceChangedCallback callback
-    );
-
-    private static native void setLobbyUpdatedCallbackNative(
-        long pointer,
-        LobbyExistenceChangedCallback callback
-    );
-
-    private static native void setLobbyMemberAddedCallbackNative(
-        long pointer,
-        LobbyMemberChangedCallback callback
-    );
-
-    private static native void setLobbyMemberRemovedCallbackNative(
-        long pointer,
-        LobbyMemberChangedCallback callback
-    );
-
-    private static native void setLobbyMemberUpdatedCallbackNative(
-        long pointer,
-        LobbyMemberChangedCallback callback
-    );
-
-    private static native void setMessageCreatedCallbackNative(
-        long pointer,
-        MessageIdCallback callback
-    );
-
-    private static native void setMessageDeletedCallbackNative(
-        long pointer,
-        MessageDeletedCallback callback
-    );
-
-    private static native void setMessageUpdatedCallbackNative(
-        long pointer,
-        MessageIdCallback callback
-    );
-
-    private static native @Nullable Message getMessageNative(
-        long pointer,
-        long messageId
-    );
-
-    private static native @Nullable Lobby getLobbyNative(
-        long pointer,
-        long lobbyId
-    );
-
-    private static native void linkChannelToLobbyNative(
-        long pointer,
-        long lobbyId,
-        long channelId,
-        GenericResultCallback callback
-    );
-
-    private static native void unlinkChannelFromLobbyNative(
-        long pointer,
-        long lobbyId,
-        GenericResultCallback callback
-    );
-
-    private static native void sendLobbyMessageNative(
-        long pointer,
-        long lobbyId,
-        String message,
-        SendMessageCallback callback
-    );
-
-    private static native void sendLobbyMessageWithMetadataNative(
-        long pointer,
+    private native void sendLobbyMessageWithMetadataNative(
         long lobbyId,
         String message,
         StringPair[] metadata,
         SendMessageCallback callback
     );
 
-    private static native void sendUserMessageNative(
-        long pointer,
-        long userId,
-        String message,
-        SendMessageCallback callback
-    );
-
-    private static native void sendUserMessageWithMetadataNative(
-        long pointer,
+    private native void sendUserMessageWithMetadataNative(
         long userId,
         String message,
         StringPair[] metadata,
         SendMessageCallback callback
-    );
-
-    private static native void getLobbyMessagesWithLimitNative(
-        long pointer,
-        long lobbyId,
-        int limit,
-        GetMessagesCallback callback
-    );
-
-    private static native void getUserMessagesWithLimitNative(
-        long pointer,
-        long userId,
-        int limit,
-        GetMessagesCallback callback
-    );
-
-    private static native void getUserMessageSummariesNative(
-        long pointer,
-        GetUserMessageSummariesCallback callback
-    );
-
-    private static native Call startCallNative(long pointer, long channelId);
-
-    private static native void endCallNative(
-        long pointer,
-        long channelId,
-        CompletionCallback callback
-    );
-
-    private static native void endCallsNative(
-        long pointer,
-        CompletionCallback callback
-    );
-
-    private static native void sendActivityInviteNative(
-        long pointer,
-        long userId,
-        String content,
-        GenericResultCallback callback
-    );
-
-    private static native void acceptActivityInviteNative(
-        long pointer,
-        ActivityInvite invite,
-        AcceptActivityInviteCallback callback
-    );
-
-    private static native void sendActivityJoinRequestNative(
-        long pointer,
-        long userId,
-        GenericResultCallback callback
-    );
-
-    private static native void sendActivityJoinRequestReplyNative(
-        long pointer,
-        ActivityInvite invite,
-        GenericResultCallback callback
-    );
-
-    private static native void setActivityInviteCreatedCallbackNative(
-        long pointer,
-        ActivityInviteCallback callback
-    );
-
-    private static native void setActivityInviteUpdatedCallbackNative(
-        long pointer,
-        ActivityInviteCallback callback
-    );
-
-    private static native void setActivityJoinCallbackNative(
-        long pointer,
-        ActivityJoinCallback callback
     );
 
     private static native String getDefaultCommunicationsScopesNative();
@@ -644,9 +317,7 @@ public class Client {
      * @return A new {@link CodeVerifier}.
      */
     @Contract("-> new")
-    public CodeVerifier createAuthorizationCodeVerifier() {
-        return createAuthorizationCodeVerifierNative(pointer);
-    }
+    public native CodeVerifier createAuthorizationCodeVerifier();
 
     /**
      * Authorizes a standard Discord user.
@@ -674,7 +345,6 @@ public class Client {
         @NotNull AuthorizationCallback callback
     ) {
         authorizeNative(
-            pointer,
             clientId,
             String.join(" ", scopes),
             state,
@@ -732,9 +402,7 @@ public class Client {
     /**
      * Aborts the ongoing authorization.
      */
-    public void abortAuthorize() {
-        abortAuthorizeNative(pointer);
-    }
+    public native void abortAuthorize();
 
     private static @NotNull TokenExchangeCallbackNative tokenExchangeCallback(
         @NotNull TokenExchangeCallback callback
@@ -772,7 +440,6 @@ public class Client {
         @NotNull TokenExchangeCallback callback
     ) {
         getProvisionalTokenNative(
-            pointer,
             applicationId,
             externalAuthType.ordinal(),
             token,
@@ -854,7 +521,6 @@ public class Client {
         @NotNull TokenExchangeCallback callback
     ) {
         getTokenNative(
-            pointer,
             applicationId,
             code,
             codeVerifier,
@@ -949,7 +615,6 @@ public class Client {
         @NotNull TokenExchangeCallback callback
     ) {
         getTokenFromProvisionalMergeNative(
-            pointer,
             applicationId,
             code,
             codeVerifier,
@@ -1038,7 +703,7 @@ public class Client {
         @NotNull String token,
         @NotNull GenericResultCallback callback
     ) {
-        updateTokenNative(pointer, type.ordinal(), token, callback);
+        updateTokenNative(type.ordinal(), token, callback);
     }
 
     /**
@@ -1077,23 +742,17 @@ public class Client {
      * the transition to {@link Status#Ready}, indicating that the client is
      * ready for use.
      */
-    public void connect() {
-        connectNative(pointer);
-    }
+    public native void connect();
 
     /**
      * Disconnects the client from Discord.
      */
-    public void disconnect() {
-        disconnectNative(pointer);
-    }
+    public native void disconnect();
 
     /**
      * @return {@code true} if this client is authenticated.
      */
-    public boolean isAuthenticated() {
-        return isAuthenticatedNative(pointer);
-    }
+    public native boolean isAuthenticated();
 
     /**
      * Call this to indicate that the user successfully merged their
@@ -1105,9 +764,7 @@ public class Client {
      *                and the SDK will retry the action that needed that.
      *                If {@code false}, the SDK will cancel said operation.
      */
-    public void provisionalMergeCompleted(boolean success) {
-        provisionalMergeCompletedNative(pointer, success);
-    }
+    public native void provisionalMergeCompleted(boolean success);
 
     /**
      * Refreshes the access token using a refresh token obtained from the
@@ -1128,7 +785,6 @@ public class Client {
         @NotNull TokenExchangeCallback callback
     ) {
         refreshTokenNative(
-            pointer,
             applicationId,
             refreshToken,
             tokenExchangeCallback(callback)
@@ -1188,11 +844,9 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void openConnectedGameSettingsInDiscord(
+    public native void openConnectedGameSettingsInDiscord(
         @NotNull GenericResultCallback callback
-    ) {
-        openConnectedGameSettingsInDiscordNative(pointer, callback);
-    }
+    );
 
     /**
      * Opens the connected game settings in the Discord app if it is found,
@@ -1206,7 +860,7 @@ public class Client {
     public CompletableFuture<Void> openConnectedGameSettingsInDiscord() {
         var future = new CompletableFuture<Void>();
 
-        openConnectedGameSettingsInDiscordNative(pointer, result -> {
+        openConnectedGameSettingsInDiscord(result -> {
             if (result.isSuccess()) {
                 future.complete(null);
             } else {
@@ -1227,9 +881,7 @@ public class Client {
      *
      * @param pid Process ID of the game.
      */
-    public void setGameWindowPid(int pid) {
-        setGameWindowPidNative(pointer, pid);
-    }
+    public native void setGameWindowPid(int pid);
 
     /**
      * Sets a handler that will be called whenever the client changes it's
@@ -1243,16 +895,13 @@ public class Client {
     public void setStatusChangedCallback(
         @NotNull StatusChangedCallback callback
     ) {
-        setStatusChangedCallbackNative(
-            pointer,
-            (status, error, errorDetail) -> {
-                callback.invoke(
-                    Status.from(status),
-                    ClientSocketResult.from(error),
-                    errorDetail
-                );
-            }
-        );
+        setStatusChangedCallbackNative((status, error, errorDetail) -> {
+            callback.invoke(
+                Status.from(status),
+                ClientSocketResult.from(error),
+                errorDetail
+            );
+        });
     }
 
     /**
@@ -1263,12 +912,10 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void updateRichPresence(
+    public native void updateRichPresence(
         @NotNull ActivityBuilder activity,
         @NotNull GenericResultCallback callback
-    ) {
-        updateRichPresenceNative(pointer, activity.pointer, callback);
-    }
+    );
 
     /**
      * Updates rich presence information.
@@ -1285,7 +932,7 @@ public class Client {
     ) {
         var future = new CompletableFuture<Void>();
 
-        updateRichPresenceNative(pointer, activity.pointer, result -> {
+        updateRichPresence(activity, result -> {
             if (result.isSuccess()) {
                 future.complete(null);
             } else {
@@ -1304,18 +951,14 @@ public class Client {
      * @deprecated Use {@link Client#getCurrentUser()} instead.
      */
     @Deprecated(forRemoval = true, since = "SocialSDK 1.6, SocialSDK4J 1.0")
-    public @NotNull User getUser() {
-        return getCurrentUserNative(pointer);
-    }
+    public native @NotNull User getUser();
 
     /**
      * Retrieves the current {@link User} that's logged in with the SDK.
      *
      * @return A {@link User} object. May be null if no value exists.
      */
-    public @Nullable User getCurrentUser() {
-        return getCurrentUserV2Native(pointer);
-    }
+    public native @Nullable User getCurrentUser();
 
     /**
      * Retrieves the {@link User} object associated with a particular user ID.
@@ -1324,9 +967,7 @@ public class Client {
      * @param userId The ID of the user.
      * @return A {@link User} object, or null if the user is not found.
      */
-    public @Nullable User getUser(long userId) {
-        return getUserNative(pointer, userId);
-    }
+    public native @Nullable User getUser(long userId);
 
     /**
      * Retrieves a list of guilds that the logged in user is a part of. Used
@@ -1338,9 +979,7 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void getUserGuilds(GetUserGuildsCallback callback) {
-        getUserGuildsNative(pointer, callback);
-    }
+    public native void getUserGuilds(GetUserGuildsCallback callback);
 
     /**
      * Retrieves a list of guilds that the logged in user is a part of. Used
@@ -1377,12 +1016,10 @@ public class Client {
      * @see Client#runCallbacks()
      * @see Client#getUserGuilds(GetUserGuildsCallback)
      */
-    public void getGuildChannels(
+    public native void getGuildChannels(
         long guildId,
         GetGuildChannelsCallback callback
-    ) {
-        getGuildChannelsNative(pointer, guildId, callback);
-    }
+    );
 
     /**
      * Retrieves a list of channels that the logged-in user can view in a
@@ -1421,12 +1058,10 @@ public class Client {
      * @see Client#runCallbacks()
      * @see Client#createOrJoinLobby(String, Map, Map, CreateOrJoinLobbyCallback)
      */
-    public void createOrJoinLobby(
+    public native void createOrJoinLobby(
         String secret,
         CreateOrJoinLobbyCallback callback
-    ) {
-        createOrJoinLobbyNative(pointer, secret, callback);
-    }
+    );
 
     /**
      * Joins a lobby. If the lobby does not exist, creates it.
@@ -1477,7 +1112,6 @@ public class Client {
         CreateOrJoinLobbyCallback callback
     ) {
         createOrJoinLobbyWithMetadataNative(
-            pointer,
             secret,
             lobbyMeta
                 .entrySet()
@@ -1536,9 +1170,7 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void leaveLobby(long lobbyId, GenericResultCallback callback) {
-        leaveLobbyNative(pointer, lobbyId, callback);
-    }
+    public native void leaveLobby(long lobbyId, GenericResultCallback callback);
 
     /**
      * Leaves a lobby.
@@ -1553,7 +1185,7 @@ public class Client {
     public CompletableFuture<Void> leaveLobby(long lobbyId) {
         var future = new CompletableFuture<Void>();
 
-        leaveLobbyNative(pointer, lobbyId, result -> {
+        leaveLobby(lobbyId, result -> {
             if (result.isSuccess()) {
                 future.complete(null);
             } else {
@@ -1571,11 +1203,9 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void setLobbyCreatedCallback(
+    public native void setLobbyCreatedCallback(
         LobbyExistenceChangedCallback callback
-    ) {
-        setLobbyCreatedCallbackNative(pointer, callback);
-    }
+    );
 
     /**
      * Sets a handler that the SDK will call when it is no longer part of a
@@ -1585,11 +1215,9 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void setLobbyDeletedCallback(
+    public native void setLobbyDeletedCallback(
         LobbyExistenceChangedCallback callback
-    ) {
-        setLobbyDeletedCallbackNative(pointer, callback);
-    }
+    );
 
     /**
      * Sets a handler that the SDK will call when a lobby is updated.
@@ -1599,11 +1227,9 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void setLobbyUpdatedCallback(
+    public native void setLobbyUpdatedCallback(
         LobbyExistenceChangedCallback callback
-    ) {
-        setLobbyUpdatedCallbackNative(pointer, callback);
-    }
+    );
 
     /**
      * Sets a handler that the SDK will call when a user joins a lobby that the
@@ -1614,11 +1240,9 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void setLobbyMemberAddedCallback(
+    public native void setLobbyMemberAddedCallback(
         LobbyMemberChangedCallback callback
-    ) {
-        setLobbyMemberAddedCallbackNative(pointer, callback);
-    }
+    );
 
     /**
      * Sets a handler that the SDK will call when a user leaves a lobby that the
@@ -1629,11 +1253,9 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void setLobbyMemberRemovedCallback(
+    public native void setLobbyMemberRemovedCallback(
         LobbyMemberChangedCallback callback
-    ) {
-        setLobbyMemberRemovedCallbackNative(pointer, callback);
-    }
+    );
 
     /**
      * Sets a handler that the SDK will call when a user in a lobby that the
@@ -1644,11 +1266,9 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void setLobbyMemberUpdatedCallback(
+    public native void setLobbyMemberUpdatedCallback(
         LobbyMemberChangedCallback callback
-    ) {
-        setLobbyMemberUpdatedCallbackNative(pointer, callback);
-    }
+    );
 
     /**
      * Sets a handler that the SDK will call when a message is created in a
@@ -1659,9 +1279,7 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void setMessageCreatedCallback(MessageIdCallback callback) {
-        setMessageCreatedCallbackNative(pointer, callback);
-    }
+    public native void setMessageCreatedCallback(MessageIdCallback callback);
 
     /**
      * <p>Sets a handler that the SDK will call when a message is deleted in a
@@ -1676,9 +1294,9 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void setMessageDeletedCallback(MessageDeletedCallback callback) {
-        setMessageDeletedCallbackNative(pointer, callback);
-    }
+    public native void setMessageDeletedCallback(
+        MessageDeletedCallback callback
+    );
 
     /**
      * Sets a handler that the SDK will call when a message is edited in a
@@ -1689,9 +1307,7 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void setMessageUpdatedCallback(MessageIdCallback callback) {
-        setMessageUpdatedCallbackNative(pointer, callback);
-    }
+    public native void setMessageUpdatedCallback(MessageIdCallback callback);
 
     /**
      * Attempts to retrieve a message by ID. The SDK keeps upto 25 message
@@ -1701,9 +1317,7 @@ public class Client {
      * @param messageId ID of the message to retrieve.
      * @return A {@link Message} handle, or {@code null} if it isn't known about.
      */
-    public @Nullable Message getMessage(long messageId) {
-        return getMessageNative(pointer, messageId);
-    }
+    public native @Nullable Message getMessage(long messageId);
 
     /**
      * Attempts to retrieve a lobby by ID. The currently logged-in user must
@@ -1712,9 +1326,7 @@ public class Client {
      * @param lobbyId ID of the lobby to retrieve.
      * @return A {@link Lobby} handle.
      */
-    public @Nullable Lobby getLobby(long lobbyId) {
-        return getLobbyNative(pointer, lobbyId);
-    }
+    public native @Nullable Lobby getLobby(long lobbyId);
 
     /**
      * Links a channel to a lobby. In order to do this, all of the following
@@ -1736,13 +1348,11 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void linkChannelToLobby(
+    public native void linkChannelToLobby(
         long lobbyId,
         long channelId,
         GenericResultCallback callback
-    ) {
-        linkChannelToLobbyNative(pointer, lobbyId, channelId, callback);
-    }
+    );
 
     /**
      * Links a channel to a lobby. In order to do this, all of the following
@@ -1772,7 +1382,7 @@ public class Client {
     ) {
         var future = new CompletableFuture<Void>();
 
-        linkChannelToLobbyNative(pointer, lobbyId, channelId, result -> {
+        linkChannelToLobby(lobbyId, channelId, result -> {
             if (result.isSuccess()) {
                 future.complete(null);
             } else {
@@ -1794,12 +1404,10 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void unlinkChannelFromLobby(
+    public native void unlinkChannelFromLobby(
         long lobbyId,
         GenericResultCallback callback
-    ) {
-        unlinkChannelFromLobbyNative(pointer, lobbyId, callback);
-    }
+    );
 
     /**
      * Unlinks a channel from the provided lobby. The currently logged-in user
@@ -1817,7 +1425,7 @@ public class Client {
     public CompletableFuture<Void> unlinkChannelFromLobby(long lobbyId) {
         var future = new CompletableFuture<Void>();
 
-        unlinkChannelFromLobbyNative(pointer, lobbyId, result -> {
+        unlinkChannelFromLobby(lobbyId, result -> {
             if (result.isSuccess()) {
                 future.complete(null);
             } else {
@@ -1838,13 +1446,11 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void sendLobbyMessage(
+    public native void sendLobbyMessage(
         long lobbyId,
         String message,
         SendMessageCallback callback
-    ) {
-        sendLobbyMessageNative(pointer, lobbyId, message, callback);
-    }
+    );
 
     /**
      * Sends a message to a lobby. The currently logged-in user must be a
@@ -1864,18 +1470,13 @@ public class Client {
     ) {
         var future = new CompletableFuture<Long>();
 
-        sendLobbyMessageNative(
-            pointer,
-            lobbyId,
-            message,
-            (result, messageId) -> {
-                if (result.isSuccess()) {
-                    future.complete(messageId);
-                } else {
-                    future.completeExceptionally(new DiscordException(result));
-                }
+        sendLobbyMessage(lobbyId, message, (result, messageId) -> {
+            if (result.isSuccess()) {
+                future.complete(messageId);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
             }
-        );
+        });
 
         return future;
     }
@@ -1901,7 +1502,6 @@ public class Client {
         SendMessageCallback callback
     ) {
         sendLobbyMessageWithMetadataNative(
-            pointer,
             lobbyId,
             message,
             metadata
@@ -1989,13 +1589,11 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void sendUserMessage(
+    public native void sendUserMessage(
         long userId,
         String message,
         SendMessageCallback callback
-    ) {
-        sendUserMessageNative(pointer, userId, message, callback);
-    }
+    );
 
     /**
      * Sends a message to a user.
@@ -2026,7 +1624,7 @@ public class Client {
     ) {
         var future = new CompletableFuture<Long>();
 
-        sendUserMessageNative(pointer, userId, message, (result, messageId) -> {
+        sendUserMessage(userId, message, (result, messageId) -> {
             if (result.isSuccess()) {
                 future.complete(messageId);
             } else {
@@ -2068,7 +1666,6 @@ public class Client {
         SendMessageCallback callback
     ) {
         sendUserMessageWithMetadataNative(
-            pointer,
             userId,
             message,
             metadata
@@ -2170,13 +1767,11 @@ public class Client {
      *                 failure, the array passed here will be empty and the
      *                 result will contain info about the issue.
      */
-    public void getLobbyMessagesWithLimit(
+    public native void getLobbyMessagesWithLimit(
         long lobbyId,
         int limit,
         GetMessagesCallback callback
-    ) {
-        getLobbyMessagesWithLimitNative(pointer, lobbyId, limit, callback);
-    }
+    );
 
     /**
      * Retrieves some messages from a lobby the user is a part of. From the SDK
@@ -2194,18 +1789,13 @@ public class Client {
     ) {
         var future = new CompletableFuture<Message[]>();
 
-        getLobbyMessagesWithLimitNative(
-            pointer,
-            lobbyId,
-            limit,
-            (result, messages) -> {
-                if (result.isSuccess()) {
-                    future.complete(messages);
-                } else {
-                    future.completeExceptionally(new DiscordException(result));
-                }
+        getLobbyMessagesWithLimit(lobbyId, limit, (result, messages) -> {
+            if (result.isSuccess()) {
+                future.complete(messages);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
             }
-        );
+        });
 
         return future;
     }
@@ -2220,13 +1810,11 @@ public class Client {
      *                 failure, the array passed here will be empty and the
      *                 result will contain info about the issue.
      */
-    public void getUserMessagesWithLimit(
+    public native void getUserMessagesWithLimit(
         long userId,
         int limit,
         GetMessagesCallback callback
-    ) {
-        getUserMessagesWithLimitNative(pointer, userId, limit, callback);
-    }
+    );
 
     /**
      * Retrieves some messages from a DM the user is a part of. From the SDK
@@ -2244,18 +1832,13 @@ public class Client {
     ) {
         var future = new CompletableFuture<Message[]>();
 
-        getUserMessagesWithLimitNative(
-            pointer,
-            userId,
-            limit,
-            (result, messages) -> {
-                if (result.isSuccess()) {
-                    future.complete(messages);
-                } else {
-                    future.completeExceptionally(new DiscordException(result));
-                }
+        getUserMessagesWithLimit(userId, limit, (result, messages) -> {
+            if (result.isSuccess()) {
+                future.complete(messages);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
             }
-        );
+        });
 
         return future;
     }
@@ -2268,11 +1851,9 @@ public class Client {
      *                 failure, the array passed here will be empty and the
      *                 result will contain info about the issue.
      */
-    public void getUserMessageSummaries(
+    public native void getUserMessageSummaries(
         GetUserMessageSummariesCallback callback
-    ) {
-        getUserMessageSummariesNative(pointer, callback);
-    }
+    );
 
     /**
      * Retrieves a list of users to display, along with the last message ID
@@ -2284,7 +1865,7 @@ public class Client {
     public Future<UserMessageSummary[]> getUserMessageSummaries() {
         var future = new CompletableFuture<UserMessageSummary[]>();
 
-        getUserMessageSummariesNative(pointer, (result, summaries) -> {
+        getUserMessageSummaries((result, summaries) -> {
             if (result.isSuccess()) {
                 future.complete(summaries);
             } else {
@@ -2305,9 +1886,7 @@ public class Client {
      * @param channelId ID of the channel to connect to.
      * @return A {@link Call} handle.
      */
-    public Call startCall(long channelId) {
-        return startCallNative(pointer, channelId);
-    }
+    public native Call startCall(long channelId);
 
     /**
      * Ends the call in the specified channel.
@@ -2317,9 +1896,7 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void endCall(long channelId, CompletionCallback callback) {
-        endCallNative(pointer, channelId, callback);
-    }
+    public native void endCall(long channelId, CompletionCallback callback);
 
     /**
      * Ends the call in the specified channel.
@@ -2334,7 +1911,7 @@ public class Client {
      */
     public CompletableFuture<Void> endCall(long channelId) {
         var future = new CompletableFuture<Void>();
-        endCallNative(pointer, channelId, () -> future.complete(null));
+        endCall(channelId, () -> future.complete(null));
         return future;
     }
 
@@ -2345,9 +1922,7 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void endCalls(CompletionCallback callback) {
-        endCallsNative(pointer, callback);
-    }
+    public native void endCalls(CompletionCallback callback);
 
     /**
      * Ends all calls managed by the SDK.
@@ -2360,7 +1935,7 @@ public class Client {
      */
     public CompletableFuture<Void> endCalls() {
         var future = new CompletableFuture<Void>();
-        endCallsNative(pointer, () -> future.complete(null));
+        endCalls(() -> future.complete(null));
         return future;
     }
 
@@ -2371,18 +1946,14 @@ public class Client {
      * @param userId ID of the user to query.
      * @return A {@link Relationship} object detailing the relationship.
      */
-    public Relationship getRelationship(long userId) {
-        return getRelationshipNative(pointer, userId);
-    }
+    public native Relationship getRelationship(long userId);
 
     /**
      * Gets all the currently logged-in user's relationships.
      *
      * @return An array of {@link Relationship} objects detailing the relationships.
      */
-    public Relationship[] getRelationships() {
-        return getRelationshipsNative(pointer);
-    }
+    public native Relationship[] getRelationships();
 
     /**
      * Sends a Discord friend request by username.
@@ -2393,12 +1964,10 @@ public class Client {
      * @see Client#runCallbacks()
      * @see Relationship#discordType()
      */
-    public void sendDiscordFriendRequest(
+    public native void sendDiscordFriendRequest(
         String username,
         GenericResultCallback callback
-    ) {
-        sendDiscordFriendRequestNative(pointer, username, callback);
-    }
+    );
 
     /**
      * Sends a Discord friend request by username.
@@ -2414,7 +1983,7 @@ public class Client {
     public CompletableFuture<Void> sendDiscordFriendRequest(String username) {
         var future = new CompletableFuture<Void>();
 
-        sendDiscordFriendRequestNative(pointer, username, result -> {
+        sendDiscordFriendRequest(username, result -> {
             if (result.isSuccess()) {
                 future.complete(null);
             } else {
@@ -2434,12 +2003,10 @@ public class Client {
      * @see Client#runCallbacks()
      * @see Relationship#discordType()
      */
-    public void sendDiscordFriendRequest(
+    public native void sendDiscordFriendRequest(
         long userId,
         GenericResultCallback callback
-    ) {
-        sendDiscordFriendRequestByIdNative(pointer, userId, callback);
-    }
+    );
 
     /**
      * Sends a Discord friend request by user ID.
@@ -2455,7 +2022,7 @@ public class Client {
     public CompletableFuture<Void> sendDiscordFriendRequest(long userId) {
         var future = new CompletableFuture<Void>();
 
-        sendDiscordFriendRequestByIdNative(pointer, userId, result -> {
+        sendDiscordFriendRequest(userId, result -> {
             if (result.isSuccess()) {
                 future.complete(null);
             } else {
@@ -2475,12 +2042,10 @@ public class Client {
      * @see Client#runCallbacks()
      * @see Relationship#gameType()
      */
-    public void sendGameFriendRequest(
+    public native void sendGameFriendRequest(
         String username,
         GenericResultCallback callback
-    ) {
-        sendGameFriendRequestNative(pointer, username, callback);
-    }
+    );
 
     /**
      * Sends a game friend request by username.
@@ -2496,7 +2061,7 @@ public class Client {
     public CompletableFuture<Void> sendGameFriendRequest(String username) {
         var future = new CompletableFuture<Void>();
 
-        sendGameFriendRequestNative(pointer, username, result -> {
+        sendGameFriendRequest(username, result -> {
             if (result.isSuccess()) {
                 future.complete(null);
             } else {
@@ -2516,12 +2081,10 @@ public class Client {
      * @see Client#runCallbacks()
      * @see Relationship#gameType()
      */
-    public void sendGameFriendRequest(
+    public native void sendGameFriendRequest(
         long userId,
         GenericResultCallback callback
-    ) {
-        sendGameFriendRequestByIdNative(pointer, userId, callback);
-    }
+    );
 
     /**
      * Sends a game friend request by user ID.
@@ -2537,7 +2100,7 @@ public class Client {
     public CompletableFuture<Void> sendGameFriendRequest(long userId) {
         var future = new CompletableFuture<Void>();
 
-        sendDiscordFriendRequestByIdNative(pointer, userId, result -> {
+        sendDiscordFriendRequest(userId, result -> {
             if (result.isSuccess()) {
                 future.complete(null);
             } else {
@@ -2556,12 +2119,10 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void acceptDiscordFriendRequest(
+    public native void acceptDiscordFriendRequest(
         long userId,
         GenericResultCallback callback
-    ) {
-        acceptDiscordFriendRequestNative(pointer, userId, callback);
-    }
+    );
 
     /**
      * Accepts an incoming Discord friend request.
@@ -2576,7 +2137,7 @@ public class Client {
     public CompletableFuture<Void> acceptDiscordFriendRequest(long userId) {
         var future = new CompletableFuture<Void>();
 
-        acceptDiscordFriendRequestNative(pointer, userId, result -> {
+        acceptDiscordFriendRequest(userId, result -> {
             if (result.isSuccess()) {
                 future.complete(null);
             } else {
@@ -2595,12 +2156,10 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void acceptGameFriendRequest(
+    public native void acceptGameFriendRequest(
         long userId,
         GenericResultCallback callback
-    ) {
-        acceptGameFriendRequestNative(pointer, userId, callback);
-    }
+    );
 
     /**
      * Accepts an incoming game friend request.
@@ -2615,7 +2174,7 @@ public class Client {
     public CompletableFuture<Void> acceptGameFriendRequest(long userId) {
         var future = new CompletableFuture<Void>();
 
-        acceptDiscordFriendRequestNative(pointer, userId, result -> {
+        acceptDiscordFriendRequest(userId, result -> {
             if (result.isSuccess()) {
                 future.complete(null);
             } else {
@@ -2634,12 +2193,10 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void cancelDiscordFriendRequest(
+    public native void cancelDiscordFriendRequest(
         long userId,
         GenericResultCallback callback
-    ) {
-        cancelDiscordFriendRequestNative(pointer, userId, callback);
-    }
+    );
 
     /**
      * Cancels an outgoing Discord friend request.
@@ -2654,7 +2211,7 @@ public class Client {
     public CompletableFuture<Void> cancelDiscordFriendRequest(long userId) {
         var future = new CompletableFuture<Void>();
 
-        cancelDiscordFriendRequestNative(pointer, userId, result -> {
+        cancelDiscordFriendRequest(userId, result -> {
             if (result.isSuccess()) {
                 future.complete(null);
             } else {
@@ -2673,12 +2230,10 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void cancelGameFriendRequest(
+    public native void cancelGameFriendRequest(
         long userId,
         GenericResultCallback callback
-    ) {
-        cancelGameFriendRequestNative(pointer, userId, callback);
-    }
+    );
 
     /**
      * Cancels an outgoing game friend request.
@@ -2693,7 +2248,7 @@ public class Client {
     public CompletableFuture<Void> cancelGameFriendRequest(long userId) {
         var future = new CompletableFuture<Void>();
 
-        cancelGameFriendRequestNative(pointer, userId, result -> {
+        cancelGameFriendRequest(userId, result -> {
             if (result.isSuccess()) {
                 future.complete(null);
             } else {
@@ -2713,11 +2268,9 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void setRelationshipCreatedCallback(
+    public native void setRelationshipCreatedCallback(
         RelationshipChangedCallback callback
-    ) {
-        setRelationshipCreatedCallbackNative(pointer, callback);
-    }
+    );
 
     /**
      * Sets a handler that the SDK will call whenever a relationship is deleted.
@@ -2727,11 +2280,9 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void setRelationshipDeletedCallback(
+    public native void setRelationshipDeletedCallback(
         RelationshipChangedCallback callback
-    ) {
-        setRelationshipDeletedCallbackNative(pointer, callback);
-    }
+    );
 
     /**
      * Rejects an incoming Discord friend request.
@@ -2741,12 +2292,10 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void rejectDiscordFriendRequest(
+    public native void rejectDiscordFriendRequest(
         long userId,
         GenericResultCallback callback
-    ) {
-        rejectDiscordFriendRequestNative(pointer, userId, callback);
-    }
+    );
 
     /**
      * Rejects an incoming Discord friend request.
@@ -2761,7 +2310,7 @@ public class Client {
     public CompletableFuture<Void> rejectDiscordFriendRequest(long userId) {
         var future = new CompletableFuture<Void>();
 
-        rejectDiscordFriendRequestNative(pointer, userId, result -> {
+        rejectDiscordFriendRequest(userId, result -> {
             if (result.isSuccess()) {
                 future.complete(null);
             } else {
@@ -2780,12 +2329,10 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void rejectGameFriendRequest(
+    public native void rejectGameFriendRequest(
         long userId,
         GenericResultCallback callback
-    ) {
-        rejectGameFriendRequestNative(pointer, userId, callback);
-    }
+    );
 
     /**
      * Rejects an incoming game friend request.
@@ -2800,7 +2347,7 @@ public class Client {
     public CompletableFuture<Void> rejectGameFriendRequest(long userId) {
         var future = new CompletableFuture<Void>();
 
-        rejectGameFriendRequestNative(pointer, userId, result -> {
+        rejectGameFriendRequest(userId, result -> {
             if (result.isSuccess()) {
                 future.complete(null);
             } else {
@@ -2820,12 +2367,10 @@ public class Client {
      * @see Client#runCallbacks()
      * @see Client#removeGameFriend(long, GenericResultCallback)
      */
-    public void removeDiscordAndGameFriend(
+    public native void removeDiscordAndGameFriend(
         long userId,
         GenericResultCallback callback
-    ) {
-        removeDiscordAndGameFriendNative(pointer, userId, callback);
-    }
+    );
 
     /**
      * Removes both Discord and game friend status with the specified user.
@@ -2841,7 +2386,7 @@ public class Client {
     public CompletableFuture<Void> removeDiscordAndGameFriend(long userId) {
         var future = new CompletableFuture<Void>();
 
-        removeDiscordAndGameFriendNative(pointer, userId, result -> {
+        removeDiscordAndGameFriend(userId, result -> {
             if (result.isSuccess()) {
                 future.complete(null);
             } else {
@@ -2861,9 +2406,10 @@ public class Client {
      * @see Client#runCallbacks()
      * @see Client#removeDiscordAndGameFriend(long, GenericResultCallback)
      */
-    public void removeGameFriend(long userId, GenericResultCallback callback) {
-        removeGameFriendNative(pointer, userId, callback);
-    }
+    public native void removeGameFriend(
+        long userId,
+        GenericResultCallback callback
+    );
 
     /**
      * Removes just game friend status with the specified user.
@@ -2879,7 +2425,7 @@ public class Client {
     public CompletableFuture<Void> removeGameFriend(long userId) {
         var future = new CompletableFuture<Void>();
 
-        removeGameFriendNative(pointer, userId, result -> {
+        removeGameFriend(userId, result -> {
             if (result.isSuccess()) {
                 future.complete(null);
             } else {
@@ -2901,18 +2447,11 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void sendActivityInvite(
+    public native void sendActivityInvite(
         long userId,
         @Nullable String content,
         GenericResultCallback callback
-    ) {
-        sendActivityInviteNative(
-            pointer,
-            userId,
-            content == null ? "" : content,
-            callback
-        );
-    }
+    );
 
     /**
      * Sends an activity invite to the specified user. You should have used
@@ -2933,92 +2472,7 @@ public class Client {
     ) {
         var future = new CompletableFuture<Void>();
 
-        sendActivityInviteNative(
-            pointer,
-            userId,
-            content == null ? "" : content,
-            result -> {
-                if (result.isSuccess()) {
-                    future.complete(null);
-                } else {
-                    future.completeExceptionally(new DiscordException(result));
-                }
-            }
-        );
-
-        return future;
-    }
-
-    /**
-     * Accepts an incoming activity invite.
-     *
-     * @param invite An activity invite received from the SDK.
-     * @param callback A callback that will be executed when the operation completes.
-     *
-     * @see Client#runCallbacks()
-     */
-    public void acceptActivityInvite(
-        ActivityInvite invite,
-        AcceptActivityInviteCallback callback
-    ) {
-        acceptActivityInviteNative(pointer, invite, callback);
-    }
-
-    /**
-     * Accepts an incoming activity invite.
-     *
-     * @param invite An activity invite received from the SDK.
-     *
-     * @return A future that completes with the join secret passed through
-     * Discord by this invite, or with {@link DiscordException} on failure.
-     *
-     * @see Client#runCallbacks()
-     */
-    public CompletableFuture<String> acceptActivityInvite(
-        ActivityInvite invite
-    ) {
-        var future = new CompletableFuture<String>();
-
-        acceptActivityInviteNative(pointer, invite, (result, joinSecret) -> {
-            if (result.isSuccess()) {
-                future.complete(joinSecret);
-            } else {
-                future.completeExceptionally(new DiscordException(result));
-            }
-        });
-
-        return future;
-    }
-
-    /**
-     * Sends an activity join request to the specified user.
-     *
-     * @param userId ID of the user to send a join request to.
-     * @param callback A callback that will be executed when the operation completes.
-     *
-     * @see Client#runCallbacks()
-     */
-    public void sendActivityJoinRequest(
-        long userId,
-        GenericResultCallback callback
-    ) {
-        sendActivityJoinRequestNative(pointer, userId, callback);
-    }
-
-    /**
-     * Sends an activity join request to the specified user.
-     *
-     * @param userId ID of the user to send a join request to.
-     *
-     * @return A future that is completed when the operation finishes, or is
-     * completed with {@link DiscordException} on failure.
-     *
-     * @see Client#runCallbacks()
-     */
-    public CompletableFuture<Void> sendActivityJoinRequest(long userId) {
-        var future = new CompletableFuture<Void>();
-
-        sendActivityJoinRequestNative(pointer, userId, result -> {
+        sendActivityInvite(userId, content == null ? "" : content, result -> {
             if (result.isSuccess()) {
                 future.complete(null);
             } else {
@@ -3037,12 +2491,86 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void sendActivityJoinRequestReply(
+    public native void acceptActivityInvite(
+        ActivityInvite invite,
+        AcceptActivityInviteCallback callback
+    );
+
+    /**
+     * Accepts an incoming activity invite.
+     *
+     * @param invite An activity invite received from the SDK.
+     *
+     * @return A future that completes with the join secret passed through
+     * Discord by this invite, or with {@link DiscordException} on failure.
+     *
+     * @see Client#runCallbacks()
+     */
+    public CompletableFuture<String> acceptActivityInvite(
+        ActivityInvite invite
+    ) {
+        var future = new CompletableFuture<String>();
+
+        acceptActivityInvite(invite, (result, joinSecret) -> {
+            if (result.isSuccess()) {
+                future.complete(joinSecret);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
+    }
+
+    /**
+     * Sends an activity join request to the specified user.
+     *
+     * @param userId ID of the user to send a join request to.
+     * @param callback A callback that will be executed when the operation completes.
+     *
+     * @see Client#runCallbacks()
+     */
+    public native void sendActivityJoinRequest(
+        long userId,
+        GenericResultCallback callback
+    );
+
+    /**
+     * Sends an activity join request to the specified user.
+     *
+     * @param userId ID of the user to send a join request to.
+     *
+     * @return A future that is completed when the operation finishes, or is
+     * completed with {@link DiscordException} on failure.
+     *
+     * @see Client#runCallbacks()
+     */
+    public CompletableFuture<Void> sendActivityJoinRequest(long userId) {
+        var future = new CompletableFuture<Void>();
+
+        sendActivityJoinRequest(userId, result -> {
+            if (result.isSuccess()) {
+                future.complete(null);
+            } else {
+                future.completeExceptionally(new DiscordException(result));
+            }
+        });
+
+        return future;
+    }
+
+    /**
+     * Accepts an incoming activity invite.
+     *
+     * @param invite An activity invite received from the SDK.
+     * @param callback A callback that will be executed when the operation completes.
+     *
+     * @see Client#runCallbacks()
+     */
+    public native void sendActivityJoinRequestReply(
         ActivityInvite invite,
         GenericResultCallback callback
-    ) {
-        sendActivityJoinRequestReplyNative(pointer, invite, callback);
-    }
+    );
 
     /**
      * Accepts an incoming activity invite.
@@ -3059,7 +2587,7 @@ public class Client {
     ) {
         var future = new CompletableFuture<Void>();
 
-        sendActivityJoinRequestReplyNative(pointer, invite, result -> {
+        sendActivityJoinRequestReply(invite, result -> {
             if (result.isSuccess()) {
                 future.complete(null);
             } else {
@@ -3080,11 +2608,9 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void setActivityInviteCreatedCallback(
+    public native void setActivityInviteCreatedCallback(
         ActivityInviteCallback callback
-    ) {
-        setActivityInviteCreatedCallbackNative(pointer, callback);
-    }
+    );
 
     /**
      * Sets a handler that will be called by the SDK whenever an activity
@@ -3096,11 +2622,9 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void setActivityInviteUpdatedCallback(
+    public native void setActivityInviteUpdatedCallback(
         ActivityInviteCallback callback
-    ) {
-        setActivityInviteUpdatedCallbackNative(pointer, callback);
-    }
+    );
 
     /**
      * Sets a handler that will be called by the SDK to join a lobby with a
@@ -3112,9 +2636,7 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void setActivityJoinCallback(ActivityJoinCallback callback) {
-        setActivityJoinCallbackNative(pointer, callback);
-    }
+    public native void setActivityJoinCallback(ActivityJoinCallback callback);
 
     /**
      * Blocks the specified user. Their friend status will be severed and their
@@ -3126,9 +2648,7 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void blockUser(long userId, GenericResultCallback callback) {
-        blockUserNative(pointer, userId, callback);
-    }
+    public native void blockUser(long userId, GenericResultCallback callback);
 
     /**
      * Blocks the specified user. Their friend status will be severed and their
@@ -3145,7 +2665,7 @@ public class Client {
     public CompletableFuture<Void> blockUser(long userId) {
         var future = new CompletableFuture<Void>();
 
-        blockUserNative(pointer, userId, result -> {
+        blockUser(userId, result -> {
             if (result.isSuccess()) {
                 future.complete(null);
             } else {
@@ -3164,9 +2684,7 @@ public class Client {
      *
      * @see Client#runCallbacks()
      */
-    public void unblockUser(long userId, GenericResultCallback callback) {
-        unblockUserNative(pointer, userId, callback);
-    }
+    public native void unblockUser(long userId, GenericResultCallback callback);
 
     /**
      * Unblocks the specified user.
@@ -3181,7 +2699,7 @@ public class Client {
     public CompletableFuture<Void> unblockUser(long userId) {
         var future = new CompletableFuture<Void>();
 
-        unblockUserNative(pointer, userId, result -> {
+        unblockUser(userId, result -> {
             if (result.isSuccess()) {
                 future.complete(null);
             } else {

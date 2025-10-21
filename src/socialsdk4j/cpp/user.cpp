@@ -1,9 +1,8 @@
 #include <net_derfruhling_discord_socialsdk4j_User.h>
-#include <discordpp.h>
 #include <optional>
 #include <utility>
 
-#include "activity.hpp"
+#include "socialsdk4j.hpp"
 
 jfieldID userPtrF = nullptr;
 
@@ -36,7 +35,7 @@ Java_net_derfruhling_discord_socialsdk4j_User_getActivityInfo
     discordpp::UserHandle *user = (discordpp::UserHandle *)env->GetLongField(obj, userPtrF);
 
     std::optional<discordpp::Activity> activity = user->GameActivity();
-    return activity.has_value() ? CreateActivityInfo(env, activity.value()) : nullptr;
+    return activity.has_value() ? s4j::createActivityInfo(env, activity.value()) : nullptr;
 }
 
 JNIEXPORT jstring JNICALL

@@ -1,15 +1,13 @@
+#include "socialsdk4j.hpp"
 #include <net_derfruhling_discord_socialsdk4j_Message.h>
 #include <discordpp.h>
 #include <optional>
 #include <vector>
 
-jfieldID messagePtrF = nullptr;
-
 JNIEXPORT jobject JNICALL
 Java_net_derfruhling_discord_socialsdk4j_Message_getAdditionalContent
 (JNIEnv *env, jobject obj) {
-    if (!messagePtrF) messagePtrF = env->GetFieldID(env->GetObjectClass(obj), "pointer", "J");
-    discordpp::MessageHandle *msg = (discordpp::MessageHandle *)env->GetLongField(obj, messagePtrF);
+    discordpp::MessageHandle *msg = s4j::getPointer<discordpp::MessageHandle>(env, obj);
 
     std::optional<discordpp::AdditionalContent> content = msg->AdditionalContent();
 
@@ -31,8 +29,7 @@ Java_net_derfruhling_discord_socialsdk4j_Message_getAdditionalContent
 JNIEXPORT jobject JNICALL
 Java_net_derfruhling_discord_socialsdk4j_Message_getAuthor
 (JNIEnv *env, jobject obj) {
-    if (!messagePtrF) messagePtrF = env->GetFieldID(env->GetObjectClass(obj), "pointer", "J");
-    discordpp::MessageHandle *msg = (discordpp::MessageHandle *)env->GetLongField(obj, messagePtrF);
+    discordpp::MessageHandle *msg = s4j::getPointer<discordpp::MessageHandle>(env, obj);
 
     std::optional<discordpp::UserHandle> user = msg->Author();
     if(!user) return nullptr;
@@ -47,8 +44,7 @@ Java_net_derfruhling_discord_socialsdk4j_Message_getAuthor
 JNIEXPORT jlong JNICALL
 Java_net_derfruhling_discord_socialsdk4j_Message_getAuthorId
 (JNIEnv *env, jobject obj) {
-    if (!messagePtrF) messagePtrF = env->GetFieldID(env->GetObjectClass(obj), "pointer", "J");
-    discordpp::MessageHandle *msg = (discordpp::MessageHandle *)env->GetLongField(obj, messagePtrF);
+    discordpp::MessageHandle *msg = s4j::getPointer<discordpp::MessageHandle>(env, obj);
 
     return (jlong)msg->AuthorId();
 }
@@ -56,8 +52,7 @@ Java_net_derfruhling_discord_socialsdk4j_Message_getAuthorId
 JNIEXPORT jobject JNICALL
 Java_net_derfruhling_discord_socialsdk4j_Message_getChannel
 (JNIEnv *env, jobject obj) {
-    if (!messagePtrF) messagePtrF = env->GetFieldID(env->GetObjectClass(obj), "pointer", "J");
-    discordpp::MessageHandle *msg = (discordpp::MessageHandle *)env->GetLongField(obj, messagePtrF);
+    discordpp::MessageHandle *msg = s4j::getPointer<discordpp::MessageHandle>(env, obj);
 
     std::optional<discordpp::ChannelHandle> channel = msg->Channel();
     if(!channel) return nullptr;
@@ -74,8 +69,7 @@ Java_net_derfruhling_discord_socialsdk4j_Message_getChannel
 JNIEXPORT jlong JNICALL
 Java_net_derfruhling_discord_socialsdk4j_Message_getChannelId
 (JNIEnv *env, jobject obj) {
-    if (!messagePtrF) messagePtrF = env->GetFieldID(env->GetObjectClass(obj), "pointer", "J");
-    discordpp::MessageHandle *msg = (discordpp::MessageHandle *)env->GetLongField(obj, messagePtrF);
+    discordpp::MessageHandle *msg = s4j::getPointer<discordpp::MessageHandle>(env, obj);
 
     return (jlong)msg->ChannelId();
 }
@@ -83,8 +77,7 @@ Java_net_derfruhling_discord_socialsdk4j_Message_getChannelId
 JNIEXPORT jstring JNICALL
 Java_net_derfruhling_discord_socialsdk4j_Message_getContent
 (JNIEnv *env, jobject obj) {
-    if (!messagePtrF) messagePtrF = env->GetFieldID(env->GetObjectClass(obj), "pointer", "J");
-    discordpp::MessageHandle *msg = (discordpp::MessageHandle *)env->GetLongField(obj, messagePtrF);
+    discordpp::MessageHandle *msg = s4j::getPointer<discordpp::MessageHandle>(env, obj);
 
     return env->NewStringUTF(msg->Content().c_str());
 }
@@ -92,8 +85,7 @@ Java_net_derfruhling_discord_socialsdk4j_Message_getContent
 JNIEXPORT jint JNICALL
 Java_net_derfruhling_discord_socialsdk4j_Message_getDisclosureTypeNative
 (JNIEnv *env, jobject obj) {
-    if (!messagePtrF) messagePtrF = env->GetFieldID(env->GetObjectClass(obj), "pointer", "J");
-    discordpp::MessageHandle *msg = (discordpp::MessageHandle *)env->GetLongField(obj, messagePtrF);
+    discordpp::MessageHandle *msg = s4j::getPointer<discordpp::MessageHandle>(env, obj);
 
     std::optional<discordpp::DisclosureTypes> disc = msg->DisclosureType();
 
@@ -107,8 +99,7 @@ Java_net_derfruhling_discord_socialsdk4j_Message_getDisclosureTypeNative
 JNIEXPORT jlong JNICALL
 Java_net_derfruhling_discord_socialsdk4j_Message_getEditedTimestamp
 (JNIEnv *env, jobject obj) {
-    if (!messagePtrF) messagePtrF = env->GetFieldID(env->GetObjectClass(obj), "pointer", "J");
-    discordpp::MessageHandle *msg = (discordpp::MessageHandle *)env->GetLongField(obj, messagePtrF);
+    discordpp::MessageHandle *msg = s4j::getPointer<discordpp::MessageHandle>(env, obj);
 
     return (jlong)msg->EditedTimestamp();
 }
@@ -116,8 +107,7 @@ Java_net_derfruhling_discord_socialsdk4j_Message_getEditedTimestamp
 JNIEXPORT jobject JNICALL
 Java_net_derfruhling_discord_socialsdk4j_Message_getLobby
 (JNIEnv *env, jobject obj) {
-    if (!messagePtrF) messagePtrF = env->GetFieldID(env->GetObjectClass(obj), "pointer", "J");
-    discordpp::MessageHandle *msg = (discordpp::MessageHandle *)env->GetLongField(obj, messagePtrF);
+    discordpp::MessageHandle *msg = s4j::getPointer<discordpp::MessageHandle>(env, obj);
 
     std::optional<discordpp::LobbyHandle> handle = msg->Lobby();
 
@@ -135,8 +125,7 @@ Java_net_derfruhling_discord_socialsdk4j_Message_getLobby
 JNIEXPORT jobjectArray JNICALL
 Java_net_derfruhling_discord_socialsdk4j_Message_getMetadataNative
 (JNIEnv *env, jobject obj) {
-    if (!messagePtrF) messagePtrF = env->GetFieldID(env->GetObjectClass(obj), "pointer", "J");
-    discordpp::MessageHandle *msg = (discordpp::MessageHandle *)env->GetLongField(obj, messagePtrF);
+    discordpp::MessageHandle *msg = s4j::getPointer<discordpp::MessageHandle>(env, obj);
 
     jclass clazz = env->FindClass("net/derfruhling/discord/socialsdk4j/StringPair");
     jmethodID methodId = env->GetMethodID(clazz, "<init>", "(Ljava/lang/String;Ljava/lang/String;)V");
@@ -156,8 +145,7 @@ Java_net_derfruhling_discord_socialsdk4j_Message_getMetadataNative
 JNIEXPORT jstring JNICALL
 Java_net_derfruhling_discord_socialsdk4j_Message_getRawContent
 (JNIEnv *env, jobject obj) {
-    if (!messagePtrF) messagePtrF = env->GetFieldID(env->GetObjectClass(obj), "pointer", "J");
-    discordpp::MessageHandle *msg = (discordpp::MessageHandle *)env->GetLongField(obj, messagePtrF);
+    discordpp::MessageHandle *msg = s4j::getPointer<discordpp::MessageHandle>(env, obj);
 
     return env->NewStringUTF(msg->RawContent().c_str());
 }
@@ -165,8 +153,7 @@ Java_net_derfruhling_discord_socialsdk4j_Message_getRawContent
 JNIEXPORT jobject JNICALL
 Java_net_derfruhling_discord_socialsdk4j_Message_getRecipient
 (JNIEnv *env, jobject obj) {
-    if (!messagePtrF) messagePtrF = env->GetFieldID(env->GetObjectClass(obj), "pointer", "J");
-    discordpp::MessageHandle *msg = (discordpp::MessageHandle *)env->GetLongField(obj, messagePtrF);
+    discordpp::MessageHandle *msg = s4j::getPointer<discordpp::MessageHandle>(env, obj);
 
     std::optional<discordpp::UserHandle> user = msg->Recipient();
     if(!user) return nullptr;
@@ -181,8 +168,7 @@ Java_net_derfruhling_discord_socialsdk4j_Message_getRecipient
 JNIEXPORT jlong JNICALL
 Java_net_derfruhling_discord_socialsdk4j_Message_getRecipientId
 (JNIEnv *env, jobject obj) {
-    if (!messagePtrF) messagePtrF = env->GetFieldID(env->GetObjectClass(obj), "pointer", "J");
-    discordpp::MessageHandle *msg = (discordpp::MessageHandle *)env->GetLongField(obj, messagePtrF);
+    discordpp::MessageHandle *msg = s4j::getPointer<discordpp::MessageHandle>(env, obj);
 
     return (jlong)msg->RecipientId();
 }
@@ -190,8 +176,7 @@ Java_net_derfruhling_discord_socialsdk4j_Message_getRecipientId
 JNIEXPORT jboolean JNICALL
 Java_net_derfruhling_discord_socialsdk4j_Message_isSentFromGame
 (JNIEnv *env, jobject obj) {
-    if (!messagePtrF) messagePtrF = env->GetFieldID(env->GetObjectClass(obj), "pointer", "J");
-    discordpp::MessageHandle *msg = (discordpp::MessageHandle *)env->GetLongField(obj, messagePtrF);
+    discordpp::MessageHandle *msg = s4j::getPointer<discordpp::MessageHandle>(env, obj);
 
     return (jboolean)msg->SentFromGame();
 }
@@ -199,8 +184,7 @@ Java_net_derfruhling_discord_socialsdk4j_Message_isSentFromGame
 JNIEXPORT jlong JNICALL
 Java_net_derfruhling_discord_socialsdk4j_Message_getSentTimestamp
 (JNIEnv *env, jobject obj) {
-    if (!messagePtrF) messagePtrF = env->GetFieldID(env->GetObjectClass(obj), "pointer", "J");
-    discordpp::MessageHandle *msg = (discordpp::MessageHandle *)env->GetLongField(obj, messagePtrF);
+    discordpp::MessageHandle *msg = s4j::getPointer<discordpp::MessageHandle>(env, obj);
 
     return (jlong)msg->SentTimestamp();
 }

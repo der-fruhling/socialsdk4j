@@ -1,5 +1,14 @@
 #include <net_derfruhling_discord_socialsdk4j_ClientResult.h>
 #include <discordpp.h>
+#include "socialsdk4j.hpp"
+
+jobject s4j::createClientResult(JNIEnv *env, discordpp::ClientResult &&res) {
+    discordpp::ClientResult *resultPtr = new discordpp::ClientResult(std::move(res));
+    jclass resultCls = env->FindClass("net/derfruhling/discord/socialsdk4j/ClientResult");
+    jmethodID resultCons = env->GetMethodID(resultCls, "<init>", "(J)V");
+    jobject result = env->NewObject(resultCls, resultCons, reinterpret_cast<jlong>(resultPtr));
+    return result;
+}
 
 JNIEXPORT jint JNICALL
 Java_net_derfruhling_discord_socialsdk4j_ClientResult_errorCode0

@@ -1,17 +1,15 @@
+#include "jni.h"
+#include "socialsdk4j.hpp"
 #include <net_derfruhling_discord_socialsdk4j_Client.h>
-#include <discordpp.h>
 #include <optional>
 #include <unordered_map>
 #include <utility>
 #include <vector>
-#include "callbacks.hpp"
-#include "client_result.hpp"
-#include "jni.h"
 
 JNIEXPORT jobject JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_createAuthorizationCodeVerifierNative
-(JNIEnv *env, jclass, jlong ptr) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_createAuthorizationCodeVerifier
+(JNIEnv *env, jobject obj) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     discordpp::AuthorizationCodeVerifier v = client->CreateAuthorizationCodeVerifier();
 
     discordpp::AuthorizationCodeChallenge *challengeValue = new discordpp::AuthorizationCodeChallenge(std::move(v.Challenge()));
@@ -30,8 +28,8 @@ Java_net_derfruhling_discord_socialsdk4j_Client_createAuthorizationCodeVerifierN
 
 JNIEXPORT void JNICALL
 Java_net_derfruhling_discord_socialsdk4j_Client_authorizeNative
-(JNIEnv *env, jclass, jlong ptr, jlong clientId, jstring scopes, jstring state, jlong codeChallenge, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+(JNIEnv *env, jobject obj, jlong clientId, jstring scopes, jstring state, jlong codeChallenge, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     discordpp::AuthorizationArgs args;
     args.SetClientId(clientId);
     args.SetScopes(discordpp::Client::GetDefaultCommunicationScopes());
@@ -42,9 +40,9 @@ Java_net_derfruhling_discord_socialsdk4j_Client_authorizeNative
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;Ljava/lang/String;Ljava/lang/String;)V");
     client->Authorize(args, [method, callback](discordpp::ClientResult res, std::string code, std::string redirectUri) {
         if(!res.Successful()) {
-            cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(res)), nullptr, nullptr);
+            cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(res)), nullptr, nullptr);
         } else {
-            cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(res)), cbenv->NewStringUTF(code.c_str()), cbenv->NewStringUTF(redirectUri.c_str()));
+            cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(res)), cbenv->NewStringUTF(code.c_str()), cbenv->NewStringUTF(redirectUri.c_str()));
         }
 
         cbenv->DeleteGlobalRef(callback);
@@ -53,19 +51,17 @@ Java_net_derfruhling_discord_socialsdk4j_Client_authorizeNative
 
 JNIEXPORT void JNICALL
 Java_net_derfruhling_discord_socialsdk4j_Client_getProvisionalTokenNative
-(JNIEnv *env, jclass, jlong ptr, jlong applicationId, jint externalAuthType, jstring token, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
-
+(JNIEnv *env, jobject obj, jlong applicationId, jint externalAuthType, jstring token, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     const char *tokenS = env->GetStringUTFChars(token, nullptr);
-
     callback = env->NewGlobalRef(callback);
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;Ljava/lang/String;Ljava/lang/String;IILjava/lang/String;)V");
     client->GetProvisionalToken(applicationId, static_cast<discordpp::AuthenticationExternalAuthType>(externalAuthType), tokenS, [token, tokenS, method, callback](discordpp::ClientResult res, std::string accessToken, std::string refreshToken, discordpp::AuthorizationTokenType type, int expiresIn, std::string scopes) {
         if (!res.Successful()) {
-            cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(res)), nullptr, nullptr, 0, 0, nullptr);
+            cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(res)), nullptr, nullptr, 0, 0, nullptr);
         } else {
-            cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(res)), cbenv->NewStringUTF(accessToken.c_str()), cbenv->NewStringUTF(refreshToken.c_str()), (jint)type, expiresIn, cbenv->NewStringUTF(scopes.c_str()));
+            cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(res)), cbenv->NewStringUTF(accessToken.c_str()), cbenv->NewStringUTF(refreshToken.c_str()), (jint)type, expiresIn, cbenv->NewStringUTF(scopes.c_str()));
         }
 
         cbenv->ReleaseStringUTFChars(token, tokenS);
@@ -75,8 +71,8 @@ Java_net_derfruhling_discord_socialsdk4j_Client_getProvisionalTokenNative
 
 JNIEXPORT void JNICALL
 Java_net_derfruhling_discord_socialsdk4j_Client_getTokenNative
-(JNIEnv *env, jclass, jlong ptr, jlong applicationId, jstring code, jstring codeVerifier, jstring redirectUri, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+(JNIEnv *env, jobject obj, jlong applicationId, jstring code, jstring codeVerifier, jstring redirectUri, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
 
     const char *codeS = env->GetStringUTFChars(code, nullptr);
     const char *codeVerifierS = env->GetStringUTFChars(codeVerifier, nullptr);
@@ -87,9 +83,9 @@ Java_net_derfruhling_discord_socialsdk4j_Client_getTokenNative
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;Ljava/lang/String;Ljava/lang/String;IILjava/lang/String;)V");
     client->GetToken(applicationId, codeS, codeVerifierS, redirectUriS, [codeS, code, codeVerifierS, codeVerifier, redirectUriS, redirectUri, method, callback](discordpp::ClientResult res, std::string accessToken, std::string refreshToken, discordpp::AuthorizationTokenType type, int expiresIn, std::string scopes) {
         if (!res.Successful()) {
-            cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(res)), nullptr, nullptr, 0, 0, nullptr);
+            cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(res)), nullptr, nullptr, 0, 0, nullptr);
         } else {
-            cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(res)), cbenv->NewStringUTF(accessToken.c_str()), cbenv->NewStringUTF(refreshToken.c_str()), (jint)type, expiresIn, cbenv->NewStringUTF(scopes.c_str()));
+            cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(res)), cbenv->NewStringUTF(accessToken.c_str()), cbenv->NewStringUTF(refreshToken.c_str()), (jint)type, expiresIn, cbenv->NewStringUTF(scopes.c_str()));
         }
 
         cbenv->ReleaseStringUTFChars(code, codeS);
@@ -101,8 +97,8 @@ Java_net_derfruhling_discord_socialsdk4j_Client_getTokenNative
 
 JNIEXPORT void JNICALL
 Java_net_derfruhling_discord_socialsdk4j_Client_getTokenFromProvisionalMergeNative
-(JNIEnv *env, jclass, jlong ptr, jlong applicationId, jstring code, jstring codeVerifier, jstring redirectUri, jint externalAuthType, jstring token, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+(JNIEnv *env, jobject obj, jlong applicationId, jstring code, jstring codeVerifier, jstring redirectUri, jint externalAuthType, jstring token, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
 
     const char *codeS = env->GetStringUTFChars(code, nullptr);
     const char *codeVerifierS = env->GetStringUTFChars(codeVerifier, nullptr);
@@ -114,9 +110,9 @@ Java_net_derfruhling_discord_socialsdk4j_Client_getTokenFromProvisionalMergeNati
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;Ljava/lang/String;Ljava/lang/String;IILjava/lang/String;)V");
     client->GetTokenFromProvisionalMerge(applicationId, codeS, codeVerifierS, redirectUriS, static_cast<discordpp::AuthenticationExternalAuthType>(externalAuthType), tokenS, [tokenS, token, codeS, code, codeVerifierS, codeVerifier, redirectUriS, redirectUri, method, callback](discordpp::ClientResult res, std::string accessToken, std::string refreshToken, discordpp::AuthorizationTokenType type, int expiresIn, std::string scopes) {
         if (!res.Successful()) {
-            cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(res)), nullptr, nullptr, 0, 0, nullptr);
+            cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(res)), nullptr, nullptr, 0, 0, nullptr);
         } else {
-            cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(res)), cbenv->NewStringUTF(accessToken.c_str()), cbenv->NewStringUTF(refreshToken.c_str()), (jint)type, expiresIn, cbenv->NewStringUTF(scopes.c_str()));
+            cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(res)), cbenv->NewStringUTF(accessToken.c_str()), cbenv->NewStringUTF(refreshToken.c_str()), (jint)type, expiresIn, cbenv->NewStringUTF(scopes.c_str()));
         }
 
         cbenv->ReleaseStringUTFChars(code, codeS);
@@ -129,8 +125,8 @@ Java_net_derfruhling_discord_socialsdk4j_Client_getTokenFromProvisionalMergeNati
 
 JNIEXPORT void JNICALL
 Java_net_derfruhling_discord_socialsdk4j_Client_setStatusChangedCallbackNative
-(JNIEnv *env, jclass, jlong ptr, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+(JNIEnv *env, jobject obj, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
 
     callback = env->NewGlobalRef(callback);
 
@@ -142,75 +138,73 @@ Java_net_derfruhling_discord_socialsdk4j_Client_setStatusChangedCallbackNative
 
 JNIEXPORT void JNICALL
 Java_net_derfruhling_discord_socialsdk4j_Client_updateTokenNative
-(JNIEnv *env, jclass, jlong ptr, jint type, jstring token, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+(JNIEnv *env, jobject obj, jint type, jstring token, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
 
     const char *tokenS = env->GetStringUTFChars(token, nullptr);
-
     callback = env->NewGlobalRef(callback);
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;)V");
     client->UpdateToken(static_cast<discordpp::AuthorizationTokenType>(type), tokenS, [tokenS, token, method, callback](discordpp::ClientResult res) {
-        cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(res)));
+        cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(res)));
         cbenv->ReleaseStringUTFChars(token, tokenS);
         cbenv->DeleteGlobalRef(callback);
     });
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_connectNative
-(JNIEnv *, jclass, jlong ptr) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_connect
+(JNIEnv *env, jobject obj) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
 
     client->Connect();
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_disconnectNative
-(JNIEnv *, jclass, jlong ptr) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_disconnect
+(JNIEnv *env, jobject obj) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
 
     client->Disconnect();
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_abortAuthorizeNative
-(JNIEnv *, jclass, jlong ptr) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_abortAuthorize
+(JNIEnv *env, jobject obj) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
 
     client->AbortAuthorize();
 }
 
 JNIEXPORT jboolean JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_isAuthenticatedNative
-(JNIEnv *, jclass, jlong ptr) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_isAuthenticated
+(JNIEnv *env, jobject obj) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
 
     return (jboolean)client->IsAuthenticated();
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_provisionalMergeCompletedNative
-(JNIEnv *, jclass, jlong ptr, jboolean success) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_provisionalMergeCompleted
+(JNIEnv *env, jobject obj, jboolean success) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
 
     client->ProvisionalUserMergeCompleted(success);
 }
 
 JNIEXPORT void JNICALL Java_net_derfruhling_discord_socialsdk4j_Client_refreshTokenNative
-(JNIEnv *env, jclass, jlong ptr, jlong applicationId, jstring token, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+(JNIEnv *env, jobject obj, jlong applicationId, jstring token, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
 
     const char *tokenS = env->GetStringUTFChars(token, nullptr);
-
     callback = env->NewGlobalRef(callback);
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;Ljava/lang/String;Ljava/lang/String;IILjava/lang/String;)V");
     client->RefreshToken(applicationId, tokenS, [tokenS, token, method, callback](discordpp::ClientResult res, std::string accessToken, std::string refreshToken, discordpp::AuthorizationTokenType type, int expiresIn, std::string scopes) {
         if (!res.Successful()) {
-            cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(res)), nullptr, nullptr, 0, 0, nullptr);
+            cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(res)), nullptr, nullptr, 0, 0, nullptr);
         } else {
-            cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(res)), cbenv->NewStringUTF(accessToken.c_str()), cbenv->NewStringUTF(refreshToken.c_str()), (jint)type, expiresIn, cbenv->NewStringUTF(scopes.c_str()));
+            cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(res)), cbenv->NewStringUTF(accessToken.c_str()), cbenv->NewStringUTF(refreshToken.c_str()), (jint)type, expiresIn, cbenv->NewStringUTF(scopes.c_str()));
         }
 
         cbenv->ReleaseStringUTFChars(token, tokenS);
@@ -219,31 +213,31 @@ JNIEXPORT void JNICALL Java_net_derfruhling_discord_socialsdk4j_Client_refreshTo
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_openConnectedGameSettingsInDiscordNative
-(JNIEnv *env, jclass, jlong ptr, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_openConnectedGameSettingsInDiscord
+(JNIEnv *env, jobject obj, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
 
     callback = env->NewGlobalRef(callback);
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;)V");
     client->OpenConnectedGamesSettingsInDiscord([method, callback](discordpp::ClientResult res) {
-        cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(res)));
+        cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(res)));
         cbenv->DeleteGlobalRef(callback);
     });
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_setGameWindowPidNative
-(JNIEnv *, jclass, jlong ptr, jint pid) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_setGameWindowPid
+(JNIEnv *env, jobject obj, jint pid) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
 
     client->SetGameWindowPid(pid);
 }
 
 JNIEXPORT jobject JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_getRelationshipNative
-(JNIEnv *env, jclass, jlong ptr, jlong userId) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_getRelationship
+(JNIEnv *env, jobject obj, jlong userId) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
 
     jclass clazz = env->FindClass("net/derfruhling/discord/socialsdk4j/Relationship");
     jmethodID cons = env->GetMethodID(clazz, "<init>", "(IIJJ)V");
@@ -257,9 +251,9 @@ Java_net_derfruhling_discord_socialsdk4j_Client_getRelationshipNative
 }
 
 JNIEXPORT jobjectArray JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_getRelationshipsNative
-(JNIEnv *env, jclass, jlong ptr) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_getRelationships
+(JNIEnv *env, jobject obj) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
 
     jclass clazz = env->FindClass("net/derfruhling/discord/socialsdk4j/Relationship");
     jmethodID cons = env->GetMethodID(clazz, "<init>", "(IIJJ)V");
@@ -282,119 +276,119 @@ Java_net_derfruhling_discord_socialsdk4j_Client_getRelationshipsNative
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_sendDiscordFriendRequestNative
-(JNIEnv *env, jclass, jlong ptr, jstring username, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_sendDiscordFriendRequest__Ljava_lang_String_2Lnet_derfruhling_discord_socialsdk4j_Client_00024GenericResultCallback_2
+(JNIEnv *env, jobject obj, jstring username, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     callback = env->NewGlobalRef(callback);
 
     const char *usernameS = env->GetStringUTFChars(username, nullptr);
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;)V");
     client->SendDiscordFriendRequest(usernameS, [username, usernameS, callback, method](discordpp::ClientResult result) {
-        cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(result)));
+        cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(result)));
         cbenv->ReleaseStringUTFChars(username, usernameS);
         cbenv->DeleteGlobalRef(callback);
     });
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_sendDiscordFriendRequestByIdNative
-(JNIEnv *env, jclass, jlong ptr, jlong userId, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_sendDiscordFriendRequest__JLnet_derfruhling_discord_socialsdk4j_Client_00024GenericResultCallback_2
+(JNIEnv *env, jobject obj, jlong userId, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     callback = env->NewGlobalRef(callback);
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;)V");
     client->SendDiscordFriendRequestById((uint64_t)userId, [callback, method](discordpp::ClientResult result) {
-        cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(result)));
+        cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(result)));
         cbenv->DeleteGlobalRef(callback);
     });
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_sendGameFriendRequestNative
-(JNIEnv *env, jclass, jlong ptr, jstring username, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_sendGameFriendRequest__Ljava_lang_String_2Lnet_derfruhling_discord_socialsdk4j_Client_00024GenericResultCallback_2
+(JNIEnv *env, jobject obj, jstring username, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     callback = env->NewGlobalRef(callback);
 
     const char *usernameS = env->GetStringUTFChars(username, nullptr);
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;)V");
     client->SendGameFriendRequest(usernameS, [username, usernameS, callback, method](discordpp::ClientResult result) {
-        cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(result)));
+        cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(result)));
         cbenv->ReleaseStringUTFChars(username, usernameS);
         cbenv->DeleteGlobalRef(callback);
     });
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_sendGameFriendRequestByIdNative
-(JNIEnv *env, jclass, jlong ptr, jlong userId, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_sendGameFriendRequest__JLnet_derfruhling_discord_socialsdk4j_Client_00024GenericResultCallback_2
+(JNIEnv *env, jobject obj, jlong userId, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     callback = env->NewGlobalRef(callback);
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;)V");
     client->SendGameFriendRequestById((uint64_t)userId, [callback, method](discordpp::ClientResult result) {
-        cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(result)));
+        cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(result)));
         cbenv->DeleteGlobalRef(callback);
     });
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_acceptDiscordFriendRequestNative
-(JNIEnv *env, jclass, jlong ptr, jlong userId, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_acceptDiscordFriendRequest
+(JNIEnv *env, jobject obj, jlong userId, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     callback = env->NewGlobalRef(callback);
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;)V");
     client->AcceptDiscordFriendRequest((uint64_t)userId, [callback, method](discordpp::ClientResult result) {
-        cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(result)));
+        cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(result)));
         cbenv->DeleteGlobalRef(callback);
     });
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_acceptGameFriendRequestNative
-(JNIEnv *env, jclass, jlong ptr, jlong userId, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_acceptGameFriendRequest
+(JNIEnv *env, jobject obj, jlong userId, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     callback = env->NewGlobalRef(callback);
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;)V");
     client->AcceptGameFriendRequest((uint64_t)userId, [callback, method](discordpp::ClientResult result) {
-        cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(result)));
+        cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(result)));
         cbenv->DeleteGlobalRef(callback);
     });
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_cancelDiscordFriendRequestNative
-(JNIEnv *env, jclass, jlong ptr, jlong userId, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_cancelDiscordFriendRequest
+(JNIEnv *env, jobject obj, jlong userId, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     callback = env->NewGlobalRef(callback);
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;)V");
     client->CancelDiscordFriendRequest((uint64_t)userId, [callback, method](discordpp::ClientResult result) {
-        cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(result)));
+        cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(result)));
         cbenv->DeleteGlobalRef(callback);
     });
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_cancelGameFriendRequestNative
-(JNIEnv *env, jclass, jlong ptr, jlong userId, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_cancelGameFriendRequest
+(JNIEnv *env, jobject obj, jlong userId, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     callback = env->NewGlobalRef(callback);
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;)V");
     client->CancelGameFriendRequest((uint64_t)userId, [callback, method](discordpp::ClientResult result) {
-        cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(result)));
+        cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(result)));
         cbenv->DeleteGlobalRef(callback);
     });
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_setRelationshipCreatedCallbackNative
-(JNIEnv *env, jclass, jlong ptr, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_setRelationshipCreatedCallback
+(JNIEnv *env, jobject obj, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     callback = env->NewGlobalRef(callback);
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(JZ)V");
@@ -404,9 +398,9 @@ Java_net_derfruhling_discord_socialsdk4j_Client_setRelationshipCreatedCallbackNa
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_setRelationshipDeletedCallbackNative
-(JNIEnv *env, jclass, jlong ptr, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_setRelationshipDeletedCallback
+(JNIEnv *env, jobject obj, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     callback = env->NewGlobalRef(callback);
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(JZ)V");
@@ -416,93 +410,93 @@ Java_net_derfruhling_discord_socialsdk4j_Client_setRelationshipDeletedCallbackNa
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_rejectDiscordFriendRequestNative
-(JNIEnv *env, jclass, jlong ptr, jlong userId, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_rejectDiscordFriendRequest
+(JNIEnv *env, jobject obj, jlong userId, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     callback = env->NewGlobalRef(callback);
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;)V");
     client->RejectDiscordFriendRequest((uint64_t)userId, [callback, method](discordpp::ClientResult result) {
-        cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(result)));
+        cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(result)));
         cbenv->DeleteGlobalRef(callback);
     });
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_rejectGameFriendRequestNative
-(JNIEnv *env, jclass, jlong ptr, jlong userId, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_rejectGameFriendRequest
+(JNIEnv *env, jobject obj, jlong userId, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     callback = env->NewGlobalRef(callback);
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;)V");
     client->RejectGameFriendRequest((uint64_t)userId, [callback, method](discordpp::ClientResult result) {
-        cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(result)));
+        cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(result)));
         cbenv->DeleteGlobalRef(callback);
     });
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_removeDiscordAndGameFriendNative
-(JNIEnv *env, jclass, jlong ptr, jlong userId, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_removeDiscordAndGameFriend
+(JNIEnv *env, jobject obj, jlong userId, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     callback = env->NewGlobalRef(callback);
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;)V");
     client->RemoveDiscordAndGameFriend((uint64_t)userId, [callback, method](discordpp::ClientResult result) {
-        cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(result)));
+        cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(result)));
         cbenv->DeleteGlobalRef(callback);
     });
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_removeGameFriendNative
-(JNIEnv *env, jclass, jlong ptr, jlong userId, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_removeGameFriend
+(JNIEnv *env, jobject obj, jlong userId, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     callback = env->NewGlobalRef(callback);
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;)V");
     client->RemoveGameFriend((uint64_t)userId, [callback, method](discordpp::ClientResult result) {
-        cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(result)));
+        cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(result)));
         cbenv->DeleteGlobalRef(callback);
     });
 }
 
-JNIEXPORT void JNICALL Java_net_derfruhling_discord_socialsdk4j_Client_blockUserNative
-(JNIEnv *env, jclass, jlong ptr, jlong userId, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+JNIEXPORT void JNICALL Java_net_derfruhling_discord_socialsdk4j_Client_blockUser
+(JNIEnv *env, jobject obj, jlong userId, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     callback = env->NewGlobalRef(callback);
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;)V");
     client->BlockUser((uint64_t)userId, [callback, method](discordpp::ClientResult result) {
-        cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(result)));
+        cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(result)));
         cbenv->DeleteGlobalRef(callback);
     });
 }
 
-JNIEXPORT void JNICALL Java_net_derfruhling_discord_socialsdk4j_Client_unblockUserNative
-(JNIEnv *env, jclass, jlong ptr, jlong userId, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+JNIEXPORT void JNICALL Java_net_derfruhling_discord_socialsdk4j_Client_unblockUser
+(JNIEnv *env, jobject obj, jlong userId, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     callback = env->NewGlobalRef(callback);
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;)V");
     client->UnblockUser((uint64_t)userId, [callback, method](discordpp::ClientResult result) {
-        cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(result)));
+        cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(result)));
         cbenv->DeleteGlobalRef(callback);
     });
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_updateRichPresenceNative
-(JNIEnv *env, jclass, jlong ptr, jlong activityPtr, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
-    discordpp::Activity *activity = reinterpret_cast<discordpp::Activity *>(activityPtr);
+Java_net_derfruhling_discord_socialsdk4j_Client_updateRichPresence
+(JNIEnv *env, jobject obj, jobject activityObj, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
+    discordpp::Activity *activity = s4j::getPointer<discordpp::Activity>(env, activityObj);
 
     if(callback) {
         callback = env->NewGlobalRef(callback);
 
         jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;)V");
         client->UpdateRichPresence(*activity, [callback, method](discordpp::ClientResult result) {
-            cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(result)));
+            cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(result)));
             cbenv->DeleteGlobalRef(callback);
         });
     } else {
@@ -511,9 +505,9 @@ Java_net_derfruhling_discord_socialsdk4j_Client_updateRichPresenceNative
 }
 
 JNIEXPORT jobject JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_getCurrentUserNative
-(JNIEnv *env, jclass, jlong ptr) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_getUser__
+(JNIEnv *env, jobject obj) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     discordpp::UserHandle *handle = new discordpp::UserHandle(std::move(client->GetCurrentUser()));
 
     jclass clazz = env->FindClass("net/derfruhling/discord/socialsdk4j/User");
@@ -522,9 +516,9 @@ Java_net_derfruhling_discord_socialsdk4j_Client_getCurrentUserNative
 }
 
 JNIEXPORT jobject JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_getCurrentUserV2Native
-(JNIEnv *env, jclass, jlong ptr) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_getCurrentUser
+(JNIEnv *env, jobject obj) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     auto user = client->GetCurrentUserV2();
     if(!user) return nullptr;
     discordpp::UserHandle *handle = new discordpp::UserHandle(std::move(*user));
@@ -535,9 +529,9 @@ Java_net_derfruhling_discord_socialsdk4j_Client_getCurrentUserV2Native
 }
 
 JNIEXPORT jobject JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_getUserNative
-(JNIEnv *env, jclass, jlong ptr, jlong userId) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_getUser__J
+(JNIEnv *env, jobject obj, jlong userId) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     std::optional<discordpp::UserHandle> h = client->GetUser((uint64_t)userId);
 
     if(h.has_value()) {
@@ -552,9 +546,9 @@ Java_net_derfruhling_discord_socialsdk4j_Client_getUserNative
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_getUserGuildsNative
-(JNIEnv *env, jclass, jlong ptr, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_getUserGuilds
+(JNIEnv *env, jobject obj, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     callback = env->NewGlobalRef(callback);
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;[Lnet/derfruhling/discord/socialsdk4j/GuildMinimal;)V");
@@ -572,15 +566,15 @@ Java_net_derfruhling_discord_socialsdk4j_Client_getUserGuildsNative
             cbenv->SetObjectArrayElement(array, i, obj);
         }
 
-        cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(res)), array);
+        cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(res)), array);
         cbenv->DeleteGlobalRef(callback);
     });
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_getGuildChannelsNative
-(JNIEnv *env, jclass, jlong ptr, jlong guildId, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_getGuildChannels
+(JNIEnv *env, jobject obj, jlong guildId, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     callback = env->NewGlobalRef(callback);
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;[Lnet/derfruhling/discord/socialsdk4j/GuildChannel;)V");
@@ -608,22 +602,22 @@ Java_net_derfruhling_discord_socialsdk4j_Client_getGuildChannelsNative
             cbenv->SetObjectArrayElement(array, i, obj);
         }
 
-        cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(res)), array);
+        cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(res)), array);
         cbenv->DeleteGlobalRef(callback);
     });
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_createOrJoinLobbyNative
-(JNIEnv *env, jclass, jlong ptr, jstring secret, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_createOrJoinLobby
+(JNIEnv *env, jobject obj, jstring secret, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
 
     const char *secretS = env->GetStringUTFChars(secret, nullptr);
     callback = env->NewGlobalRef(callback);
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;J)V");
     client->CreateOrJoinLobby(secretS, [secret, secretS, method, callback](discordpp::ClientResult res, uint64_t lobbyId) {
-        cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(res)), (jlong)lobbyId);
+        cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(res)), (jlong)lobbyId);
         cbenv->ReleaseStringUTFChars(secret, secretS);
         cbenv->DeleteGlobalRef(callback);
     });
@@ -644,8 +638,8 @@ std::pair<std::string, std::string> pairFromJava(JNIEnv *env, jclass pairClazz, 
 
 JNIEXPORT void JNICALL
 Java_net_derfruhling_discord_socialsdk4j_Client_createOrJoinLobbyWithMetadataNative
-(JNIEnv *env, jclass, jlong ptr, jstring secret, jobjectArray lobbyMeta, jobjectArray memberMeta, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+(JNIEnv *env, jobject obj, jstring secret, jobjectArray lobbyMeta, jobjectArray memberMeta, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
 
     const char *secretS = env->GetStringUTFChars(secret, nullptr);
     callback = env->NewGlobalRef(callback);
@@ -668,30 +662,30 @@ Java_net_derfruhling_discord_socialsdk4j_Client_createOrJoinLobbyWithMetadataNat
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;J)V");
     client->CreateOrJoinLobbyWithMetadata(secretS, lobbyMetadata, memberMetadata, [secret, secretS, method, callback](discordpp::ClientResult res, uint64_t lobbyId) {
-        cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(res)), (jlong)lobbyId);
+        cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(res)), (jlong)lobbyId);
         cbenv->ReleaseStringUTFChars(secret, secretS);
         cbenv->DeleteGlobalRef(callback);
     });
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_leaveLobbyNative
-(JNIEnv *env, jclass, jlong ptr, jlong lobbyId, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_leaveLobby
+(JNIEnv *env, jobject obj, jlong lobbyId, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
 
     callback = env->NewGlobalRef(callback);
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;)V");
     client->LeaveLobby(lobbyId, [method, callback](discordpp::ClientResult res) {
-        cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(res)));
+        cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(res)));
         cbenv->DeleteGlobalRef(callback);
     });
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_setLobbyCreatedCallbackNative
-(JNIEnv *env, jclass, jlong ptr, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_setLobbyCreatedCallback
+(JNIEnv *env, jobject obj, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
 
     callback = env->NewGlobalRef(callback);
 
@@ -702,9 +696,9 @@ Java_net_derfruhling_discord_socialsdk4j_Client_setLobbyCreatedCallbackNative
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_setLobbyDeletedCallbackNative
-(JNIEnv *env, jclass, jlong ptr, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_setLobbyDeletedCallback
+(JNIEnv *env, jobject obj, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
 
     callback = env->NewGlobalRef(callback);
 
@@ -715,9 +709,9 @@ Java_net_derfruhling_discord_socialsdk4j_Client_setLobbyDeletedCallbackNative
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_setLobbyUpdatedCallbackNative
-(JNIEnv *env, jclass, jlong ptr, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_setLobbyUpdatedCallback
+(JNIEnv *env, jobject obj, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
 
     callback = env->NewGlobalRef(callback);
 
@@ -728,9 +722,9 @@ Java_net_derfruhling_discord_socialsdk4j_Client_setLobbyUpdatedCallbackNative
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_setLobbyMemberAddedCallbackNative
-(JNIEnv *env, jclass, jlong ptr, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_setLobbyMemberAddedCallback
+(JNIEnv *env, jobject obj, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
 
     callback = env->NewGlobalRef(callback);
 
@@ -741,9 +735,9 @@ Java_net_derfruhling_discord_socialsdk4j_Client_setLobbyMemberAddedCallbackNativ
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_setLobbyMemberRemovedCallbackNative
-(JNIEnv *env, jclass, jlong ptr, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_setLobbyMemberRemovedCallback
+(JNIEnv *env, jobject obj, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
 
     callback = env->NewGlobalRef(callback);
 
@@ -754,9 +748,9 @@ Java_net_derfruhling_discord_socialsdk4j_Client_setLobbyMemberRemovedCallbackNat
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_setLobbyMemberUpdatedCallbackNative
-(JNIEnv *env, jclass, jlong ptr, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_setLobbyMemberUpdatedCallback
+(JNIEnv *env, jobject obj, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
 
     callback = env->NewGlobalRef(callback);
 
@@ -767,9 +761,9 @@ Java_net_derfruhling_discord_socialsdk4j_Client_setLobbyMemberUpdatedCallbackNat
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_setMessageCreatedCallbackNative
-(JNIEnv *env, jclass, jlong ptr, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_setMessageCreatedCallback
+(JNIEnv *env, jobject obj, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
 
     callback = env->NewGlobalRef(callback);
 
@@ -780,9 +774,9 @@ Java_net_derfruhling_discord_socialsdk4j_Client_setMessageCreatedCallbackNative
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_setMessageDeletedCallbackNative
-(JNIEnv *env, jclass, jlong ptr, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_setMessageDeletedCallback
+(JNIEnv *env, jobject obj, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
 
     callback = env->NewGlobalRef(callback);
 
@@ -793,9 +787,9 @@ Java_net_derfruhling_discord_socialsdk4j_Client_setMessageDeletedCallbackNative
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_setMessageUpdatedCallbackNative
-(JNIEnv *env, jclass, jlong ptr, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_setMessageUpdatedCallback
+(JNIEnv *env, jobject obj, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
 
     callback = env->NewGlobalRef(callback);
 
@@ -806,9 +800,9 @@ Java_net_derfruhling_discord_socialsdk4j_Client_setMessageUpdatedCallbackNative
 }
 
 JNIEXPORT jobject JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_getMessageNative
-(JNIEnv *env, jclass, jlong ptr, jlong messageId) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_getMessage
+(JNIEnv *env, jobject obj, jlong messageId) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
 
     std::optional<discordpp::MessageHandle> msgOpt = client->GetMessageHandle((uint64_t)messageId);
     if(msgOpt) {
@@ -823,9 +817,9 @@ Java_net_derfruhling_discord_socialsdk4j_Client_getMessageNative
 }
 
 JNIEXPORT jobject JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_getLobbyNative
-(JNIEnv *env, jclass, jlong ptr, jlong lobbyId) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_getLobby
+(JNIEnv *env, jobject obj, jlong lobbyId) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
 
     std::optional<discordpp::LobbyHandle> handle = client->GetLobbyHandle((uint64_t)lobbyId);
 
@@ -841,42 +835,42 @@ Java_net_derfruhling_discord_socialsdk4j_Client_getLobbyNative
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_linkChannelToLobbyNative
-(JNIEnv *env, jclass, jlong ptr, jlong lobbyId, jlong channelId, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_linkChannelToLobby
+(JNIEnv *env, jobject obj, jlong lobbyId, jlong channelId, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     callback = env->NewGlobalRef(callback);
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;)V");
     client->LinkChannelToLobby(lobbyId, channelId, [method, callback](discordpp::ClientResult res) {
-        cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(res)));
+        cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(res)));
         cbenv->DeleteGlobalRef(callback);
     });
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_unlinkChannelFromLobbyNative
-(JNIEnv *env, jclass, jlong ptr, jlong lobbyId, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_unlinkChannelFromLobby
+(JNIEnv *env, jobject obj, jlong lobbyId, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     callback = env->NewGlobalRef(callback);
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;)V");
     client->UnlinkChannelFromLobby(lobbyId, [method, callback](discordpp::ClientResult res) {
-        cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(res)));
+        cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(res)));
         cbenv->DeleteGlobalRef(callback);
     });
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_sendLobbyMessageNative
-(JNIEnv *env, jclass, jlong ptr, jlong lobbyId, jstring message, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_sendLobbyMessage
+(JNIEnv *env, jobject obj, jlong lobbyId, jstring message, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     callback = env->NewGlobalRef(callback);
 
     const char *messageS = env->GetStringUTFChars(message, nullptr);
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;J)V");
     client->SendLobbyMessage(lobbyId, messageS, [message, messageS, method, callback](discordpp::ClientResult res, uint64_t messageId) {
-        cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(res)), (jlong)messageId);
+        cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(res)), (jlong)messageId);
         cbenv->DeleteGlobalRef(callback);
         cbenv->ReleaseStringUTFChars(message, messageS);
     });
@@ -884,8 +878,8 @@ Java_net_derfruhling_discord_socialsdk4j_Client_sendLobbyMessageNative
 
 JNIEXPORT void JNICALL
 Java_net_derfruhling_discord_socialsdk4j_Client_sendLobbyMessageWithMetadataNative
-(JNIEnv *env, jclass, jlong ptr, jlong lobbyId, jstring message, jobjectArray meta, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+(JNIEnv *env, jobject obj, jlong lobbyId, jstring message, jobjectArray meta, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     callback = env->NewGlobalRef(callback);
 
     const char *messageS = env->GetStringUTFChars(message, nullptr);
@@ -902,23 +896,23 @@ Java_net_derfruhling_discord_socialsdk4j_Client_sendLobbyMessageWithMetadataNati
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;J)V");
     client->SendLobbyMessageWithMetadata(lobbyId, messageS, metadata, [message, messageS, method, callback](discordpp::ClientResult res, uint64_t messageId) {
-        cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(res)), (jlong)messageId);
+        cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(res)), (jlong)messageId);
         cbenv->DeleteGlobalRef(callback);
         cbenv->ReleaseStringUTFChars(message, messageS);
     });
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_sendUserMessageNative
-(JNIEnv *env, jclass, jlong ptr, jlong userId, jstring message, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_sendUserMessage
+(JNIEnv *env, jobject obj, jlong userId, jstring message, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     callback = env->NewGlobalRef(callback);
 
     const char *messageS = env->GetStringUTFChars(message, nullptr);
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;J)V");
     client->SendUserMessage(userId, messageS, [message, messageS, method, callback](discordpp::ClientResult res, uint64_t messageId) {
-        cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(res)), (jlong)messageId);
+        cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(res)), (jlong)messageId);
         cbenv->DeleteGlobalRef(callback);
         cbenv->ReleaseStringUTFChars(message, messageS);
     });
@@ -944,16 +938,16 @@ Java_net_derfruhling_discord_socialsdk4j_Client_sendUserMessageWithMetadataNativ
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;J)V");
     client->SendUserMessageWithMetadata(userId, messageS, metadata, [message, messageS, method, callback](discordpp::ClientResult res, uint64_t messageId) {
-        cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(res)), (jlong)messageId);
+        cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(res)), (jlong)messageId);
         cbenv->DeleteGlobalRef(callback);
         cbenv->ReleaseStringUTFChars(message, messageS);
     });
 }
 
 JNIEXPORT jobject JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_startCallNative
-(JNIEnv *env, jclass, jlong ptr, jlong channelId) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_startCall
+(JNIEnv *env, jobject obj, jlong channelId) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     discordpp::Call *call = new discordpp::Call(std::move(client->StartCall(channelId)));
 
     jclass clazz = env->FindClass("net/derfruhling/discord/socialsdk4j/Call");
@@ -963,9 +957,9 @@ Java_net_derfruhling_discord_socialsdk4j_Client_startCallNative
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_endCallNative
-(JNIEnv *env, jclass, jlong ptr, jlong channelId, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_endCall
+(JNIEnv *env, jobject obj, jlong channelId, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     callback = env->NewGlobalRef(callback);
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "()V");
@@ -976,9 +970,9 @@ Java_net_derfruhling_discord_socialsdk4j_Client_endCallNative
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_endCallsNative
-(JNIEnv *env, jclass, jlong ptr, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_endCalls
+(JNIEnv *env, jobject obj, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     callback = env->NewGlobalRef(callback);
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "()V");
@@ -989,17 +983,17 @@ Java_net_derfruhling_discord_socialsdk4j_Client_endCallsNative
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_sendActivityInviteNative
-(JNIEnv *env, jclass, jlong ptr, jlong userId, jstring contentNullable, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_sendActivityInvite
+(JNIEnv *env, jobject obj, jlong userId, jstring contentNullable, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     callback = env->NewGlobalRef(callback);
 
-    const char *content = env->GetStringUTFChars(contentNullable, nullptr);
+    const char *content = contentNullable ? env->GetStringUTFChars(contentNullable, nullptr) : "";
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;)V");
     client->SendActivityInvite(userId, content, [content, contentNullable, method, callback](discordpp::ClientResult res) {
-        cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(res)));
-        cbenv->ReleaseStringUTFChars(contentNullable, content);
+        cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(res)));
+        if(contentNullable) cbenv->ReleaseStringUTFChars(contentNullable, content);
         cbenv->DeleteGlobalRef(callback);
     });
 }
@@ -1074,48 +1068,48 @@ jobject DeconstructActivityInvite(JNIEnv *env, discordpp::ActivityInvite invite)
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_acceptActivityInviteNative
-(JNIEnv *env, jclass, jlong ptr, jobject inviteObj, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_acceptActivityInvite
+(JNIEnv *env, jobject obj, jobject inviteObj, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     callback = env->NewGlobalRef(callback);
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;Ljava/lang/String;)V");
     client->AcceptActivityInvite(ReconstructActivityInvite(env, inviteObj), [method, callback](discordpp::ClientResult res, std::string joinSecret) {
-        cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(res)), cbenv->NewStringUTF(joinSecret.c_str()));
+        cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(res)), cbenv->NewStringUTF(joinSecret.c_str()));
         cbenv->DeleteGlobalRef(callback);
     });
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_sendActivityJoinRequestNative
-(JNIEnv *env, jclass, jlong ptr, jlong userId, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_sendActivityJoinRequest
+(JNIEnv *env, jobject obj, jlong userId, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     callback = env->NewGlobalRef(callback);
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;)V");
     client->SendActivityJoinRequest(userId, [method, callback](discordpp::ClientResult res) {
-        cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(res)));
+        cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(res)));
         cbenv->DeleteGlobalRef(callback);
     });
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_sendActivityJoinRequestReplyNative
-(JNIEnv *env, jclass, jlong ptr, jobject inviteObj, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_sendActivityJoinRequestReply
+(JNIEnv *env, jobject obj, jobject inviteObj, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     callback = env->NewGlobalRef(callback);
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;)V");
     client->SendActivityJoinRequestReply(ReconstructActivityInvite(env, inviteObj), [method, callback](discordpp::ClientResult res) {
-        cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(res)));
+        cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(res)));
         cbenv->DeleteGlobalRef(callback);
     });
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_setActivityInviteCreatedCallbackNative
-(JNIEnv *env, jclass, jlong ptr, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_setActivityInviteCreatedCallback
+(JNIEnv *env, jobject obj, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     callback = env->NewGlobalRef(callback);
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ActivityInvite;)V");
@@ -1125,9 +1119,9 @@ Java_net_derfruhling_discord_socialsdk4j_Client_setActivityInviteCreatedCallback
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_Client_setActivityInviteUpdatedCallbackNative
-(JNIEnv *env, jclass, jlong ptr, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+Java_net_derfruhling_discord_socialsdk4j_Client_setActivityInviteUpdatedCallback
+(JNIEnv *env, jobject obj, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     callback = env->NewGlobalRef(callback);
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ActivityInvite;)V");
@@ -1136,9 +1130,10 @@ Java_net_derfruhling_discord_socialsdk4j_Client_setActivityInviteUpdatedCallback
     });
 }
 
-JNIEXPORT void JNICALL Java_net_derfruhling_discord_socialsdk4j_Client_setActivityJoinCallbackNative
-(JNIEnv *env, jclass, jlong ptr, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+JNIEXPORT void JNICALL
+Java_net_derfruhling_discord_socialsdk4j_Client_setActivityJoinCallback
+(JNIEnv *env, jobject obj, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     callback = env->NewGlobalRef(callback);
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Ljava/lang/String;)V");
@@ -1159,9 +1154,9 @@ Java_net_derfruhling_discord_socialsdk4j_Client_getDefaultPresenceScopesNative
     return env->NewStringUTF(discordpp::Client::GetDefaultPresenceScopes().c_str());
 }
 
-JNIEXPORT void JNICALL Java_net_derfruhling_discord_socialsdk4j_Client_getLobbyMessagesWithLimitNative
-(JNIEnv *env, jclass, jlong ptr, jlong lobbyId, jint limit, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+JNIEXPORT void JNICALL Java_net_derfruhling_discord_socialsdk4j_Client_getLobbyMessagesWithLimit
+(JNIEnv *env, jobject obj, jlong lobbyId, jint limit, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     callback = env->NewGlobalRef(callback);
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;[Lnet/derfruhling/discord/socialsdk4j/Message;)V");
@@ -1175,14 +1170,14 @@ JNIEXPORT void JNICALL Java_net_derfruhling_discord_socialsdk4j_Client_getLobbyM
             cbenv->SetObjectArrayElement(a, len - i - 1, cbenv->NewObject(clazz, cons, (jlong)msg, (jlong)msg->Id()));
         }
 
-        cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(result)), a);
+        cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(result)), a);
         cbenv->DeleteGlobalRef(callback);
     });
 }
 
-JNIEXPORT void JNICALL Java_net_derfruhling_discord_socialsdk4j_Client_getUserMessagesWithLimitNative
-(JNIEnv *env, jclass, jlong ptr, jlong userId, jint limit, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+JNIEXPORT void JNICALL Java_net_derfruhling_discord_socialsdk4j_Client_getUserMessagesWithLimit
+(JNIEnv *env, jobject obj, jlong userId, jint limit, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     callback = env->NewGlobalRef(callback);
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;[Lnet/derfruhling/discord/socialsdk4j/Message;)V");
@@ -1196,14 +1191,14 @@ JNIEXPORT void JNICALL Java_net_derfruhling_discord_socialsdk4j_Client_getUserMe
             cbenv->SetObjectArrayElement(a, len - i - 1, cbenv->NewObject(clazz, cons, (jlong)msg, (jlong)msg->Id()));
         }
 
-        cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(result)), a);
+        cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(result)), a);
         cbenv->DeleteGlobalRef(callback);
     });
 }
 
-JNIEXPORT void JNICALL Java_net_derfruhling_discord_socialsdk4j_Client_getUserMessageSummariesNative
-(JNIEnv *env, jclass, jlong ptr, jobject callback) {
-    discordpp::Client *client = reinterpret_cast<discordpp::Client *>(ptr);
+JNIEXPORT void JNICALL Java_net_derfruhling_discord_socialsdk4j_Client_getUserMessageSummaries
+(JNIEnv *env, jobject obj, jobject callback) {
+    discordpp::Client *client = s4j::getPointer<discordpp::Client>(env, obj);
     callback = env->NewGlobalRef(callback);
 
     jmethodID method = env->GetMethodID(env->GetObjectClass(callback), "invoke", "(Lnet/derfruhling/discord/socialsdk4j/ClientResult;[Lnet/derfruhling/discord/socialsdk4j/UserMessageSummary;)V");
@@ -1217,7 +1212,7 @@ JNIEXPORT void JNICALL Java_net_derfruhling_discord_socialsdk4j_Client_getUserMe
             cbenv->SetObjectArrayElement(a, i, cbenv->NewObject(clazz, cons, (jlong)s.UserId(), (jlong)s.LastMessageId()));
         }
 
-        cbenv->CallVoidMethod(callback, method, CreateClientResult(cbenv, std::move(result)), a);
+        cbenv->CallVoidMethod(callback, method, s4j::createClientResult(cbenv, std::move(result)), a);
         cbenv->DeleteGlobalRef(callback);
     });
 }
