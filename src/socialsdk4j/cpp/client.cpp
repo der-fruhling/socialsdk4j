@@ -1167,6 +1167,7 @@ JNIEXPORT void JNICALL Java_net_derfruhling_discord_socialsdk4j_Client_getLobbyM
 
         for (int i = 0, len = messages.size(); i < len; i++) {
             discordpp::MessageHandle *msg = new discordpp::MessageHandle(std::move(messages.back()));
+            messages.pop_back();
             cbenv->SetObjectArrayElement(a, len - i - 1, cbenv->NewObject(clazz, cons, (jlong)msg, (jlong)msg->Id()));
         }
 
@@ -1188,6 +1189,7 @@ JNIEXPORT void JNICALL Java_net_derfruhling_discord_socialsdk4j_Client_getUserMe
 
         for (int i = 0, len = messages.size(); i < len; i++) {
             discordpp::MessageHandle *msg = new discordpp::MessageHandle(std::move(messages.back()));
+            messages.pop_back();
             cbenv->SetObjectArrayElement(a, len - i - 1, cbenv->NewObject(clazz, cons, (jlong)msg, (jlong)msg->Id()));
         }
 
