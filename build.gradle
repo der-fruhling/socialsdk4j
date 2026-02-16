@@ -395,8 +395,8 @@ def setupTest = tasks.register("setupTest", Copy) {
 dependencies {
     compileOnly 'org.jetbrains:annotations:26.0.2'
 
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:6.0.3'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:6.0.3'
 }
 
 test {
