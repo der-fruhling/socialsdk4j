@@ -24,7 +24,7 @@ Java_net_derfruhling_discord_socialsdk4j_SocialSdk_createClientNative
 JNIEnv *cbenv;
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_SocialSdk_runCallbacksNative
+Java_net_derfruhling_discord_socialsdk4j_SocialSdk_runCallbacks
 (JNIEnv *env, jclass cls) {
     cbenv = env;
     discordpp::RunCallbacks();

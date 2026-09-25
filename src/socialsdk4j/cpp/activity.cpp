@@ -5,11 +5,11 @@ jobject s4j::createActivityInfo(
     JNIEnv *env,
     const discordpp::Activity &activity
 ) {
-    jclass cls = env->FindClass("net/derfruhling/discord/socialsdk4j/ActivityInfo");
-    jmethodID method = env->GetMethodID(cls, "<init>", "(ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lnet/derfruhling/discord/socialsdk4j/ActivityInfo$Button;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JJLjava/lang/String;IIZLjava/lang/String;I)V");
+    jclass cls = env->FindClass("net/derfruhling/discord/socialsdk4j/Activity");
+    jmethodID method = env->GetMethodID(cls, "<init>", "(ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;[Lnet/derfruhling/discord/socialsdk4j/Activity$Button;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JJLjava/lang/String;IIZLjava/lang/String;I)V");
     auto buttons = activity.GetButtons();
 
-    jclass buttonCls = env->FindClass("net/derfruhling/discord/socialsdk4j/ActivityInfo$Button");
+    jclass buttonCls = env->FindClass("net/derfruhling/discord/socialsdk4j/Activity$Button");
     jmethodID buttonCons = env->GetMethodID(buttonCls, "<init>", "(Ljava/lang/String;Ljava/lang/String;)V");
     jobjectArray buttonsJni = env->NewObjectArray(buttons.size(), buttonCls, nullptr);
 
