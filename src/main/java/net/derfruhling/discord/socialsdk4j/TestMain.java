@@ -15,7 +15,7 @@ public class TestMain {
         CodeVerifier verifier = client.createAuthorizationCodeVerifier();
         client.authorize(
             APP_ID,
-            Client.COMMUNICATIONS_SCOPES,
+            Client.getDefaultCommunicationScopes(),
             "miaw miaw",
             verifier.challenge(),
             (authResult, code, redirectUri) -> {
@@ -51,7 +51,7 @@ public class TestMain {
         );
 
         while (true) {
-            client.runCallbacks();
+            SocialSdk.runCallbacks();
             Thread.sleep(15);
         }
     }
@@ -68,10 +68,10 @@ public class TestMain {
         });
 
         client.setStatusChangedCallback((status, error, errorDetail) -> {
-            if (status == Client.Status.Ready) {
+            if (status == ClientStatus.Ready) {
                 client
                     .updateRichPresence(
-                        new ActivityBuilder()
+                        Activity.create()
                             .setType(ActivityType.Playing)
                             .setState("miawing")
                             .setDetails("in test miaw")

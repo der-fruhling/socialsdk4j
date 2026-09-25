@@ -1,7 +1,7 @@
 package net.derfruhling.discord.socialsdk4j;
 
 /**
- * Represents a code verifier bundle provided by the SDK for client-side
+ * Represents a type verifier bundle provided by the SDK for client-side
  * authentication.
  *
  * @param challenge A challenge passed to {@link Client#authorize}

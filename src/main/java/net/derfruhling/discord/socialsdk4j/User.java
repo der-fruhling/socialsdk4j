@@ -2,25 +2,22 @@ package net.derfruhling.discord.socialsdk4j;
 
 import org.jetbrains.annotations.Nullable;
 
-public class User {
-
-    long pointer;
+public non-sealed class User extends SdkObject {
     public final long id;
 
     User(long pointer, long id) {
+        super(pointer);
         this.id = id;
-        SocialSdk.ensureInitialized();
-        this.pointer = pointer;
-        SocialSdk.cleaner.register(this, () ->
-            SocialSdk.deleteUserNative(pointer)
-        );
     }
+
+    @Override
+    final native void delete(long pointer);
 
     public native @Nullable String getAvatar();
 
     public native String getDisplayName();
 
-    public native @Nullable ActivityInfo getActivityInfo();
+    public native @Nullable Activity getActivityInfo();
 
     public native @Nullable String getGlobalName();
 

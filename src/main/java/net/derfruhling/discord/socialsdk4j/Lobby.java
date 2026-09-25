@@ -8,23 +8,19 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Represents a lobby handle retrieved from {@link Client#getLobby(long)}.
  */
-public class Lobby {
-
-    long pointer;
-
+public non-sealed class Lobby extends SdkObject {
     /**
      * ID of this Lobby.
      */
     public final long id;
 
     Lobby(long pointer, long id) {
+        super(pointer);
         this.id = id;
-        SocialSdk.ensureInitialized();
-        this.pointer = pointer;
-        SocialSdk.cleaner.register(this, () ->
-            SocialSdk.deleteLobbyNative(pointer)
-        );
     }
+
+    @Override
+    final native void delete(long pointer);
 
     /**
      * @return Voice call info if it exists, {@code null} otherwise.

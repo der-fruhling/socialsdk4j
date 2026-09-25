@@ -2,7 +2,7 @@ package net.derfruhling.discord.socialsdk4j;
 
 import org.jetbrains.annotations.Nullable;
 
-public record ActivityInfo(
+public record Activity(
     ActivityType type,
     String name,
     @Nullable String state,
@@ -16,7 +16,7 @@ public record ActivityInfo(
     int supportedPlatforms
 ) {
     @SuppressWarnings("unused")
-    private ActivityInfo(
+    private Activity(
         int type,
         String name,
         @Nullable String state,
@@ -80,4 +80,8 @@ public record ActivityInfo(
     public static final int SUPPORTS_EMBEDDED = 32;
     public static final int SUPPORTS_PS4 = 64;
     public static final int SUPPORTS_PS5 = 128;
+
+    public static ActivityBuilder create() {
+        return new ActivityBuilder();
+    }
 }

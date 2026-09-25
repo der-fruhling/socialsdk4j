@@ -3,6 +3,8 @@ package net.derfruhling.discord.socialsdk4j;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
+
+import net.derfruhling.discord.socialsdk4j.callbacks.*;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -11,206 +13,28 @@ import org.jetbrains.annotations.Nullable;
  * The main part of the SocialSDK. Most actions are initiated by calling
  * methods on this object.
  */
-public class Client {
-
-    long pointer = SocialSdk.createClientNative();
-
+public non-sealed class Client extends SdkObject {
+    /**
+     * Constructs a new client.
+     *
+     * @throws IllegalStateException If the {@link SocialSdk#initialize}
+     *                               function has not yet been called.
+     */
     public Client() {
-        SocialSdk.ensureInitialized();
-        long pointer = this.pointer;
-        SocialSdk.cleaner.register(this, () ->
-            SocialSdk.deleteClientNative(pointer)
-        );
+        super(SocialSdk.createClient());
     }
+
+    @Override
+    final native void delete(long pointer);
 
     /**
      * Runs all pending callbacks the SocialSDK wants to call. This must be run
      * in order to make use of the SocialSDK properly.
+     * @deprecated Use {@link SocialSdk#runCallbacks()} directly instead.
      */
+    @Deprecated
     public void runCallbacks() {
-        SocialSdk.runCallbacksNative();
-    }
-
-    public interface CompletionCallback {
-        @SuppressWarnings({ "unused", "MissingJavadoc" })
-        void invoke();
-    }
-
-    public interface GenericResultCallback {
-        @SuppressWarnings({ "unused", "MissingJavadoc" })
-        void invoke(ClientResult result);
-    }
-
-    public interface AuthorizationCallback {
-        @SuppressWarnings({ "unused", "MissingJavadoc" })
-        void invoke(ClientResult result, String code, String redirectUri);
-    }
-
-    public record AuthorizationResult(String code, String redirectUri) {}
-
-    public interface StatusChangedCallbackNative {
-        @SuppressWarnings({ "unused", "MissingJavadoc" })
-        void invoke(int status, int error, int errorDetail);
-    }
-
-    public interface TokenExchangeCallbackNative {
-        @SuppressWarnings({ "unused", "MissingJavadoc" })
-        void invoke(
-            ClientResult result,
-            String accessToken,
-            String refreshToken,
-            int type,
-            int expiresIn,
-            String scopes
-        );
-    }
-
-    public interface TokenExchangeCallback {
-        @SuppressWarnings("MissingJavadoc")
-        void invoke(
-            ClientResult result,
-            String accessToken,
-            String refreshToken,
-            AuthorizationTokenType type,
-            int expiresIn,
-            String[] scopes
-        );
-    }
-
-    public record TokenExchangeResult(
-        String accessToken,
-        String refreshToken,
-        AuthorizationTokenType type,
-        int expiresIn,
-        String[] scopes
-    ) {}
-
-    public interface StatusChangedCallback {
-        @SuppressWarnings("MissingJavadoc")
-        void invoke(Status status, ClientSocketResult error, int errorDetail);
-    }
-
-    public interface GetUserGuildsCallback {
-        @SuppressWarnings({ "unused", "MissingJavadoc" })
-        void invoke(ClientResult result, GuildMinimal[] guilds);
-    }
-
-    public interface GetGuildChannelsCallback {
-        @SuppressWarnings({ "unused", "MissingJavadoc" })
-        void invoke(ClientResult result, GuildChannel[] channels);
-    }
-
-    public interface CreateOrJoinLobbyCallback {
-        @SuppressWarnings({ "unused", "MissingJavadoc" })
-        void invoke(ClientResult result, long lobbyId);
-    }
-
-    public interface LobbyExistenceChangedCallback {
-        @SuppressWarnings({ "unused", "MissingJavadoc" })
-        void invoke(long lobbyId);
-    }
-
-    public interface LobbyMemberChangedCallback {
-        @SuppressWarnings({ "unused", "MissingJavadoc" })
-        void invoke(long lobbyId, long userId);
-    }
-
-    public interface SendMessageCallback {
-        @SuppressWarnings({ "unused", "MissingJavadoc" })
-        void invoke(ClientResult result, long messageId);
-    }
-
-    public interface MessageIdCallback {
-        @SuppressWarnings({ "unused", "MissingJavadoc" })
-        void invoke(long messageId);
-    }
-
-    public interface MessageDeletedCallback {
-        @SuppressWarnings({ "unused", "MissingJavadoc" })
-        void invoke(long messageId, long channelId);
-    }
-
-    public interface RelationshipChangedCallback {
-        @SuppressWarnings({ "unused", "MissingJavadoc" })
-        void invoke(long userId, boolean isDiscordRelationshipUpdate);
-    }
-
-    public interface ActivityInviteCallback {
-        @SuppressWarnings({ "unused", "MissingJavadoc" })
-        void invoke(ActivityInvite invite);
-    }
-
-    public interface AcceptActivityInviteCallback {
-        @SuppressWarnings({ "unused", "MissingJavadoc" })
-        void invoke(ClientResult result, String joinSecret);
-    }
-
-    public interface ActivityJoinCallback {
-        @SuppressWarnings({ "unused", "MissingJavadoc" })
-        void invoke(String joinSecret);
-    }
-
-    public interface GetMessagesCallback {
-        @SuppressWarnings({ "unused", "MissingJavadoc" })
-        void invoke(ClientResult result, Message[] messages);
-    }
-
-    public interface GetUserMessageSummariesCallback {
-        @SuppressWarnings({ "unused", "MissingJavadoc" })
-        void invoke(ClientResult result, UserMessageSummary[] summaries);
-    }
-
-    /**
-     * Represents the status of this client. The most important status is
-     * {@link Status#Ready} as almost nothing can be done (other than
-     * authorize) before the client reaches this state.
-     *
-     * @see Client#setStatusChangedCallback
-     */
-    public enum Status {
-        /**
-         * The client is not connected to Discord.
-         */
-        Disconnected,
-        /**
-         * The client is actively connecting to Discord.
-         */
-        Connecting,
-        /**
-         * The client is connected to Discord, but not ready to do stuff.
-         */
-        Connected,
-        /**
-         * The client is ready for action!
-         */
-        Ready,
-        /**
-         * The client is reconnecting to Discord.
-         */
-        Reconnecting,
-        /**
-         * The client is disconnecting from Discord.
-         */
-        Disconnecting,
-        /**
-         * Waiting on HTTP?
-         */
-        HttpWait;
-
-        static Status from(int status) {
-            return switch (status) {
-                case 0 -> Disconnected;
-                case 1 -> Connecting;
-                case 2 -> Connected;
-                case 3 -> Ready;
-                case 4 -> Reconnecting;
-                case 5 -> Disconnecting;
-                case 6 -> HttpWait;
-                default -> throw new IllegalStateException(
-                    "Unknown status: " + status
-                );
-            };
-        }
+        SocialSdk.runCallbacks();
     }
 
     private native void authorizeNative(
@@ -258,6 +82,12 @@ public class Client {
         TokenExchangeCallbackNative callback
     );
 
+    @FunctionalInterface
+    private interface StatusChangedCallbackNative {
+        @SuppressWarnings({"unused", "MissingJavadoc"})
+        void invoke(int status, int error, int errorDetail);
+    }
+
     private native void setStatusChangedCallbackNative(
         StatusChangedCallbackNative callback
     );
@@ -291,23 +121,39 @@ public class Client {
         SocialSdk.ensureInitialized();
     }
 
+    private static @Nullable String[] communicationScopes, presenceScopes;
+
     /**
-     * Contains the default communications scopes. If you want to include
+     * Retrieves the default communications scopes. If you want to include
      * the SocialSDK's chat features in your game, you'll want to use this.
+     *
+     * @throws IllegalStateException If the {@link SocialSdk#initialize}
+     *                               function has not yet been called.
      */
-    public static final String[] COMMUNICATIONS_SCOPES =
-        getDefaultCommunicationsScopesNative().split(" ");
+    public static String[] getDefaultCommunicationScopes() {
+        if(communicationScopes != null) return communicationScopes;
+
+        SocialSdk.ensureInitialized();
+        return communicationScopes = getDefaultCommunicationsScopesNative().split(" ");
+    }
 
     /**
      * Contains the default presence scopes. If you just want to use the
      * SocialSDK's rich presence features, you'll want to use this instead of
-     * {@link Client#COMMUNICATIONS_SCOPES}. Note that the SocialSDK is
+     * {@link Client#getDefaultCommunicationScopes()}. Note that the SocialSDK is
      * quite large for a library to do this, you may want to consider
      * using a smaller-sized and more dedicated library if you just want
      * rich-presence.
+     *
+     * @throws IllegalStateException If the {@link SocialSdk#initialize}
+     *                               function has not yet been called.
      */
-    public static final String[] PRESENCE_SCOPES =
-        getDefaultPresenceScopesNative().split(" ");
+    public static String[] getDefaultPresenceScopes() {
+        if(presenceScopes != null) return presenceScopes;
+
+        SocialSdk.ensureInitialized();
+        return presenceScopes = getDefaultCommunicationsScopesNative().split(" ");
+    }
 
     /**
      * Creates a {@link CodeVerifier} that can be used to authenticate a
@@ -326,8 +172,8 @@ public class Client {
      *                 the developer panel.
      * @param scopes The scopes to request. You can include most scopes here
      *               as well as the SocialSDK scopes contained in
-     *               {@link Client#COMMUNICATIONS_SCOPES} and
-     *               {@link Client#PRESENCE_SCOPES}.
+     *               {@link Client#getDefaultCommunicationScopes()} and
+     *               {@link Client#getDefaultPresenceScopes()}.
      * @param state A randomized, unique state value used to correlate a user's
      *              authorization request with their authenticated state. This
      *              should be random and not predictable.
@@ -335,7 +181,7 @@ public class Client {
      *                  {@link CodeVerifier#challenge()}
      * @param callback A callback that will be executed when the operation completes.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public void authorize(
         long clientId,
@@ -360,8 +206,8 @@ public class Client {
      *                 the developer panel.
      * @param scopes The scopes to request. You can include most scopes here
      *               as well as the SocialSDK scopes contained in
-     *               {@link Client#COMMUNICATIONS_SCOPES} and
-     *               {@link Client#PRESENCE_SCOPES}.
+     *               {@link Client#getDefaultCommunicationScopes()} and
+     *               {@link Client#getDefaultPresenceScopes()}.
      * @param state A randomized, unique state value used to correlate a user's
      *              authorization request with their authenticated state. This
      *              should be random and not predictable.
@@ -371,7 +217,7 @@ public class Client {
      * @return A future that completes with the {@link AuthorizationResult}, or
      * a {@link DiscordException} on failure.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      * @see Client#authorize(long, String[], String, CodeChallenge, AuthorizationCallback)
      */
     public CompletableFuture<AuthorizationResult> authorize(
@@ -404,6 +250,19 @@ public class Client {
      */
     public native void abortAuthorize();
 
+    @FunctionalInterface
+    private interface TokenExchangeCallbackNative {
+        @SuppressWarnings({"unused", "MissingJavadoc"})
+        void invoke(
+                ClientResult result,
+                String accessToken,
+                String refreshToken,
+                int type,
+                int expiresIn,
+                String scopes
+        );
+    }
+
     private static @NotNull TokenExchangeCallbackNative tokenExchangeCallback(
         @NotNull TokenExchangeCallback callback
     ) {
@@ -431,7 +290,7 @@ public class Client {
      *              This will be sent to Discord.
      * @param callback A callback that will be executed when the operation completes.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public void getProvisionalToken(
         long applicationId,
@@ -461,7 +320,7 @@ public class Client {
      * @return A future that is completed with a {@link TokenExchangeResult},
      * or a {@link DiscordException} on failure.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      * @see Client#getProvisionalToken(long, ExternalAuthType, String, TokenExchangeCallback)
      */
     public CompletableFuture<TokenExchangeResult> getProvisionalToken(
@@ -504,12 +363,12 @@ public class Client {
      * @param applicationId The application ID of your application. This can be
      *                      found in the developer panel. AFAIK, this is always
      *                      the same as a client ID.
-     * @param code The code obtained from a successful authorization.
+     * @param code The type obtained from a successful authorization.
      * @param codeVerifier The verifier retrieved from {@link CodeVerifier#verifier()}
      * @param redirectUri The redirect URI used.
      * @param callback A callback that will be executed when the operation completes.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      * @see Client#authorize(long, String[], String, CodeChallenge, AuthorizationCallback)
      * @see Client#getTokenFromProvisionalMerge(long, String, String, String, ExternalAuthType, String, TokenExchangeCallback)
      */
@@ -538,14 +397,14 @@ public class Client {
      * @param applicationId The application ID of your application. This can be
      *                      found in the developer panel. AFAIK, this is always
      *                      the same as a client ID.
-     * @param code The code obtained from a successful authorization.
+     * @param code The type obtained from a successful authorization.
      * @param codeVerifier The verifier retrieved from {@link CodeVerifier#verifier()}
      * @param redirectUri The redirect URI used.
      *
      * @return A future that is completed with a {@link TokenExchangeResult},
      * or a {@link DiscordException} on failure.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      * @see Client#authorize(long, String[], String, CodeChallenge, AuthorizationCallback)
      * @see Client#getTokenFromProvisionalMerge(long, String, String, String, ExternalAuthType, String, TokenExchangeCallback)
      * @see Client#getToken(long, String, String, String, TokenExchangeCallback)
@@ -591,7 +450,7 @@ public class Client {
      * @param applicationId The application ID of your application. This can be
      *                      found in the developer panel. AFAIK, this is always
      *                      the same as a client ID.
-     * @param code The code obtained from a successful authorization.
+     * @param code The type obtained from a successful authorization.
      * @param codeVerifier The verifier retrieved from {@link CodeVerifier#verifier()}
      * @param redirectUri The redirect URI used.
      * @param externalAuthType The kind of external auth service to try
@@ -600,7 +459,7 @@ public class Client {
      *                          auth service. This will be sent to Discord.
      * @param callback A callback that will be executed when the operation completes.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      * @see Client#authorize(long, String[], String, CodeChallenge, AuthorizationCallback)
      * @see Client#getToken(long, String, String, String, TokenExchangeCallback)
      * @see Client#getProvisionalToken(long, ExternalAuthType, String, TokenExchangeCallback)
@@ -633,7 +492,7 @@ public class Client {
      * @param applicationId The application ID of your application. This can be
      *                      found in the developer panel. AFAIK, this is always
      *                      the same as a client ID.
-     * @param code The code obtained from a successful authorization.
+     * @param code The type obtained from a successful authorization.
      * @param codeVerifier The verifier retrieved from {@link CodeVerifier#verifier()}
      * @param redirectUri The redirect URI used.
      * @param externalAuthType The kind of external auth service to try
@@ -644,7 +503,7 @@ public class Client {
      * @return A future that is completed with a {@link TokenExchangeResult},
      * or a {@link DiscordException} on failure.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      * @see Client#authorize(long, String[], String, CodeChallenge, AuthorizationCallback)
      * @see Client#getToken(long, String, String, String, TokenExchangeCallback)
      * @see Client#getProvisionalToken(long, ExternalAuthType, String, TokenExchangeCallback)
@@ -696,7 +555,7 @@ public class Client {
      * @param token The Discord token obtained from the authorization flow.
      * @param callback A callback that will be executed when the operation completes.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public void updateToken(
         @NotNull AuthorizationTokenType type,
@@ -717,7 +576,7 @@ public class Client {
      * @return A future that is completed when the operation finishes,
      * or a {@link DiscordException} on failure.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public CompletableFuture<Void> updateToken(
         @NotNull AuthorizationTokenType type,
@@ -739,7 +598,7 @@ public class Client {
     /**
      * Connects to Discord using the set token. The client should use
      * {@link Client#setStatusChangedCallback(StatusChangedCallback)} to handle
-     * the transition to {@link Status#Ready}, indicating that the client is
+     * the transition to {@link ClientStatus#Ready}, indicating that the client is
      * ready for use.
      */
     public native void connect();
@@ -776,7 +635,7 @@ public class Client {
      * @param refreshToken The refresh token, not the access token.
      * @param callback A callback that will be executed when the operation completes.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      * @see Client#updateToken(AuthorizationTokenType, String, GenericResultCallback)
      */
     public void refreshToken(
@@ -803,7 +662,7 @@ public class Client {
      * @return A future that is completed with a {@link TokenExchangeResult},
      * or a {@link DiscordException} on failure.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      * @see Client#updateToken(AuthorizationTokenType, String, GenericResultCallback)
      * @see Client#refreshToken(long, String, TokenExchangeCallback)
      */
@@ -842,7 +701,7 @@ public class Client {
      *
      * @param callback A callback that will be executed when the operation completes.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public native void openConnectedGameSettingsInDiscord(
         @NotNull GenericResultCallback callback
@@ -855,7 +714,7 @@ public class Client {
      * @return A future that completes when the operation finishes, or
      * with {@link DiscordException} on failure.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public CompletableFuture<Void> openConnectedGameSettingsInDiscord() {
         var future = new CompletableFuture<Void>();
@@ -890,14 +749,14 @@ public class Client {
      * @param callback Callback that will be called whenever the client changes
      *                 it's status.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public void setStatusChangedCallback(
         @NotNull StatusChangedCallback callback
     ) {
         setStatusChangedCallbackNative((status, error, errorDetail) -> {
             callback.invoke(
-                Status.from(status),
+                ClientStatus.from(status),
                 ClientSocketResult.from(error),
                 errorDetail
             );
@@ -910,7 +769,7 @@ public class Client {
      * @param activity An {@link ActivityBuilder} object.
      * @param callback A callback that will be executed when the operation completes.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public native void updateRichPresence(
         @NotNull ActivityBuilder activity,
@@ -925,7 +784,7 @@ public class Client {
      * @return A future that completes when the operation finishes, or
      * with {@link DiscordException} on failure.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public CompletableFuture<Void> updateRichPresence(
         @NotNull ActivityBuilder activity
@@ -977,7 +836,7 @@ public class Client {
      *
      * @param callback A callback that will be executed when the operation completes.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public native void getUserGuilds(GetUserGuildsCallback callback);
 
@@ -990,7 +849,7 @@ public class Client {
      * @return A future that completes with an array of {@link GuildMinimal},
      * or with {@link DiscordException} on failure.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public CompletableFuture<GuildMinimal[]> getUserGuilds() {
         var future = new CompletableFuture<GuildMinimal[]>();
@@ -1013,7 +872,7 @@ public class Client {
      * @param guildId The guild ID.
      * @param callback A callback that will be executed when the operation completes.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      * @see Client#getUserGuilds(GetUserGuildsCallback)
      */
     public native void getGuildChannels(
@@ -1030,7 +889,7 @@ public class Client {
      * @return A future that completes with an array of {@link GuildChannel},
      * or with {@link DiscordException} on failure.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      * @see Client#getUserGuilds(GetUserGuildsCallback)
      */
     public CompletableFuture<GuildChannel[]> getGuildChannels(long guildId) {
@@ -1055,7 +914,7 @@ public class Client {
      *               using the same application.
      * @param callback A callback that will be executed when the operation completes.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      * @see Client#createOrJoinLobby(String, Map, Map, CreateOrJoinLobbyCallback)
      */
     public native void createOrJoinLobby(
@@ -1073,7 +932,7 @@ public class Client {
      * @return A future that completes with the ID of the lobby that was just
      * joined, or with {@link DiscordException} on failure.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      * @see Client#createOrJoinLobby(String, Map, Map, CreateOrJoinLobbyCallback)
      */
     public CompletableFuture<Long> createOrJoinLobby(String secret) {
@@ -1102,7 +961,7 @@ public class Client {
      *                   this metadata.
      * @param callback A callback that will be executed when the operation completes.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      * @see Client#createOrJoinLobby(String, CreateOrJoinLobbyCallback)
      */
     public void createOrJoinLobby(
@@ -1141,7 +1000,7 @@ public class Client {
      * @return A future that completes with the ID of the lobby that was just
      * joined, or with {@link DiscordException} on failure.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      * @see Client#createOrJoinLobby(String, Map, Map, CreateOrJoinLobbyCallback)
      */
     public CompletableFuture<Long> createOrJoinLobby(
@@ -1168,7 +1027,7 @@ public class Client {
      * @param lobbyId The ID of the lobby to leave.
      * @param callback A callback that will be executed when the operation completes.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public native void leaveLobby(long lobbyId, GenericResultCallback callback);
 
@@ -1180,7 +1039,7 @@ public class Client {
      * @return A future that is completed when the operation finishes, or
      * is completed with {@link DiscordException} on failure.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public CompletableFuture<Void> leaveLobby(long lobbyId) {
         var future = new CompletableFuture<Void>();
@@ -1201,7 +1060,7 @@ public class Client {
      *
      * @param callback A callback that will be executed when a lobby is joined.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public native void setLobbyCreatedCallback(
         LobbyExistenceChangedCallback callback
@@ -1213,7 +1072,7 @@ public class Client {
      *
      * @param callback A callback that will be executed when a lobby is left.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public native void setLobbyDeletedCallback(
         LobbyExistenceChangedCallback callback
@@ -1225,7 +1084,7 @@ public class Client {
      * @param callback A callback that will be executed when a lobby is
      *                 updated.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public native void setLobbyUpdatedCallback(
         LobbyExistenceChangedCallback callback
@@ -1238,7 +1097,7 @@ public class Client {
      * @param callback A callback that will be executed when a lobby member
      *                 joins.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public native void setLobbyMemberAddedCallback(
         LobbyMemberChangedCallback callback
@@ -1251,7 +1110,7 @@ public class Client {
      * @param callback A callback that will be executed when a lobby member
      *                 leaves.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public native void setLobbyMemberRemovedCallback(
         LobbyMemberChangedCallback callback
@@ -1264,7 +1123,7 @@ public class Client {
      * @param callback A callback that will be executed when a lobby member
      *                 is updated.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public native void setLobbyMemberUpdatedCallback(
         LobbyMemberChangedCallback callback
@@ -1277,7 +1136,7 @@ public class Client {
      *
      * @param callback A callback that will be executed when a message is created.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public native void setMessageCreatedCallback(MessageIdCallback callback);
 
@@ -1292,7 +1151,7 @@ public class Client {
      *
      * @param callback A callback that will be executed when a message is deleted.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public native void setMessageDeletedCallback(
         MessageDeletedCallback callback
@@ -1305,7 +1164,7 @@ public class Client {
      *
      * @param callback A callback that will be executed when a message is edited.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public native void setMessageUpdatedCallback(MessageIdCallback callback);
 
@@ -1346,7 +1205,7 @@ public class Client {
      * @param channelId The ID of the channel to link to.
      * @param callback A callback that will be executed when the operation completes.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public native void linkChannelToLobby(
         long lobbyId,
@@ -1374,7 +1233,7 @@ public class Client {
      * @return A future that is completed when the operation finishes, or with
      * {@link DiscordException} on failure.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public CompletableFuture<Void> linkChannelToLobby(
         long lobbyId,
@@ -1402,7 +1261,7 @@ public class Client {
      * @param lobbyId The ID of the lobby to update.
      * @param callback A callback that will be executed when the operation completes.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public native void unlinkChannelFromLobby(
         long lobbyId,
@@ -1420,7 +1279,7 @@ public class Client {
      * @return A future that is completed when the operation finishes, or with
      * {@link DiscordException} on failure.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public CompletableFuture<Void> unlinkChannelFromLobby(long lobbyId) {
         var future = new CompletableFuture<Void>();
@@ -1444,7 +1303,7 @@ public class Client {
      * @param message The message. Markdown and message formatting is supported.
      * @param callback A callback that will be executed when the operation completes.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public native void sendLobbyMessage(
         long lobbyId,
@@ -1462,7 +1321,7 @@ public class Client {
      * @return A future that completes with the ID of the message that was
      * just created, or with {@link DiscordException} on failure.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public CompletableFuture<Long> sendLobbyMessage(
         long lobbyId,
@@ -1493,7 +1352,7 @@ public class Client {
      *                 within the SDK.
      * @param callback A callback that will be executed when the operation completes.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public void sendLobbyMessage(
         long lobbyId,
@@ -1526,7 +1385,7 @@ public class Client {
      * @param callback A callback that will be executed when the operation completes.
      *
      * @deprecated Use {@link Client#sendLobbyMessage(long, String, Map, SendMessageCallback)} instead.
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     @Deprecated(since = "SocialSDK4J 1.0")
     public void sendLobbyMessageWithMetadata(
@@ -1548,7 +1407,7 @@ public class Client {
      * @return A future that completes with the ID of the message that was
      * just created, or with {@link DiscordException} on failure.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public CompletableFuture<Long> sendLobbyMessage(
         long lobbyId,
@@ -1587,7 +1446,7 @@ public class Client {
      *                Markdown and message formatting is supported.
      * @param callback A callback that will be executed when the operation completes.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public native void sendUserMessage(
         long userId,
@@ -1616,7 +1475,7 @@ public class Client {
      * @return A future that completes with the ID of the message that was
      * just created, or with {@link DiscordException} on failure.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public CompletableFuture<Long> sendUserMessage(
         long userId,
@@ -1657,7 +1516,7 @@ public class Client {
      *                 within the SDK.
      * @param callback A callback that will be executed when the operation completes.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public void sendUserMessage(
         long userId,
@@ -1701,7 +1560,7 @@ public class Client {
      *
      * @deprecated Use {@link Client#sendUserMessage(long, String, Map, SendMessageCallback)} instead.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     @Deprecated(since = "SocialSDK4J 1.0")
     public void sendUserMessageWithMetadata(
@@ -1737,7 +1596,7 @@ public class Client {
      * @return A future that completes with the ID of the message that was
      * just created, or with {@link DiscordException} on failure.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public CompletableFuture<Long> sendUserMessage(
         long userId,
@@ -1894,7 +1753,7 @@ public class Client {
      * @param channelId ID of the channel to end the call in.
      * @param callback A callback that will be executed when the operation completes.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public native void endCall(long channelId, CompletionCallback callback);
 
@@ -1907,7 +1766,7 @@ public class Client {
      * <b>Unlike the other functions, this one is infallible and will never
      * complete exceptionally.</b>
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public CompletableFuture<Void> endCall(long channelId) {
         var future = new CompletableFuture<Void>();
@@ -1920,7 +1779,7 @@ public class Client {
      *
      * @param callback A callback that will be executed when the operation completes.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public native void endCalls(CompletionCallback callback);
 
@@ -1931,7 +1790,7 @@ public class Client {
      * <b>Unlike the other functions, this one is infallible and will never
      * complete exceptionally.</b>
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public CompletableFuture<Void> endCalls() {
         var future = new CompletableFuture<Void>();
@@ -1961,7 +1820,7 @@ public class Client {
      * @param username Unique username of the user to send a friend request to.
      * @param callback A callback that will be executed when the operation completes.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      * @see Relationship#discordType()
      */
     public native void sendDiscordFriendRequest(
@@ -1977,7 +1836,7 @@ public class Client {
      * @return A future that is completed when the operation finishes, or is
      * completed with {@link DiscordException} on failure.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      * @see Relationship#discordType()
      */
     public CompletableFuture<Void> sendDiscordFriendRequest(String username) {
@@ -2000,7 +1859,7 @@ public class Client {
      * @param userId ID of the user to send a friend request to.
      * @param callback A callback that will be executed when the operation completes.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      * @see Relationship#discordType()
      */
     public native void sendDiscordFriendRequest(
@@ -2016,7 +1875,7 @@ public class Client {
      * @return A future that is completed when the operation finishes, or is
      * completed with {@link DiscordException} on failure.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      * @see Relationship#discordType()
      */
     public CompletableFuture<Void> sendDiscordFriendRequest(long userId) {
@@ -2039,7 +1898,7 @@ public class Client {
      * @param username Unique username of the user to send a friend request to.
      * @param callback A callback that will be executed when the operation completes.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      * @see Relationship#gameType()
      */
     public native void sendGameFriendRequest(
@@ -2055,7 +1914,7 @@ public class Client {
      * @return A future that is completed when the operation finishes, or is
      * completed with {@link DiscordException} on failure.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      * @see Relationship#gameType()
      */
     public CompletableFuture<Void> sendGameFriendRequest(String username) {
@@ -2078,7 +1937,7 @@ public class Client {
      * @param userId ID of the user to send a friend request to.
      * @param callback A callback that will be executed when the operation completes.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      * @see Relationship#gameType()
      */
     public native void sendGameFriendRequest(
@@ -2094,7 +1953,7 @@ public class Client {
      * @return A future that is completed when the operation finishes, or is
      * completed with {@link DiscordException} on failure.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      * @see Relationship#gameType()
      */
     public CompletableFuture<Void> sendGameFriendRequest(long userId) {
@@ -2117,7 +1976,7 @@ public class Client {
      * @param userId ID of the user sending the request.
      * @param callback A callback that will be executed when the operation completes.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public native void acceptDiscordFriendRequest(
         long userId,
@@ -2132,7 +1991,7 @@ public class Client {
      * @return A future that is completed when the operation finishes, or is
      * completed with {@link DiscordException} on failure.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public CompletableFuture<Void> acceptDiscordFriendRequest(long userId) {
         var future = new CompletableFuture<Void>();
@@ -2154,7 +2013,7 @@ public class Client {
      * @param userId ID of the user sending the request.
      * @param callback A callback that will be executed when the operation completes.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public native void acceptGameFriendRequest(
         long userId,
@@ -2169,7 +2028,7 @@ public class Client {
      * @return A future that is completed when the operation finishes, or is
      * completed with {@link DiscordException} on failure.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public CompletableFuture<Void> acceptGameFriendRequest(long userId) {
         var future = new CompletableFuture<Void>();
@@ -2191,7 +2050,7 @@ public class Client {
      * @param userId ID of the user receiving the request.
      * @param callback A callback that will be executed when the operation completes.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public native void cancelDiscordFriendRequest(
         long userId,
@@ -2206,7 +2065,7 @@ public class Client {
      * @return A future that is completed when the operation finishes, or is
      * completed with {@link DiscordException} on failure.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public CompletableFuture<Void> cancelDiscordFriendRequest(long userId) {
         var future = new CompletableFuture<Void>();
@@ -2228,7 +2087,7 @@ public class Client {
      * @param userId ID of the user receiving the request.
      * @param callback A callback that will be executed when the operation completes.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public native void cancelGameFriendRequest(
         long userId,
@@ -2243,7 +2102,7 @@ public class Client {
      * @return A future that is completed when the operation finishes, or is
      * completed with {@link DiscordException} on failure.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public CompletableFuture<Void> cancelGameFriendRequest(long userId) {
         var future = new CompletableFuture<Void>();
@@ -2266,7 +2125,7 @@ public class Client {
      * @param callback A callback that will be executed whenever a relationship
      *                 is created or updated.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public native void setRelationshipCreatedCallback(
         RelationshipChangedCallback callback
@@ -2278,7 +2137,7 @@ public class Client {
      * @param callback A callback that will be executed whenever a relationship
      *                 is deleted.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public native void setRelationshipDeletedCallback(
         RelationshipChangedCallback callback
@@ -2290,7 +2149,7 @@ public class Client {
      * @param userId ID of the user sending the request.
      * @param callback A callback that will be executed when the operation completes.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public native void rejectDiscordFriendRequest(
         long userId,
@@ -2305,7 +2164,7 @@ public class Client {
      * @return A future that is completed when the operation finishes, or is
      * completed with {@link DiscordException} on failure.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public CompletableFuture<Void> rejectDiscordFriendRequest(long userId) {
         var future = new CompletableFuture<Void>();
@@ -2327,7 +2186,7 @@ public class Client {
      * @param userId ID of the user sending the request.
      * @param callback A callback that will be executed when the operation completes.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public native void rejectGameFriendRequest(
         long userId,
@@ -2342,7 +2201,7 @@ public class Client {
      * @return A future that is completed when the operation finishes, or is
      * completed with {@link DiscordException} on failure.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public CompletableFuture<Void> rejectGameFriendRequest(long userId) {
         var future = new CompletableFuture<Void>();
@@ -2364,7 +2223,7 @@ public class Client {
      * @param userId ID of the user to sever the relationship with.
      * @param callback A callback that will be executed when the operation completes.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      * @see Client#removeGameFriend(long, GenericResultCallback)
      */
     public native void removeDiscordAndGameFriend(
@@ -2380,7 +2239,7 @@ public class Client {
      * @return A future that is completed when the operation finishes, or is
      * completed with {@link DiscordException} on failure.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      * @see Client#removeGameFriend(long, GenericResultCallback)
      */
     public CompletableFuture<Void> removeDiscordAndGameFriend(long userId) {
@@ -2403,7 +2262,7 @@ public class Client {
      * @param userId ID of the user to sever the relationship with.
      * @param callback A callback that will be executed when the operation completes.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      * @see Client#removeDiscordAndGameFriend(long, GenericResultCallback)
      */
     public native void removeGameFriend(
@@ -2419,7 +2278,7 @@ public class Client {
      * @return A future that is completed when the operation finishes, or is
      * completed with {@link DiscordException} on failure.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      * @see Client#removeDiscordAndGameFriend(long, GenericResultCallback)
      */
     public CompletableFuture<Void> removeGameFriend(long userId) {
@@ -2445,7 +2304,7 @@ public class Client {
      * @param content Optional message content to be included.
      * @param callback A callback that will be executed when the operation completes.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public native void sendActivityInvite(
         long userId,
@@ -2464,7 +2323,7 @@ public class Client {
      * @return A future that is completed when the operation finishes, or is
      * completed with {@link DiscordException} on failure.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public CompletableFuture<Void> sendActivityInvite(
         long userId,
@@ -2489,7 +2348,7 @@ public class Client {
      * @param invite An activity invite received from the SDK.
      * @param callback A callback that will be executed when the operation completes.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public native void acceptActivityInvite(
         ActivityInvite invite,
@@ -2504,7 +2363,7 @@ public class Client {
      * @return A future that completes with the join secret passed through
      * Discord by this invite, or with {@link DiscordException} on failure.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public CompletableFuture<String> acceptActivityInvite(
         ActivityInvite invite
@@ -2528,7 +2387,7 @@ public class Client {
      * @param userId ID of the user to send a join request to.
      * @param callback A callback that will be executed when the operation completes.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public native void sendActivityJoinRequest(
         long userId,
@@ -2543,7 +2402,7 @@ public class Client {
      * @return A future that is completed when the operation finishes, or is
      * completed with {@link DiscordException} on failure.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public CompletableFuture<Void> sendActivityJoinRequest(long userId) {
         var future = new CompletableFuture<Void>();
@@ -2565,7 +2424,7 @@ public class Client {
      * @param invite An activity invite received from the SDK.
      * @param callback A callback that will be executed when the operation completes.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public native void sendActivityJoinRequestReply(
         ActivityInvite invite,
@@ -2580,7 +2439,7 @@ public class Client {
      * @return A future that is completed when the operation finishes, or is
      * completed with {@link DiscordException} on failure.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public CompletableFuture<Void> sendActivityJoinRequestReply(
         ActivityInvite invite
@@ -2606,7 +2465,7 @@ public class Client {
      * @param callback A callback that will be executed when an activity
      *                 invite is created.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public native void setActivityInviteCreatedCallback(
         ActivityInviteCallback callback
@@ -2620,7 +2479,7 @@ public class Client {
      * @param callback A callback that will be executed when an activity
      *                 invite is updated.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public native void setActivityInviteUpdatedCallback(
         ActivityInviteCallback callback
@@ -2634,7 +2493,7 @@ public class Client {
      * @param callback A callback that will be executed when the player
      *                 tries to join someone else.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public native void setActivityJoinCallback(ActivityJoinCallback callback);
 
@@ -2646,7 +2505,7 @@ public class Client {
      * @param userId ID of the user to block.
      * @param callback A callback that will be executed when the operation completes.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public native void blockUser(long userId, GenericResultCallback callback);
 
@@ -2660,7 +2519,7 @@ public class Client {
      * @return A future that is completed when the operation finishes, or is
      * completed with {@link DiscordException} on failure.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public CompletableFuture<Void> blockUser(long userId) {
         var future = new CompletableFuture<Void>();
@@ -2682,7 +2541,7 @@ public class Client {
      * @param userId ID of the user to unblock.
      * @param callback A callback that will be executed when the operation completes.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public native void unblockUser(long userId, GenericResultCallback callback);
 
@@ -2694,7 +2553,7 @@ public class Client {
      * @return A future that is completed when the operation finishes, or is
      * completed with {@link DiscordException} on failure.
      *
-     * @see Client#runCallbacks()
+     * @see SocialSdk#runCallbacks
      */
     public CompletableFuture<Void> unblockUser(long userId) {
         var future = new CompletableFuture<Void>();

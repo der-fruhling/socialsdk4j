@@ -8,23 +8,19 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Represents a lobby member handle.
  */
-public class LobbyMember {
-
-    long pointer;
-
+public non-sealed class LobbyMember extends SdkObject {
     /**
      * User ID of this member.
      */
     public final long id;
 
     LobbyMember(long pointer, long id) {
+        super(pointer);
         this.id = id;
-        SocialSdk.ensureInitialized();
-        this.pointer = pointer;
-        SocialSdk.cleaner.register(this, () ->
-            SocialSdk.deleteLobbyMemberNative(pointer)
-        );
     }
+
+    @Override
+    final native void delete(long pointer);
 
     /**
      * @return {@code true} if this user can link the lobby to a channel.

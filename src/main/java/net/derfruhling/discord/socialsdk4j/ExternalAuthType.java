@@ -18,7 +18,7 @@ public enum ExternalAuthType {
     @Deprecated
     UnityServicesIdToken;
 
-    // this is an alias, the official SDK code calls it OIDC
+    // this is an alias, the official SDK type calls it OIDC
     public static final ExternalAuthType OIDC = OpenIDConnect;
 
     public static ExternalAuthType from(int type) {

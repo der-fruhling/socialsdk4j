@@ -3,4 +3,5 @@ module socialsdk4j.main {
 
     exports net.derfruhling.discord.socialsdk4j;
     exports net.derfruhling.discord.socialsdk4j.loader;
+    exports net.derfruhling.discord.socialsdk4j.callbacks;
 }

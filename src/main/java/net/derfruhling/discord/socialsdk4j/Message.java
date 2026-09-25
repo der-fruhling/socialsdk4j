@@ -5,23 +5,19 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.jetbrains.annotations.Nullable;
 
-public class Message {
-
-    long pointer;
-
+public non-sealed class Message extends SdkObject {
     /**
      * ID of this message.
      */
     public final long id;
 
     public Message(long pointer, long id) {
+        super(pointer);
         this.id = id;
-        SocialSdk.ensureInitialized();
-        this.pointer = pointer;
-        SocialSdk.cleaner.register(this, () ->
-            SocialSdk.deleteMessageNative(pointer)
-        );
     }
+
+    @Override
+    final native void delete(long pointer);
 
     /**
      * Represents some content that cannot be rendered in-game.

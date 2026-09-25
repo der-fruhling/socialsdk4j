@@ -6,63 +6,25 @@ package net.derfruhling.discord.socialsdk4j;
  * checked.
  * <a href="https://discord.com/developers/docs/social-sdk/classdiscordpp_1_1ClientResult.html">See the official documentation.</a>
  */
-public class ClientResult {
-
-    private final long pointer;
-
+public record ClientResult(ClientResultType type, String message, boolean retryable, float retryDelay) {
     ClientResult(long pointer) {
-        this.pointer = pointer;
+        this(ClientResultType.from(Results.errorCode(pointer)), Results.errorMessage(pointer), Results.isRetryable(pointer), Results.getRetryDelay(pointer));
+        Results.delete(pointer);
     }
 
-    private static native int errorCode0(long pointer);
+    private static class Results {
+        private static native void delete(long pointer);
 
-    private static native String errorMessage0(long pointer);
+        private static native int errorCode(long pointer);
 
-    private static native boolean isRetryable0(long pointer);
+        private static native String errorMessage(long pointer);
 
-    private static native float getRetryDelay0(long pointer);
+        private static native boolean isRetryable(long pointer);
 
-    /**
-     * @return The category of error this result represents, or
-     *         {@link ClientResultType#None} if there is no error.
-     */
-    public ClientResultType type() {
-        return ClientResultType.from(errorCode0(pointer));
+        private static native float getRetryDelay(long pointer);
     }
 
-    /**
-     * @return The Discord provided message for the failure, always in the
-     *         user's Discord language.
-     */
-    public String message() {
-        return errorMessage0(pointer);
-    }
-
-    /**
-     * @return {@code true} if the operation should be retried.
-     *
-     * @see ClientResult#retryAfter()
-     */
-    public boolean retry() {
-        return isRetryable0(pointer);
-    }
-
-    /**
-     * @return Number of seconds to wait before retrying the operation.
-     */
-    public float retryAfter() {
-        return getRetryDelay0(pointer);
-    }
-
-    @Override
-    public String toString() {
-        return "ClientResult {" + type() + ": " + message() + "}";
-    }
-
-    /**
-     * @return {@code true} if the result represents success.
-     */
     public boolean isSuccess() {
-        return type() == ClientResultType.None;
+        return type == ClientResultType.None;
     }
 }

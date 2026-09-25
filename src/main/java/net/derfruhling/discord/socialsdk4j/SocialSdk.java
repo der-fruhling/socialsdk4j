@@ -46,6 +46,10 @@ public class SocialSdk {
         isInitialized = true;
     }
 
+    /**
+     * @throws IllegalStateException The {@link SocialSdk#initialize}
+     *                               function has not yet been called
+     */
     public static void ensureInitialized() {
         if (!isInitialized) throw new IllegalStateException(
             "SocialSDK4J not initialized"
@@ -58,8 +62,12 @@ public class SocialSdk {
         SocialSdk.logCallback = logCallback;
     }
 
+    public static void log(LogLevel level, String message) {
+        logCallback.accept(level, message);
+    }
+
     private static void javaLog(int severity, String message) {
-        logCallback.accept(
+        log(
             switch (severity) {
                 case 1 -> LogLevel.DEBUG;
                 case 2 -> LogLevel.INFO;
@@ -73,19 +81,17 @@ public class SocialSdk {
         );
     }
 
-    static native long createClientNative();
+    static long createClient() {
+        ensureInitialized();
 
-    static native void deleteClientNative(long ptr);
+        return createClientNative();
+    }
 
-    static native void deleteLobbyNative(long ptr);
+    private static native long createClientNative();
 
-    static native void deleteLobbyMemberNative(long ptr);
-
-    static native void deleteCallNative(long ptr);
-
-    static native void deleteUserNative(long ptr);
-
-    static native void deleteMessageNative(long ptr);
-
-    static native void runCallbacksNative();
+    /**
+     * Runs all pending callbacks the SocialSDK wants to call. This must be run
+     * in order to make use of the SocialSDK properly.
+     */
+    public static native void runCallbacks();
 }

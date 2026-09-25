@@ -1,5 +1,6 @@
 package net.derfruhling.discord.socialsdk4j;
 
+import net.derfruhling.discord.socialsdk4j.callbacks.GenericResultCallback;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -32,10 +33,10 @@ public record Relationship(
         /**
          * No relationship, user is not friends and not blocked.
          *
-         * @see Client#sendDiscordFriendRequest(long, Client.GenericResultCallback)
-         * @see Client#sendDiscordFriendRequest(String, Client.GenericResultCallback)
-         * @see Client#sendGameFriendRequest(long, Client.GenericResultCallback)
-         * @see Client#sendGameFriendRequest(String, Client.GenericResultCallback)
+         * @see Client#sendDiscordFriendRequest(long, GenericResultCallback)
+         * @see Client#sendDiscordFriendRequest(String, GenericResultCallback)
+         * @see Client#sendGameFriendRequest(long, GenericResultCallback)
+         * @see Client#sendGameFriendRequest(String, GenericResultCallback)
          * @see Client#blockUser
          */
         None,

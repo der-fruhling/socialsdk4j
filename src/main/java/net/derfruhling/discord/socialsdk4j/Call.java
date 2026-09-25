@@ -1,14 +1,10 @@
 package net.derfruhling.discord.socialsdk4j;
 
-public class Call {
-
-    long pointer;
-
-    public Call(long pointer) {
-        SocialSdk.ensureInitialized();
-        this.pointer = pointer;
-        SocialSdk.cleaner.register(this, () ->
-            SocialSdk.deleteCallNative(pointer)
-        );
+public non-sealed class Call extends SdkObject {
+    Call(long pointer) {
+        super(pointer);
     }
+
+    @Override
+    final native void delete(long pointer);
 }

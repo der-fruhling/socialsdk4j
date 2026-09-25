@@ -70,7 +70,7 @@ Java_net_derfruhling_discord_socialsdk4j_ActivityBuilder_createNewActivityNative
 }
 
 JNIEXPORT void JNICALL
-Java_net_derfruhling_discord_socialsdk4j_ActivityBuilder_deleteActivityNative
+Java_net_derfruhling_discord_socialsdk4j_ActivityBuilder_delete
 (JNIEnv *, jclass, jlong ptr) {
     delete reinterpret_cast<discordpp::Activity *>(ptr);
 }

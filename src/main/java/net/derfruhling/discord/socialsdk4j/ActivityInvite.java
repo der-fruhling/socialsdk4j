@@ -1,5 +1,8 @@
 package net.derfruhling.discord.socialsdk4j;
 
+import net.derfruhling.discord.socialsdk4j.callbacks.AcceptActivityInviteCallback;
+import net.derfruhling.discord.socialsdk4j.callbacks.GenericResultCallback;
+
 public record ActivityInvite(
     long senderId,
     long channelId,
@@ -18,7 +21,7 @@ public record ActivityInvite(
      * @param messageId Message ID of the invite.
      * @param type Type of the invite, determines how it must be handled.
      * @param applicationId Application ID the invite was sent from.
-     * @param partyId Party ID set by the application in it's rich presence code.
+     * @param partyId Party ID set by the application in it's rich presence type.
      * @param sessionId Session ID of the user who sent the invite.
      */
     public ActivityInvite(
@@ -72,7 +75,7 @@ public record ActivityInvite(
          * The invite was sent by a party member to invite someone to the
          * party, and must be accepted by the targeted user.
          *
-         * @see Client#acceptActivityInvite(ActivityInvite, Client.AcceptActivityInviteCallback)
+         * @see Client#acceptActivityInvite(ActivityInvite, AcceptActivityInviteCallback)
          */
         Join(1),
 
@@ -80,7 +83,7 @@ public record ActivityInvite(
          * The invite was sent by a non-member of the party to request an
          * activity invite from the targeted user.
          *
-         * @see Client#sendActivityJoinRequestReply(ActivityInvite, Client.GenericResultCallback)
+         * @see Client#sendActivityJoinRequestReply(ActivityInvite, GenericResultCallback)
          */
         JoinRequest(5);
 

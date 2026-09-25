@@ -1,30 +1,26 @@
 package net.derfruhling.discord.socialsdk4j;
 
+import net.derfruhling.discord.socialsdk4j.callbacks.GenericResultCallback;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
  * Allows building a rich presence activity.
  *
- * @see Client#updateRichPresence(ActivityBuilder, Client.GenericResultCallback)
+ * @see Client#updateRichPresence(ActivityBuilder, GenericResultCallback)
  */
-public class ActivityBuilder {
-
+public non-sealed class ActivityBuilder extends SdkObject {
     private static native long createNewActivityNative();
-
-    private static native void deleteActivityNative(long pointer);
-
-    final long pointer = createNewActivityNative();
 
     /**
      * Creates a new empty activity builder.
      */
     public ActivityBuilder() {
-        long pointer = this.pointer;
-        SocialSdk.cleaner.register(this, () -> {
-            deleteActivityNative(pointer);
-        });
+        super(createNewActivityNative());
     }
+
+    @Override
+    final native void delete(long pointer);
 
     private static native void addButton(
         long pointer,
